@@ -20,17 +20,17 @@ public class MatHangAppService :
     {
         _matHangRepository = matHangRepository;
     }
-    public async Task<List<MathangDto>> LayDanhSachMatHang()
+    public async Task<List<MatHangDto>> LayDanhSachMatHang()
     {
         var matHangs = await _matHangRepository.GetAll().ToListAsync();
-        return ObjectMapper.Map<List<MathangDto>>(matHangs);
+        return ObjectMapper.Map<List<MatHangDto>>(matHangs);
     }
-    public async Task<MathangDto> LayChiTietMatHang(int id)
+    public async Task<MatHangDto> LayChiTietMatHang(int id)
     {
         var matHang = await _matHangRepository.GetAsync(id);
-        return ObjectMapper.Map<MathangDto>(matHang);
+        return ObjectMapper.Map<MatHangDto>(matHang);
     }
-    public async Task<int> ThemMatHang(ThemmathangDto input)
+    public async Task<int> ThemMatHang(ThemMatHangDto input)
     {
         var matHang = ObjectMapper.Map<MatHang>(input);
         if (matHang.Soluong < 0)
@@ -40,7 +40,7 @@ public class MatHangAppService :
         var createdMatHangId = await _matHangRepository.InsertAndGetIdAsync(matHang);
         return createdMatHangId;
     }
-    public async Task SuaMatHang(SuamathangDto input)
+    public async Task SuaMatHang(SuaMatHangDto input)
     {
         var matHang = await _matHangRepository.GetAsync(input.Id);
         if (matHang == null)

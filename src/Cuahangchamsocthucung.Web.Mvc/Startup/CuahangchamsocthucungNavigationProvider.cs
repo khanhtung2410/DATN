@@ -15,14 +15,6 @@ namespace Cuahangchamsocthucung.Web.Startup
             context.Manager.MainMenu
                 .AddItem(
                     new MenuItemDefinition(
-                        PageNames.About,
-                        L("About"),
-                        url: "About",
-                        icon: "fas fa-info-circle"
-                    )
-                )
-                .AddItem(
-                    new MenuItemDefinition(
                         PageNames.Home,
                         L("HomePage"),
                         url: "",
@@ -56,126 +48,44 @@ namespace Cuahangchamsocthucung.Web.Startup
                 ).AddItem(
                     new MenuItemDefinition(
                         PageNames.HoaDon,
-                        L("Hóa Đơn"),
+                        new FixedLocalizableString("Hóa Đơn"),
                         url: "HoaDon",
                         icon: "fas fa-file-invoice"
                     )
                 ).AddItem(
                     new MenuItemDefinition(
                         PageNames.KhachHang,
-                        L("Khách Hàng"),
+                        new FixedLocalizableString("Khách Hàng"),
                         url: "KhachHang",
                         icon: "fas fa-user-friends"
                     )
                 ).AddItem(
                     new MenuItemDefinition(
                         PageNames.DichVu,
-                        L("Dịch Vụ"),
+                        new FixedLocalizableString("Dịch Vụ"),
                         url: "DichVu",
                         icon: "fas fa-concierge-bell"
                     )
                 ).AddItem(
                     new MenuItemDefinition(
                         PageNames.LichChamSoc,
-                        L("Lịch Chăm Sóc"),
+                        new FixedLocalizableString("Lịch Chăm Sóc"),
                         url: "LichChamSoc",
                         icon: "fas fa-calendar-alt"
                     )
                 ).AddItem(
                     new MenuItemDefinition(
                         PageNames.NhanVien,
-                        L("Nhân Viên"),
+                        new FixedLocalizableString("Nhân Viên"),
                         url: "NhanVien",
                         icon: "fas fa-id-badge"
                     )
                 ).AddItem(
                     new MenuItemDefinition(
                         PageNames.MatHang,
-                        L("Mặt Hàng"),
+                        new FixedLocalizableString("Mặt Hàng"),
                         url: "MatHang",
                         icon: "fas fa-box-open"
-                    )
-                )
-                .AddItem( // Menu items below is just for demonstration!
-                    new MenuItemDefinition(
-                        "MultiLevelMenu",
-                        L("MultiLevelMenu"),
-                        icon: "fas fa-circle"
-                    ).AddItem(
-                        new MenuItemDefinition(
-                            "AspNetBoilerplate",
-                            new FixedLocalizableString("ASP.NET Boilerplate"),
-                            icon: "far fa-circle"
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetBoilerplateHome",
-                                new FixedLocalizableString("Home"),
-                                url: "https://aspnetboilerplate.com?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetBoilerplateTemplates",
-                                new FixedLocalizableString("Templates"),
-                                url: "https://aspnetboilerplate.com/Templates?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetBoilerplateSamples",
-                                new FixedLocalizableString("Samples"),
-                                url: "https://aspnetboilerplate.com/Samples?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetBoilerplateDocuments",
-                                new FixedLocalizableString("Documents"),
-                                url: "https://aspnetboilerplate.com/Pages/Documents?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        )
-                    ).AddItem(
-                        new MenuItemDefinition(
-                            "AspNetZero",
-                            new FixedLocalizableString("ASP.NET Zero"),
-                            icon: "far fa-circle"
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetZeroHome",
-                                new FixedLocalizableString("Home"),
-                                url: "https://aspnetzero.com?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetZeroFeatures",
-                                new FixedLocalizableString("Features"),
-                                url: "https://aspnetzero.com/Features?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetZeroPricing",
-                                new FixedLocalizableString("Pricing"),
-                                url: "https://aspnetzero.com/Pricing?ref=abptmpl#pricing",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetZeroFaq",
-                                new FixedLocalizableString("Faq"),
-                                url: "https://aspnetzero.com/Faq?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        ).AddItem(
-                            new MenuItemDefinition(
-                                "AspNetZeroDocuments",
-                                new FixedLocalizableString("Documents"),
-                                url: "https://aspnetzero.com/Documents?ref=abptmpl",
-                                icon: "far fa-dot-circle"
-                            )
-                        )
                     )
                 );
         }

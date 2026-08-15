@@ -1,0 +1,63 @@
+﻿@model Cuahangchamsocthucung.Web.Models.DichVu.DichVuListViewModel
+@using System.Security.Claims
+
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    ViewBag.Title = "Danh sách dịch vụ";
+    ViewBag.CurrentPageName = "Dịch vụ";
+}
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1>Dịch vụ</h1>
+            </div>
+            <div class="col-sm-6 text-right">
+                <a href="javascript:;" data-toggle="modal" data-target="#BookCreateModal" class="btn bg-blue">
+                    <i class="fa fa-plus-square"></i> Thêm
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="DichVuTable" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Tên</th>
+                                        <th>Mô tả</th>
+                                        <th>Trạng thái</th>
+                                        <th style="width: 200px">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@* 
+@await Html.PartialAsync("~/Views/Books/_ImportModal.cshtml")
+@await Html.PartialAsync("~/Views/Books/_CreateModal.cshtml", new Bookstore.Web.Models.Books.BookCreateViewModel())
+@await Html.PartialAsync("~/Views/Books/_UpdateModal.cshtml", new Bookstore.Web.Models.Books.BookUpdateViewModel())
+@await Html.PartialAsync("~/Views/Books/_DetailModal.cshtml", new Bookstore.Web.Models.Books.BookDetailViewModel()) *@
+@section Scripts {
+
+
+}

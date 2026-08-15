@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cuahangchamsocthucung.Nhanvien.Dto
+namespace Cuahangchamsocthucung.NhanVien.Dto
 {
-    public class NhanvienDto
+    public class NhanVienDto
     {
         public int Id { get; set; }
         public string Hoten { get; set; }

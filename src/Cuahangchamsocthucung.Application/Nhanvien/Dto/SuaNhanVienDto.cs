@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Cuahangchamsocthucung.Nhanvien.Dto
+namespace Cuahangchamsocthucung.NhanVien.Dto
 {
     public class SuaNhanVienDto
     {

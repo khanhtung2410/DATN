@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.MatHang.Dto
 {
-    public class ThemmathangDto
+    public class ThemMatHangDto
     {
         public string Tenmathang { get; set; }
         public string Mota { get; set; }

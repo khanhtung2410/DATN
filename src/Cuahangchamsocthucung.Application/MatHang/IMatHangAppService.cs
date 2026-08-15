@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 public interface IMatHangAppService : IApplicationService
 {
-    public Task<List<MathangDto>> LayDanhSachMatHang();
-    public Task<MathangDto> LayChiTietMatHang(int id);
-    public Task<int> ThemMatHang(ThemmathangDto input);
-    public Task SuaMatHang(SuamathangDto input);
+    public Task<List<MatHangDto>> LayDanhSachMatHang();
+    public Task<MatHangDto> LayChiTietMatHang(int id);
+    public Task<int> ThemMatHang(ThemMatHangDto input);
+    public Task SuaMatHang(SuaMatHangDto input);
     public Task SuaTrangThaiMatHang(SuaTrangThaiMatHangDto input);
 }
 

@@ -4,7 +4,7 @@ using Abp.Domain.Repositories;
 using Abp.UI;
 using Cuahangchamsocthucung.DichVu.Dto;
 using Cuahangchamsocthucung.Entities;
-using Cuahangchamsocthucung.Nhanvien.Dto;
+using Cuahangchamsocthucung.NhanVien.Dto;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,10 +67,10 @@ public class NhanvienAppService :
         return nhanVienId;
     }
 
-    public Task<List<NhanvienDto>> GetAll()
+    public Task<List<NhanVienDto>> GetAll()
     {
         var query = _nhanVienRepository.GetAll();
-            return Task.FromResult(query.Select(x => new NhanvienDto
+            return Task.FromResult(query.Select(x => new NhanVienDto
             {
             Id = x.Id,
             Hoten = x.Hoten,
@@ -82,14 +82,14 @@ public class NhanvienAppService :
         }).ToList());
     }
 
-    public Task<NhanvienDto> GetNhanVien(int id)
+    public Task<NhanVienDto> GetNhanVien(int id)
     {
        var nhanVien = _nhanVienRepository.GetAll().FirstOrDefault(x => x.Id == id);
         if (nhanVien == null)
         {
             throw new UserFriendlyException("Nhân viên không tồn tại.");
         }
-        var nhanVienDto = new NhanvienDto
+        var NhanVienDto = new NhanVienDto
         {
             Id = nhanVien.Id,
             Hoten = nhanVien.Hoten,
@@ -99,7 +99,7 @@ public class NhanvienAppService :
             SDT = nhanVien.SDT,
             Trangthai = nhanVien.Trangthai
         };
-        return Task.FromResult(nhanVienDto);
+        return Task.FromResult(NhanVienDto);
     }
 
     public async Task Update(SuaNhanVienDto input)
