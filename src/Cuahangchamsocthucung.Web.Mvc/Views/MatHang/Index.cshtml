@@ -56,3 +56,12 @@
 @section Scripts {
 
 }
+
+@await Html.PartialAsync("~/Views/MatHang/_CreateModal.cshtml", Model)
+
+<div class="modal fade" id="MatHangEditModal" tabindex="-1" role="dialog" aria-labelledby="MatHangEditModalLabel" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>

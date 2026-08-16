@@ -1,85 +1,64 @@
-﻿@using Abp.Authorization.Users
-@model Cuahangchamsocthucung.Web.Models.Account.RegisterViewModel
-@{
-    ViewBag.Title = L("Register");
-}
-@section scripts
-{
-    <environment names="Development">
-        <script src="~/view-resources/Views/Account/Register.js" asp-append-version="true"></script>
-    </environment>
+﻿@using Cuahangchamsocthucung.KhachHang.Dto
+@model DangKyDto
 
-    <environment names="Staging,Production">
-        <script src="~/view-resources/Views/Account/Register.min.js" asp-append-version="true"></script>
-    </environment>
+@{
+    ViewData["Title"] = "Đăng ký";
 }
-<h4 class="text-center">@L("Register")</h4>
-<form id="RegisterForm" asp-action="Register" method="post">
-    @if (ViewBag.ErrorMessage != null)
-    {
-        <div class="alert alert-danger">
-            <i class="fas fa-warning"></i> @ViewBag.ErrorMessage
-        </div>
-    }
-    <input type="hidden" name="IsExternalLogin" value="@Model.IsExternalLogin.ToString()" />
-    <input type="hidden" name="ExternalLoginAuthSchema" value="@Model.ExternalLoginAuthSchema" />
-    <div class="input-group mb-3">
-        <input type="text" name="Name" class="form-control" placeholder="@L("Name")" value="@Model.Name" required maxlength="@AbpUserBase.MaxNameLength">
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-arrow-left"></span>
-            </div>
-        </div>
+
+<h2>Đăng ký</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<form asp-action="Register" method="post" novalidate>
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label for="SDT" class="form-label">Số điện thoại</label>
+        <input asp-for="SDT" class="form-control" maxlength="10"  />
+        <span class="text-danger" asp-validation-for="SDT"></span>
     </div>
-    <div class="input-group mb-3">
-        <input type="text" name="Surname" class="form-control" placeholder="@L("Surname")" value="@Model.Surname" required maxlength="@AbpUserBase.MaxSurnameLength">
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-arrow-left"></span>
-            </div>
-        </div>
+
+    <div class="mb-3">
+        <label for="HoTen" class="form-label">Họ và tên</label>
+        <input asp-for="HoTen" class="form-control" />
+        <span class="text-danger" asp-validation-for="HoTen"></span>
     </div>
-    <div class="input-group mb-3">
-        <input type="email" name="EmailAddress" class="form-control" placeholder="@L("EmailAddress")" value="@Model.EmailAddress" required maxlength="@AbpUserBase.MaxEmailAddressLength">
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-envelope"></span>
-            </div>
-        </div>
+
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span class="text-danger" asp-validation-for="Email"></span>
     </div>
-    <div class="input-group mb-3">
-        <input type="text" name="UserName" class="form-control" placeholder="@L("UserName")" value="@Model.UserName" required maxlength="@AbpUserBase.MaxUserNameLength">
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-user"></span>
-            </div>
-        </div>
+
+    <div class="mb-3">
+        <label for="MatKhau" class="form-label">Mật khẩu</label>
+        <input asp-for="MatKhau" type="password" class="form-control"  />
+        <span class="text-danger" asp-validation-for="MatKhau"></span>
     </div>
-    <div class="input-group mb-3">
-        <input type="password" name="Password" class="form-control" placeholder="@L("Password")" required maxlength="@AbpUserBase.MaxPlainPasswordLength">
-        <div class="input-group-append">
-            <div class="input-group-text">
-                <span class="fas fa-lock"></span>
-            </div>
-        </div>
+
+    <div class="mb-3">
+        <label for="XacNhanMatKhau" class="form-label">Nhập lại mật khẩu</label>
+        <input asp-for="XacNhanMatKhau" type="password" class="form-control"  />
+        <span class="text-danger" asp-validation-for="XacNhanMatKhau"></span>
     </div>
-    <div class="row">
-        <div class="col-8">
-            <a asp-action="Login" class="btn btn-default btn-flat"><i class="fa fa-arrow-circle-left"></i> @L("Back")</a>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <button type="submit" class="btn btn-primary">Đăng ký</button>
         </div>
-        <div class="col-4">
-            <button type="submit" id="RegisterButton" class="btn btn-primary btn-flat float-right">@L("Register")</button>
+        <div class="text-end">
+            <small>Bạn đã có tài khoản? <a asp-action="Login" asp-controller="Account">Đăng nhập</a></small>
         </div>
     </div>
 </form>
-@*<div class="social-auth-links text-center">
-        <p>- OR -</p>
-        <a href="javascript:;" class="btn btn-block btn-primary">
-            <i class="fab fa-facebook mr-2"></i>
-            Sign up using Facebook
-        </a>
-        <a href="javascript:;" class="btn btn-block btn-danger">
-            <i class="fab fa-google-plus mr-2"></i>
-            Sign up using Google+
-        </a>
-    </div>*@
+
+@section Scripts {
+    @* <partial name="_ValidationScriptsPartial" /> *@
+}

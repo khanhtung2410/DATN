@@ -1,0 +1,164 @@
+﻿@using Cuahangchamsocthucung.KhachHang.Dto
+@model XacThucOtpDto
+
+@{
+    ViewData["Title"] = "Xác nhận OTP";
+    var initialResendSeconds = (int?)(ViewBag.ResendAfterSeconds) ?? 0;
+}
+
+<div class="container d-flex justify-content-center align-items-center py-5">
+    <div class="card shadow-sm border-0" style="max-width: 450px; width: 100%;">
+        <div class="card-body p-4 p-md-5">
+
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="fa fa-shield-alt fa-3x text-primary"></i>
+                </div>
+
+                <h3 class="fw-bold mb-2">Xác nhận OTP</h3>
+
+                <p class="text-muted mb-1">
+                    Chúng tôi đã gửi mã OTP đến số điện thoại
+                </p>
+
+                <strong class="text-primary">
+                    @Model.SDT
+                </strong>
+            </div>
+
+            <div class="alert alert-info text-center">
+                <i class="fa fa-clock me-1"></i>
+                Mã OTP có hiệu lực trong <strong>5 phút</strong>.
+            </div>
+
+            @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+            {
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-circle me-1"></i>
+                    @ViewBag.ErrorMessage
+                </div>
+            }
+
+            <form asp-action="ConfirmOtp" method="post" novalidate id="ConfirmOtpForm">
+                @Html.AntiForgeryToken()
+
+                <input asp-for="SDT" type="hidden" />
+
+                <div class="mb-4">
+                    <label asp-for="Otp" class="form-label fw-semibold">
+                        Mã OTP
+                    </label>
+
+                    <input asp-for="Otp"
+                           class="form-control form-control-lg"
+                           maxlength="6"
+                           inputmode="numeric"
+                           autocomplete="one-time-code"
+                           placeholder="Nhập 6 chữ số"/>
+
+                    <span asp-validation-for="Otp"
+                          class="text-danger small">
+                    </span>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg w-100">
+                    <i class="fa fa-check-circle me-1"></i>
+                    Xác nhận OTP
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    Bạn nhập sai mã?
+                    <a asp-action="Register" class="text-decoration-none">
+                        Đăng ký lại
+                    </a>
+                </small>
+            </div>
+
+            <div class="text-center mt-3">
+                <button id="resendBtn" class="btn btn-link" disabled>
+                    Gửi lại mã OTP (<span id="resendCountdown">--</span>)
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function ($) {
+            var remaining = @initialResendSeconds;
+            var $resendBtn = $('#resendBtn');
+            var $countdown = $('#resendCountdown');
+
+            function setCountdown(seconds) {
+                remaining = seconds;
+                if (remaining > 0) {
+                    $resendBtn.prop('disabled', true);
+                    updateText();
+                    startTimer();
+                } else {
+                    $resendBtn.prop('disabled', false);
+                    $countdown.text('Gửi lại');
+                }
+            }
+
+            var intervalId = null;
+            function startTimer() {
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(function () {
+                    remaining--;
+                    updateText();
+                    if (remaining <= 0) {
+                        clearInterval(intervalId);
+                        $resendBtn.prop('disabled', false);
+                        $countdown.text('Gửi lại');
+                    }
+                }, 1000);
+            }
+
+            function updateText() {
+                var mins = Math.floor(remaining / 60);
+                var secs = remaining % 60;
+                $countdown.text((mins > 0 ? mins + 'm ' : '') + secs + 's');
+            }
+
+            $resendBtn.on('click', function (e) {
+                e.preventDefault();
+                if (remaining > 0) return;
+
+                var sdt = $('input[name="SDT"]').val();
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '@Url.Action("ResendOtp","Account")',
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token },
+                    data: { sdt: sdt },
+                    success: function (resp) {
+                        if (resp && resp.success) {
+                            var next = resp.remainingSeconds || 180;
+                            setCountdown(next);
+                            // Optionally show a toast / alert
+                            alert(resp.message || 'Mã OTP đã được gửi lại.');
+                        } else {
+                            alert(resp.message || 'Không thể gửi lại mã OTP.');
+                            if (resp && resp.remainingSeconds) {
+                                setCountdown(resp.remainingSeconds);
+                            }
+                        }
+                    },
+                    error: function () {
+                        alert('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
+                    }
+                });
+            });
+
+            // initialize on load
+            setCountdown(remaining);
+        })(jQuery);
+    </script>
+}

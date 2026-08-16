@@ -57,3 +57,12 @@
 @section Scripts {
 
 }
+
+@await Html.PartialAsync("~/Views/HoaDon/_CreateModal.cshtml", Model)
+
+<div class="modal fade" id="HoaDonEditModal" tabindex="-1" role="dialog" aria-labelledby="HoaDonEditModalLabel" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>

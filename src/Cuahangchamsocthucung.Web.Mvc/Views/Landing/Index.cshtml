@@ -1,9 +1,40 @@
-﻿@{
+﻿@using Cuahangchamsocthucung.Sessions.Dto
+@inject Cuahangchamsocthucung.Sessions.ISessionAppService SessionAppService
+
+@{
     Layout = null;
 }
 
 @{
     ViewData["Title"] = "Cửa Hàng Chăm Sóc Thú Cưng";
+
+    // Load current login informations (server side)
+    GetCurrentLoginInformationsOutput loginInfo = null;
+    try
+    {
+        loginInfo = await SessionAppService.GetCurrentLoginInformations();
+    }
+    catch
+    {
+        // swallow - if session service is not available just leave loginInfo null
+        loginInfo = null;
+    }
+
+    string fullName = null;
+    if (loginInfo?.User != null)
+    {
+        // Prefer Name + Surname; fall back to UserName if empty
+        var name = loginInfo.User.Name?.Trim();
+        var surname = loginInfo.User.Surname?.Trim();
+        if (!string.IsNullOrEmpty(name) || !string.IsNullOrEmpty(surname))
+        {
+            fullName = $"{name} {(surname ?? "")}".Trim();
+        }
+        else
+        {
+            fullName = loginInfo.User.UserName;
+        }
+    }
 }
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -116,11 +147,12 @@
             Cửa Hàng Chăm Sóc Thú Cưng
         </a>
 
-
-        <div class="ms-auto">
+        <div class="ms-auto d-flex align-items-center">
 
             @if (User.Identity.IsAuthenticated)
             {
+                <span class="me-3 text-muted">Xin chào, <strong>@(fullName ?? "Người dùng")</strong></span>
+
                 <a class="btn btn-outline-danger rounded-pill px-4"
                    href="/Account/Logout">
                     Đăng xuất

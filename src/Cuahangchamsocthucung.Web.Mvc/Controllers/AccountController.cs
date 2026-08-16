@@ -2,40 +2,43 @@
 using Abp.AspNetCore.Mvc.Authorization;
 using Abp.Authorization;
 using Abp.Authorization.Users;
-using Abp.Configuration;
 using Abp.Configuration.Startup;
 using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.MultiTenancy;
 using Abp.Notifications;
-using Abp.Runtime.Session;
-using Abp.Threading;
 using Abp.Timing;
 using Abp.UI;
 using Abp.Web.Models;
-using Abp.Zero.Configuration;
 using Cuahangchamsocthucung.Authorization;
 using Cuahangchamsocthucung.Authorization.Roles;
 using Cuahangchamsocthucung.Authorization.Users;
 using Cuahangchamsocthucung.Controllers;
 using Cuahangchamsocthucung.Identity;
+using Cuahangchamsocthucung.KhachHang.Dto;
 using Cuahangchamsocthucung.MultiTenancy;
 using Cuahangchamsocthucung.Sessions;
 using Cuahangchamsocthucung.Web.Models.Account;
 using Cuahangchamsocthucung.Web.Views.Shared.Components.TenantChange;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.DataProtection;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.Web.Controllers
 {
     public class AccountController : CuahangchamsocthucungControllerBase
     {
+        private const int OtpLength = 6;
+        private const int MaxFailedOtpAttempts = 5;
+        private const int ResendCooldownSeconds = 180; // 3 minutes
+        private const int MaxResendCount = 5;
+
         private readonly UserManager _userManager;
         private readonly TenantManager _tenantManager;
         private readonly IMultiTenancyConfig _multiTenancyConfig;
@@ -47,6 +50,9 @@ namespace Cuahangchamsocthucung.Web.Controllers
         private readonly ISessionAppService _sessionAppService;
         private readonly ITenantCache _tenantCache;
         private readonly INotificationPublisher _notificationPublisher;
+        private readonly IKhachHangAppService _khachHangAppService;
+        private readonly IDistributedCache _distributedCache;
+        private readonly IDataProtector _dataProtector;
 
         public AccountController(
             UserManager userManager,
@@ -59,7 +65,10 @@ namespace Cuahangchamsocthucung.Web.Controllers
             UserRegistrationManager userRegistrationManager,
             ISessionAppService sessionAppService,
             ITenantCache tenantCache,
-            INotificationPublisher notificationPublisher)
+            INotificationPublisher notificationPublisher,
+            IKhachHangAppService khachHangAppService,
+            IDistributedCache distributedCache,
+            IDataProtectionProvider dataProtectionProvider) // added
         {
             _userManager = userManager;
             _multiTenancyConfig = multiTenancyConfig;
@@ -72,6 +81,9 @@ namespace Cuahangchamsocthucung.Web.Controllers
             _sessionAppService = sessionAppService;
             _tenantCache = tenantCache;
             _notificationPublisher = notificationPublisher;
+            _khachHangAppService = khachHangAppService;
+            _distributedCache = distributedCache;
+            _dataProtector = dataProtectionProvider.CreateProtector("PendingRegistration.Protector"); // set
         }
 
         #region Login / Logout
@@ -89,7 +101,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
             {
                 ReturnUrl = returnUrl,
                 IsMultiTenancyEnabled = _multiTenancyConfig.IsEnabled,
-                IsSelfRegistrationAllowed = IsSelfRegistrationEnabled(),
                 MultiTenancySide = AbpSession.MultiTenancySide
             });
         }
@@ -125,6 +136,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
                 TargetUrl = targetUrl
             });
         }
+
         public async Task<ActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
@@ -150,10 +162,10 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
         public ActionResult Register()
         {
-            return RegisterView(new RegisterViewModel());
+            return RegisterView(new DangKyDto());
         }
 
-        private ActionResult RegisterView(RegisterViewModel model)
+        private ActionResult RegisterView(DangKyDto model)
         {
             ViewBag.IsMultiTenancyEnabled = false;
             ViewBag.IsSelfRegistrationAllowed = true;
@@ -161,212 +173,349 @@ namespace Cuahangchamsocthucung.Web.Controllers
             return View("Register", model);
         }
 
-        private bool IsSelfRegistrationEnabled()
-        {
-            // Không dùng Tenant nữa
-            return true;
-        }
 
         [HttpPost]
         [UnitOfWork]
-        public async Task<ActionResult> Register(RegisterViewModel model)
+        public async Task<ActionResult> Register(DangKyDto model)
         {
             try
             {
-                if (model.UserName.IsNullOrEmpty() ||
-                    model.Password.IsNullOrEmpty())
+                if (!ModelState.IsValid)
                 {
-                    throw new UserFriendlyException(
-                        L("FormIsNotValidMessage"));
+                    ViewBag.ErrorMessage = "Biểu mẫu không hợp lệ.";
+                    return View("Register", model);
                 }
 
-                // Tạo User ở Host, không thuộc Tenant
-                var user = new User
+                var existedUser = await _userManager
+                    .Users
+                    .AnyAsync(x => x.UserName == model.SDT);
+
+                if (existedUser)
                 {
-                    TenantId = null,
-                    UserName = model.UserName,
-                    Name = model.Name,
-                    Surname = model.Surname,
-                    EmailAddress = model.EmailAddress,
-                    IsActive = true,
-                    IsEmailConfirmed = true
+                    ViewBag.ErrorMessage = "Số điện thoại đã được sử dụng.";
+                    return View("Register", model);
+                }
+
+                // Tạo OTP (6 digits)
+                var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+
+                // Hash OTP with a random salt for secure storage
+                var saltBytes = new byte[16];
+                RandomNumberGenerator.Fill(saltBytes);
+                var otpHash = ComputeOtpHash(otp, saltBytes);
+
+                // Protect the plain password before caching (do not store plain text)
+                var protectedPassword = _dataProtector.Protect(model.MatKhau);
+
+                // Create a safe lightweight model without passwords
+                var safeModel = new
+                {
+                    HoTen = model.HoTen,
+                    SDT = model.SDT,
+                    Email = model.Email
                 };
 
-                var createResult = await _userManager.CreateAsync(
-                    user,
-                    model.Password);
-
-                if (!createResult.Succeeded)
+                // Include LastSentAt, ResendCount so we can enforce resend cooldown and limits
+                var pending = new
                 {
-                    throw new UserFriendlyException(
-                        string.Join(
-                            ", ",
-                            createResult.Errors.Select(x => x.Description)
-                        )
-                    );
-                }
+                    SafeModel = safeModel,
+                    ProtectedPassword = protectedPassword,
+                    OtpHash = otpHash,
+                    OtpSalt = Convert.ToBase64String(saltBytes),
+                    FailedAttempts = 0,
+                    ResendCount = 0,
+                    LastSentAt = DateTime.UtcNow
+                };
 
-                // Gán role Customer
-                var roleResult = await _userManager.AddToRoleAsync(
-                    user,
-                    StaticRoleNames.Tenants.Customer);
+                var cacheKey = $"PendingRegistration:{model.SDT}";
+                var json = JsonSerializer.Serialize(pending);
 
-                if (!roleResult.Succeeded)
+                var cacheOptions = new DistributedCacheEntryOptions
                 {
-                    throw new UserFriendlyException(
-                        string.Join(
-                            ", ",
-                            roleResult.Errors.Select(x => x.Description)
-                        )
-                    );
-                }
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                };
 
-                await _unitOfWorkManager.Current.SaveChangesAsync();
+                await _distributedCache.SetStringAsync(cacheKey, json, cacheOptions);
 
-                // Đăng nhập ngay sau khi đăng ký
-                var loginResult = await GetLoginResultAsync(
-                    user.UserName,
-                    model.Password,
-                    null);
+                // TODO: send OTP via SMS gateway. For demo/logging we'll write to logger (do NOT log in production).
+                Logger.Info($"OTP đăng ký tài khoản SDT={model.SDT}: {otp}");
 
-                if (loginResult.Result == AbpLoginResultType.Success)
-                {
-                    await _signInManager.SignInAsync(
-                        loginResult.Identity,
-                        false);
-
-                    return Redirect(GetAppHomeUrl());
-                }
-
-                return RedirectToAction("Login");
-
+                return RedirectToAction(nameof(ConfirmOtp), new { sdt = model.SDT });
             }
             catch (UserFriendlyException ex)
             {
-                ViewBag.ErrorMessage = ex.Message;
-
+                ViewBag.ErrorMessage = ex.Message ?? "Đã xảy ra lỗi.";
                 return View("Register", model);
             }
         }
 
-        #endregion
+        [HttpGet]
+        public  ActionResult ConfirmOtp(string sdt = null)
+        {
+            // Show view where user enters OTP. SDT prefilled if provided.
+            var vm = new XacThucOtpDto
+            {
+                SDT = sdt
+            };
 
-        #region External Login
+            // compute remaining seconds for resend cooldown (if any)
+            var remainingSeconds = 0;
+            if (!string.IsNullOrWhiteSpace(sdt))
+            {
+                var cacheKey = $"PendingRegistration:{sdt}";
+                var pendingJsonTask = _distributedCache.GetStringAsync(cacheKey);
+                pendingJsonTask.Wait(); // safe here because this is a short sync call in GET preparing view
+                var pendingJson = pendingJsonTask.Result;
+
+                if (!string.IsNullOrWhiteSpace(pendingJson))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(pendingJson);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("LastSentAt", out var lastSentAtProp) &&
+                            DateTime.TryParse(lastSentAtProp.GetString(), out var lastSentAt))
+                        {
+                            var elapsed = DateTime.UtcNow - lastSentAt.ToUniversalTime();
+                            var remain = ResendCooldownSeconds - (int)elapsed.TotalSeconds;
+                            if (remain > 0) remainingSeconds = remain;
+                        }
+                    }
+                    catch
+                    {
+                        // ignore parsing errors, default to 0
+                    }
+                }
+            }
+
+            ViewBag.ResendAfterSeconds = remainingSeconds;
+            return View("ConfirmOtp", vm);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ExternalLogin(string provider, string returnUrl)
+        public async Task<JsonResult> ResendOtp(string sdt)
         {
-            var redirectUrl = Url.Action(
-                "ExternalLoginCallback",
-                "Account",
-                new
+            if (string.IsNullOrWhiteSpace(sdt))
+            {
+                return Json(new { success = false, message = "Số điện thoại không hợp lệ." });
+            }
+
+            var cacheKey = $"PendingRegistration:{sdt}";
+            var pendingJson = await _distributedCache.GetStringAsync(cacheKey);
+
+            if (string.IsNullOrWhiteSpace(pendingJson))
+            {
+                return Json(new { success = false, message = "Không tìm thấy thông tin đăng ký hoặc mã OTP đã hết hạn. Vui lòng đăng ký lại." });
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(pendingJson);
+                var root = doc.RootElement;
+
+                // Read LastSentAt and ResendCount if present
+                DateTime? lastSentAt = null;
+                var resendCount = 0;
+                if (root.TryGetProperty("LastSentAt", out var lastSentAtProp))
                 {
-                    ReturnUrl = returnUrl
-                });
+                    if (DateTime.TryParse(lastSentAtProp.GetString(), out var parsed))
+                    {
+                        lastSentAt = parsed.ToUniversalTime();
+                    }
+                }
 
-            return Challenge(
-                // TODO: ...?
-                // new Microsoft.AspNetCore.Http.Authentication.AuthenticationProperties
-                // {
-                //     Items = { { "LoginProvider", provider } },
-                //     RedirectUri = redirectUrl
-                // },
-                provider
-            );
+                if (root.TryGetProperty("ResendCount", out var rcProp))
+                {
+                    resendCount = rcProp.GetInt32();
+                }
+
+                if (resendCount >= MaxResendCount)
+                {
+                    // Remove pending registration and force re-register
+                    await _distributedCache.RemoveAsync(cacheKey);
+                    return Json(new { success = false, message = $"Bạn đã vượt quá {MaxResendCount} lần gửi lại mã. Vui lòng đăng ký lại." });
+                }
+
+                if (lastSentAt.HasValue)
+                {
+                    var elapsed = DateTime.UtcNow - lastSentAt.Value;
+                    if (elapsed.TotalSeconds < ResendCooldownSeconds)
+                    {
+                        var wait = ResendCooldownSeconds - (int)elapsed.TotalSeconds;
+                        return Json(new { success = false, message = $"Vui lòng chờ {wait} giây trước khi gửi lại mã.", remainingSeconds = wait });
+                    }
+                }
+
+                // Generate new OTP and update cache (increment resend count, reset failed attempts)
+                var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+                var saltBytes = new byte[16];
+                RandomNumberGenerator.Fill(saltBytes);
+                var otpHash = ComputeOtpHash(otp, saltBytes);
+
+                // Recreate pending object using existing SafeModel and ProtectedPassword
+                var safeModelElement = root.GetProperty("SafeModel");
+                var safeModel = JsonSerializer.Deserialize<DangKyDto>(safeModelElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                // Read existing protected password
+                var protectedPassword = root.GetProperty("ProtectedPassword").GetString();
+
+                var updatedPending = new
+                {
+                    SafeModel = new { HoTen = safeModel.HoTen, SDT = safeModel.SDT, Email = safeModel.Email },
+                    ProtectedPassword = protectedPassword,
+                    OtpHash = otpHash,
+                    OtpSalt = Convert.ToBase64String(saltBytes),
+                    FailedAttempts = 0,
+                    ResendCount = resendCount + 1,
+                    CreatedAt = DateTime.UtcNow,
+                    LastSentAt = DateTime.UtcNow
+                };
+
+                var updatedJson = JsonSerializer.Serialize(updatedPending);
+                var cacheOptions = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                };
+
+                await _distributedCache.SetStringAsync(cacheKey, updatedJson, cacheOptions);
+
+                // TODO: call SMS provider. For demo we log.
+                Logger.Info($"Resent OTP đăng ký SDT={sdt}: {otp}");
+
+                return Json(new { success = true, message = "Mã OTP đã được gửi lại.", remainingSeconds = ResendCooldownSeconds, resendCount = updatedPending.ResendCount });
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("ResendOtp error", ex);
+                return Json(new { success = false, message = "Không thể gửi lại mã OTP. Vui lòng thử lại sau." });
+            }
         }
 
+        [HttpPost]
         [UnitOfWork]
-        public virtual async Task<ActionResult> ExternalLoginCallback(string returnUrl, string remoteError = null)
+        public async Task<ActionResult> ConfirmOtp(XacThucOtpDto input)
         {
-            returnUrl = NormalizeReturnUrl(returnUrl);
-
-            if (remoteError != null)
+            try
             {
-                Logger.Error("Remote Error in ExternalLoginCallback: " + remoteError);
-                throw new UserFriendlyException(L("CouldNotCompleteLoginOperation"));
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.ErrorMessage = "Biểu mẫu không hợp lệ.";
+                    return View("ConfirmOtp", input);
+                }
+
+                var cacheKey = $"PendingRegistration:{input.SDT}";
+                var pendingJson = await _distributedCache.GetStringAsync(cacheKey);
+
+                if (string.IsNullOrWhiteSpace(pendingJson))
+                {
+                    ViewBag.ErrorMessage = "Không tìm thấy thông tin đăng ký hoặc mã OTP đã hết hạn.";
+                    return View("ConfirmOtp", input);
+                }
+
+                using var doc = JsonDocument.Parse(pendingJson);
+                var root = doc.RootElement;
+
+                var otpHash = root.GetProperty("OtpHash").GetString();
+                var otpSaltB64 = root.GetProperty("OtpSalt").GetString();
+                var failedAttempts = root.GetProperty("FailedAttempts").GetInt32();
+                var safeModelElement = root.GetProperty("SafeModel");
+                var protectedPassword = root.GetProperty("ProtectedPassword").GetString();
+
+                // safeModel contains HoTen, SDT, Email
+                var safeModel = JsonSerializer.Deserialize<DangKyDto>(safeModelElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (safeModel == null || otpHash == null || otpSaltB64 == null || protectedPassword == null)
+                {
+                    ViewBag.ErrorMessage = "Dữ liệu đăng ký không hợp lệ.";
+                    return View("ConfirmOtp", input);
+                }
+
+                if (safeModel.SDT != input.SDT)
+                {
+                    ViewBag.ErrorMessage = "Số điện thoại không khớp với yêu cầu đăng ký.";
+                    return View("ConfirmOtp", input);
+                }
+
+                var saltBytes = Convert.FromBase64String(otpSaltB64);
+                var inputHash = ComputeOtpHash(input.Otp, saltBytes);
+
+                if (!SecureEquals(otpHash, inputHash))
+                {
+                    failedAttempts++;
+                    if (failedAttempts >= MaxFailedOtpAttempts)
+                    {
+                        // Exceeded allowed attempts: remove pending registration
+                        await _distributedCache.RemoveAsync(cacheKey);
+                        ViewBag.ErrorMessage = $"Bạn đã nhập OTP sai quá {MaxFailedOtpAttempts} lần. Vui lòng đăng ký lại.";
+                        return View("ConfirmOtp", input);
+                    }
+
+                    // Update failed attempts count in cache and reset expiry (preserve protected password and resend count)
+                    var resendCount = root.TryGetProperty("ResendCount", out var rcProp) ? rcProp.GetInt32() : 0;
+                    var updatedPending = new
+                    {
+                        SafeModel = new { HoTen = safeModel.HoTen, SDT = safeModel.SDT, Email = safeModel.Email },
+                        ProtectedPassword = protectedPassword,
+                        OtpHash = otpHash,
+                        OtpSalt = otpSaltB64,
+                        FailedAttempts = failedAttempts,
+                        ResendCount = resendCount,
+                        CreatedAt = DateTime.UtcNow,
+                        LastSentAt = root.TryGetProperty("LastSentAt", out var lastSentAtProp) ? lastSentAtProp.GetString() : DateTime.UtcNow.ToString("o")
+                    };
+                    var updatedJson = JsonSerializer.Serialize(updatedPending);
+                    var cacheOptions = new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                    };
+                    await _distributedCache.SetStringAsync(cacheKey, updatedJson, cacheOptions);
+
+                    ViewBag.ErrorMessage = $"OTP không đúng. Bạn còn {MaxFailedOtpAttempts - failedAttempts} lần thử.";
+                    return View("ConfirmOtp", input);
+                }
+
+                // OTP is valid -> finalize registration by delegating to application service.
+                // Reconstruct DangKyDto including the unprotected password
+                var plainPassword = _dataProtector.Unprotect(protectedPassword);
+
+                var registrationDto = new DangKyDto
+                {
+                    HoTen = safeModel.HoTen,
+                    SDT = safeModel.SDT,
+                    Email = safeModel.Email,
+                    MatKhau = plainPassword,
+                    XacNhanMatKhau = plainPassword
+                };
+
+                var result = await _khachHangAppService.DangKy(registrationDto);
+
+                // Clear cache after successful registration
+                await _distributedCache.RemoveAsync(cacheKey);
+
+                // Redirect to login page with success message
+                TempData["SuccessMessage"] = "Đăng ký thành công. Vui lòng đăng nhập.";
+                return RedirectToAction("Login");
             }
-
-            var externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
-            if (externalLoginInfo == null)
+            catch (UserFriendlyException ex)
             {
-                Logger.Warn("Could not get information from external login.");
-                return RedirectToAction(nameof(Login));
+                ViewBag.ErrorMessage = ex.Message ?? "Đã xảy ra lỗi.";
+                return View("ConfirmOtp", input);
             }
-
-            await _signInManager.SignOutAsync();
-
-            var tenancyName = GetTenancyNameOrNull();
-
-            var loginResult = await _logInManager.LoginAsync(externalLoginInfo, tenancyName);
-
-            switch (loginResult.Result)
-            {
-                case AbpLoginResultType.Success:
-                    await _signInManager.SignInAsync(loginResult.Identity, false);
-                    return Redirect(returnUrl);
-                case AbpLoginResultType.UnknownExternalLogin:
-                    return await RegisterForExternalLogin(externalLoginInfo);
-                default:
-                    throw _abpLoginResultTypeHelper.CreateExceptionForFailedLoginAttempt(
-                        loginResult.Result,
-                        externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email) ?? externalLoginInfo.ProviderKey,
-                        tenancyName
-                    );
-            }
-        }
-
-        private async Task<ActionResult> RegisterForExternalLogin(ExternalLoginInfo externalLoginInfo)
-        {
-            var email = externalLoginInfo.Principal.FindFirstValue(ClaimTypes.Email);
-            var nameinfo = ExternalLoginInfoHelper.GetNameAndSurnameFromClaims(externalLoginInfo.Principal.Claims.ToList());
-
-            var viewModel = new RegisterViewModel
-            {
-                EmailAddress = email,
-                Name = nameinfo.name,
-                Surname = nameinfo.surname,
-                IsExternalLogin = true,
-                ExternalLoginAuthSchema = externalLoginInfo.LoginProvider
-            };
-
-            if (nameinfo.name != null &&
-                nameinfo.surname != null &&
-                email != null)
-            {
-                return await Register(viewModel);
-            }
-
-            return RegisterView(viewModel);
-        }
-
-        [UnitOfWork]
-        protected virtual async Task<List<Tenant>> FindPossibleTenantsOfUserAsync(UserLoginInfo login)
-        {
-            List<User> allUsers;
-            using (_unitOfWorkManager.Current.DisableFilter(AbpDataFilters.MayHaveTenant))
-            {
-                allUsers = await _userManager.FindAllAsync(login);
-            }
-
-            return allUsers
-                .Where(u => u.TenantId != null)
-                .Select(u => AsyncHelper.RunSync(() => _tenantManager.FindByIdAsync(u.TenantId.Value)))
-                .ToList();
         }
 
         #endregion
 
         #region 403 Forbidden
-        
+
         [Route("/Account/Forbidden")]
         public ActionResult Error403()
         {
             return View();
         }
-        
+
         #endregion
-        
+
         #region Helpers
 
         public ActionResult RedirectToAppHome()
@@ -379,8 +528,30 @@ namespace Cuahangchamsocthucung.Web.Controllers
             return Url.Action("Index", "About");
         }
 
-        #endregion
+        private static string ComputeOtpHash(string otp, byte[] salt)
+        {
+            // Use HMACSHA256 with salt as key
+            using var hmac = new HMACSHA256(salt);
+            var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(otp));
+            return Convert.ToBase64String(hashBytes);
+        }
 
+        private static bool SecureEquals(string a, string b)
+        {
+            if (a == null || b == null) return false;
+            var aBytes = Convert.FromBase64String(a);
+            var bBytes = Convert.FromBase64String(b);
+            if (aBytes.Length != bBytes.Length) return false;
+            var diff = 0;
+            for (var i = 0; i < aBytes.Length; i++)
+            {
+                diff |= aBytes[i] ^ bBytes[i];
+            }
+            return diff == 0;
+        }
+
+        #endregion
+                
         #region Change Tenant
 
         public async Task<ActionResult> TenantChangeModal()

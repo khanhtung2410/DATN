@@ -56,3 +56,12 @@
 @section Scripts {
 
 }
+
+@await Html.PartialAsync("~/Views/LichChamSoc/_CreateModal.cshtml", Model)
+
+<div class="modal fade" id="LichChamSocEditModal" tabindex="-1" role="dialog" aria-labelledby="LichChamSocEditModalLabel" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>

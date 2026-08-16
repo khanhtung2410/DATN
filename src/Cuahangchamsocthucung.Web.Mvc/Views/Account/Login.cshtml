@@ -47,13 +47,12 @@
         </div>
     </div>
 </form>
-<p class="mb-0">
-    @if (Model.IsSelfRegistrationAllowed)
-    {
-        <div class="row">
-            <div class="col-12">
-                <a asp-action="Register" class="text-center"><i class="fa fa-plus-circle"></i> @L("Register")</a>
-            </div>
+<div class="mb-0">
+    <div class="row">
+        <div class="col-12">
+            <a asp-action="Register" class="text-center">
+                <i class="fa fa-plus-circle"></i> Đăng ký
+            </a>
         </div>
-    }
-</p>
+    </div>
+</div>
