@@ -27,6 +27,9 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
             // Default tenant seed (in host database).
             new DefaultTenantBuilder(context).Create();
             new TenantRoleAndUserBuilder(context, 1).Create();
+
+            // Tenant-specific default data (tenant id 1)
+            new DefaultTenantDataCreator(context, 1).Create();
         }
 
         private static void WithDbContext<TDbContext>(IIocResolver iocResolver, Action<TDbContext> contextAction)
