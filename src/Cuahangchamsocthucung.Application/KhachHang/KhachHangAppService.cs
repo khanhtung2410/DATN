@@ -5,6 +5,7 @@ using Cuahangchamsocthucung.Authorization.Roles;
 using Cuahangchamsocthucung.Authorization.Users;
 using Cuahangchamsocthucung.Entities;
 using Cuahangchamsocthucung.KhachHang.Dto;
+using Cuahangchamsocthucung.ThuCung.Dto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -17,16 +18,19 @@ public class KhachHangAppService :
 {
     private readonly IRepository<KhachHang, int> _khachHangRepository;
     private readonly UserRegistrationManager _userRegistrationManager;
-    private readonly UserManager<User> _userManager;    
+    private readonly UserManager<User> _userManager;
+    private readonly IRepository<ThuCung, int> _thuCungRepository;
 
     public KhachHangAppService(
         IRepository<KhachHang, int> khachHangRepository,
         UserRegistrationManager userRegistrationManager,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IRepository<ThuCung, int> thuCungRepository)
     {
         _khachHangRepository = khachHangRepository;
         _userRegistrationManager = userRegistrationManager;
         _userManager = userManager;
+        _thuCungRepository = thuCungRepository;
     }
 
     public async Task<KhachHangDto> DangKy(DangKyDto input)
@@ -128,7 +132,7 @@ public class KhachHangAppService :
 
     public async Task<List<KhachHangDto>> GetAllKhachHangAsync()
     {
-        return await _khachHangRepository
+        var khachHangs = await _khachHangRepository
             .GetAll()
             .Select(x => new KhachHangDto
             {
@@ -138,6 +142,34 @@ public class KhachHangAppService :
                 Email = x.Email
             })
             .ToListAsync();
+
+        var khachHangIds = khachHangs
+            .Select(x => x.Id)
+            .ToList();
+
+        var thuCungs = await _thuCungRepository
+            .GetAll()
+            .Where(x => khachHangIds.Contains(x.KhachHangId))
+            .Select(x => new ThuCungDto
+            {
+                Id = x.Id,
+                KhachHangId = x.KhachHangId,
+                TenThuCung = x.TenThuCung,
+                LoaiThuCung = x.LoaiThuCung,
+                GhiChu = x.GhiChu,
+                TrangThai = x.TrangThai,
+                ImageUrl = x.ImageUrl
+            })
+            .ToListAsync();
+
+        foreach (var khachHang in khachHangs)
+        {
+            khachHang.ThuCungs = thuCungs
+                .Where(x => x.KhachHangId == khachHang.Id)
+                .ToList();
+        }
+
+        return khachHangs;
     }
 
     public async Task<KhachHangDto> GetKhachHangByIdAsync(int id)
@@ -152,12 +184,28 @@ public class KhachHangAppService :
                 "Không tìm thấy khách hàng.");
         }
 
+        var thuCungs = await _thuCungRepository
+            .GetAll()
+            .Where(x => x.KhachHangId == id)
+            .Select(x => new ThuCungDto
+            {
+                Id = x.Id,
+                KhachHangId = x.KhachHangId,
+                TenThuCung = x.TenThuCung,
+                LoaiThuCung = x.LoaiThuCung,
+                GhiChu = x.GhiChu,
+                TrangThai = x.TrangThai,
+                ImageUrl = x.ImageUrl
+            })
+            .ToListAsync();
+
         return new KhachHangDto
         {
             Id = khachHang.Id,
             Hoten = khachHang.Hoten,
             SDT = khachHang.SDT,
-            Email = khachHang.Email
+            Email = khachHang.Email,
+            ThuCungs = thuCungs
         };
-    }
+    }   
 }

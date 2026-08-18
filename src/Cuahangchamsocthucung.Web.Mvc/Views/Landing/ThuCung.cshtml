@@ -1,0 +1,164 @@
+﻿@using Cuahangchamsocthucung.ThuCung.Dto
+@model List<ThuCungDto>
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Quản lý thú cưng";
+}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold">
+                🐾 Thú cưng của tôi
+            </h2>
+
+            <p class="text-muted mb-0">
+                Quản lý thông tin thú cưng của bạn
+            </p>
+        </div>
+
+        <button type="button"
+                class="btn btn-warning rounded-pill px-4"
+                data-bs-toggle="modal"
+                data-bs-target="#themThuCungModal">
+
+            + Thêm thú cưng
+
+        </button>
+
+    </div>
+
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+
+            <div class="fs-1">
+                🐶
+            </div>
+
+            <h4 class="fw-bold mt-3">
+                Chưa có thú cưng
+            </h4>
+
+            <p class="text-muted">
+                Hãy thêm thú cưng để có thể đặt lịch chăm sóc.
+            </p>
+
+            <button type="button"
+                    class="btn btn-warning rounded-pill px-4"
+                    data-bs-toggle="modal"
+                    data-bs-target="#ThuCungCreateModal">
+                + Thêm thú cưng
+            </button>
+
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="card border-0 shadow-sm h-100 overflow-hidden">
+
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl"
+                                 class="card-img-top"
+                                 style="height:220px;
+                                                    object-fit:cover;"
+                                 alt="@item.TenThuCung" />
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center bg-light"
+                                 style="height:220px;">
+
+                                <span class="display-1">
+                                    @(item.LoaiThuCung == "Mèo" ? "🐱" : "🐶")
+                                </span>
+
+                            </div>
+                        }
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <h4 class="fw-bold mb-2">
+                                    @item.TenThuCung
+                                </h4>
+
+                                @if (item.TrangThai)
+                                {
+                                    <span class="badge bg-success">
+                                        Hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Không hoạt động
+                                    </span>
+                                }
+
+                            </div>
+
+                            <p class="mb-2">
+                                <strong>Loài:</strong>
+                                @item.LoaiThuCung
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(item.GhiChu))
+                            {
+                                <p class="text-muted">
+                                    <strong>Ghi chú:</strong>
+                                    @item.GhiChu
+                                </p>
+                            }
+
+                            <div class="d-flex gap-2 mt-4">
+
+                                <button type="button"
+                                        class="btn btn-outline-warning rounded-pill flex-fill edit-thucung"
+                                        data-id="@item.Id"
+                                        data-toggle="modal"
+                                        data-target="#ThuCungEditModal">
+                                    Sửa
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary rounded-pill flex-fill"
+                                        onclick="doiTrangThaiThuCung(@item.Id, '@item.TenThuCung', @item.TrangThai.ToString().ToLower())">
+
+                                    @(item.TrangThai ? "Ngừng hoạt động" : "Kích hoạt")
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+@await Html.PartialAsync("~/Views/Landing/_CreateThuCungModal.cshtml")
+
+@await Html.PartialAsync("~/Views/Landing/_UpdateThuCungModal.cshtml")
+
+
+@section Scripts {
+
+  
+}

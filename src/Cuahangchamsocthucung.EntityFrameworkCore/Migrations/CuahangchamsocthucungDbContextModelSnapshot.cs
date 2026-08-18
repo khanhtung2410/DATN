@@ -1606,9 +1606,6 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<int>("DichVuId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DichVuId1")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("Giadv")
                         .HasColumnType("decimal(18,2)");
 
@@ -1629,8 +1626,6 @@ namespace Cuahangchamsocthucung.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DichVuId");
-
-                    b.HasIndex("DichVuId1");
 
                     b.ToTable("BangGias");
                 });
@@ -1832,6 +1827,9 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<DateTime>("ThoiGian")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ThuCungId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TrangThai")
                         .HasColumnType("int");
 
@@ -1844,6 +1842,8 @@ namespace Cuahangchamsocthucung.Migrations
                     b.HasIndex("KhachHangId");
 
                     b.HasIndex("NhanVienId");
+
+                    b.HasIndex("ThuCungId");
 
                     b.ToTable("LichChamSocs");
                 });
@@ -1946,6 +1946,10 @@ namespace Cuahangchamsocthucung.Migrations
 
                     b.Property<string>("GhiChu")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -2260,14 +2264,10 @@ namespace Cuahangchamsocthucung.Migrations
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.BangGia", b =>
                 {
                     b.HasOne("Cuahangchamsocthucung.Entities.DichVu", "DichVu")
-                        .WithMany()
+                        .WithMany("BangGias")
                         .HasForeignKey("DichVuId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("Cuahangchamsocthucung.Entities.DichVu", null)
-                        .WithMany("BangGias")
-                        .HasForeignKey("DichVuId1");
 
                     b.Navigation("DichVu");
                 });
@@ -2345,6 +2345,12 @@ namespace Cuahangchamsocthucung.Migrations
                         .WithMany()
                         .HasForeignKey("NhanVienId");
 
+                    b.HasOne("Cuahangchamsocthucung.Entities.ThuCung", "ThuCung")
+                        .WithMany()
+                        .HasForeignKey("ThuCungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("BangGia");
 
                     b.Navigation("DichVu");
@@ -2352,6 +2358,8 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Navigation("KhachHang");
 
                     b.Navigation("NhanVien");
+
+                    b.Navigation("ThuCung");
                 });
 
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.ThuCung", b =>

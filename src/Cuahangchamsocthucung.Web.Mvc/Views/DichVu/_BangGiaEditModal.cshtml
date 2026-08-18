@@ -1,0 +1,58 @@
+﻿@model Cuahangchamsocthucung.DichVu.Dto.SuaBangGiaDto
+@{
+    Layout = null;
+}
+<div class="modal fade" id="BangGiaEditModal" tabindex="-1" aria-labelledby="BangGiaEditModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            @await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel("Sửa mức giá"))
+
+            <form id="bg-edit-form" name="BgEditForm" role="form" class="form-horizontal">
+                <input type="hidden" id="bg-id" name="Id" />
+                <input type="hidden" id="bg-dichvu-id" name="DichVuId" />
+
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Đối tượng</label>
+                        <div class="col-md-9">
+                            <input id="bg-loaithucung" name="Loaithucung" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Lông dài</label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="bg-loailong" name="Loailong">
+                                <option value="false">Không</option>
+                                <option value="true">Có</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Cân nặng từ</label>
+                        <div class="col-md-9">
+                            <input id="bg-cannangtu" name="Cannangtu" class="form-control" type="number" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Cân nặng đến</label>
+                        <div class="col-md-9">
+                            <input id="bg-cannangden" name="Cannangden" class="form-control" type="number" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Giá</label>
+                        <div class="col-md-9">
+                            <input id="bg-giadv" name="Giadv" class="form-control" type="number" />
+                        </div>
+                    </div>
+                </div>
+
+                @await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
+            </form>
+        </div>
+    </div>
+</div>

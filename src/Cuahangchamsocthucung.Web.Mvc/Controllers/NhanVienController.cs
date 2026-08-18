@@ -1,13 +1,33 @@
-using Microsoft.AspNetCore.Mvc;
+using Abp.Authorization;
+using Cuahangchamsocthucung.Authorization.Roles;
 using Cuahangchamsocthucung.Controllers;
+using Cuahangchamsocthucung.Web.Models.NhanVien;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.Web.Controllers
 {
+    
+    [Authorize(Roles = StaticRoleNames.Tenants.Admin)]
+
     public class NhanVienController : CuahangchamsocthucungControllerBase
     {
-        public IActionResult Index()
+        private readonly INhanvienAppService _nhanVienAppService;
+
+        public NhanVienController(INhanvienAppService nhanVienAppService)
         {
-            return View();
+            _nhanVienAppService = nhanVienAppService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var nhanViens = await _nhanVienAppService.GetAll();
+            var model = new NhanVienListViewModel
+            {
+                NhanViens = nhanViens
+            };
+            return View(model);
         }
     }
 }

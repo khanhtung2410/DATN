@@ -1,0 +1,434 @@
+﻿body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #fff;
+    color: #333;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    min-height: 70px;
+}
+
+.navbar-brand {
+    color: #ff8c42 !important;
+    font-size: 21px;
+}
+
+
+/* =========================
+   HOME - HERO
+========================= */
+
+/* =========================
+   HERO LANDING
+========================= */
+
+.hero {
+    position: relative;
+    min-height: 620px;
+    background-image: linear-gradient( 90deg, rgba(0, 0, 0, 0.60) 0%, rgba(0, 0, 0, 0.35) 45%, rgba(0, 0, 0, 0.10) 100% ), url('/img/banner-pet.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+
+    /* Nội dung Hero */
+
+    .hero .container {
+        position: relative;
+        z-index: 2;
+    }
+
+
+    /* Tiêu đề */
+
+    .hero h1 {
+        font-size: 58px;
+        line-height: 1.15;
+        letter-spacing: -1px;
+        text-shadow: 0 3px 10px rgba(0,0,0,.35);
+    }
+
+
+    /* Mô tả */
+
+    .hero p {
+        max-width: 650px;
+        line-height: 1.7;
+        text-shadow: 0 2px 6px rgba(0,0,0,.4);
+    }
+
+
+    /* Nút */
+
+    .hero .btn {
+        font-weight: 600;
+        transition: all .25s ease;
+    }
+
+
+    /* Nút xem dịch vụ */
+
+    .hero .btn-warning {
+        border: none;
+        color: #fff;
+        box-shadow: 0 5px 15px rgba(255, 193, 7, .3);
+    }
+
+        .hero .btn-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 193, 7, .4);
+        }
+
+
+    /* Nút đặt lịch */
+
+    .hero .btn-light {
+        color: #333;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,.15);
+    }
+
+        .hero .btn-light:hover {
+            transform: translateY(-3px);
+            background: #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,.25);
+        }
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+    .hero {
+        min-height: 550px;
+        background-position: center;
+    }
+
+        .hero h1 {
+            font-size: 42px;
+        }
+
+        .hero p {
+            font-size: 18px !important;
+        }
+}
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.btn-pet {
+    display: inline-block;
+    background: #ff8c42;
+    color: white;
+    padding: 13px 32px;
+    border-radius: 30px;
+    border: none;
+    font-weight: 600;
+    text-decoration: none;
+    transition: .3s;
+}
+
+    .btn-pet:hover {
+        background: #e97830;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+
+/* =========================
+   SECTION
+========================= */
+
+.section-title {
+    text-align: center;
+    margin: 60px 0 35px;
+    font-weight: 700;
+}
+
+
+/* =========================
+   SERVICE CARD
+========================= */
+
+.service-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px #ddd;
+    transition: .3s;
+    height: 100%;
+    background: white;
+}
+
+    .service-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 30px #ccc;
+    }
+
+    .service-card img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+    }
+
+.service-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+    .service-link:hover {
+        color: inherit;
+    }
+
+.service-title {
+    font-weight: 700;
+}
+
+
+/* =========================
+   LANDING CTA
+========================= */
+
+.cta {
+    background: #ff8c42;
+    color: white;
+    padding: 70px 30px;
+    border-radius: 30px;
+}
+
+    .cta h2 {
+        font-weight: 700;
+    }
+
+
+/* =========================
+   HOTEL PAGE
+========================= */
+
+.page-header {
+    background: linear-gradient( rgba(0, 0, 0, .45), rgba(0, 0, 0, .45) ), url('/images/hotel.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 350px;
+    display: flex;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+
+    .page-header h1 {
+        font-size: 50px;
+        font-weight: 700;
+    }
+
+
+/* =========================
+   INTRO CARD
+========================= */
+
+.intro-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px #ddd;
+    overflow: hidden;
+}
+
+
+/* =========================
+   FEATURE CARD
+========================= */
+
+.feature-card {
+    border: none;
+    border-radius: 20px;
+    height: 100%;
+    box-shadow: 0 5px 20px #eee;
+    transition: .3s;
+}
+
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 25px #ddd;
+    }
+
+.feature-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: #fff5ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   PRICE TABLE
+========================= */
+
+.price-table {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px #eee;
+}
+
+    .price-table thead {
+        background: #ff8c42;
+        color: white;
+    }
+
+    .price-table th,
+    .price-table td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+
+
+/* =========================
+   NOTICE
+========================= */
+
+.notice {
+    background: #fff5ec;
+    border-left: 5px solid #ff8c42;
+    border-radius: 10px;
+    padding: 25px;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    margin-top: 70px;
+    background: #222;
+    color: #ddd;
+    padding: 35px 0;
+}
+
+    footer h5 {
+        color: white;
+    }
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+    .hero {
+        min-height: 500px;
+    }
+
+        .hero h1 {
+            font-size: 40px;
+        }
+
+        .hero p {
+            font-size: 18px !important;
+        }
+
+    .page-header h1 {
+        font-size: 38px;
+    }
+
+    .navbar .d-flex {
+        margin-top: 10px;
+    }
+}
+/* =========================
+   QUY TRÌNH ĐẶT LỊCH
+========================= */
+
+.process-card {
+    border: 2px solid #f1f1f1;
+    border-radius: 25px;
+    padding: 35px 20px;
+    background: #fff;
+    transition: all .3s ease;
+    height: 100%;
+}
+
+    .process-card:hover {
+        transform: translateY(-8px);
+        border-color: #ff8c42;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+    }
+
+
+/* Số thứ tự */
+
+.step-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ff8c42;
+    color: white;
+    font-size: 25px;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(255, 140, 66, .3);
+    transition: all .3s ease;
+}
+
+.process-card:hover .step-icon {
+    transform: scale(1.1);
+}
+
+
+/* =========================
+   LỢI ÍCH
+========================= */
+
+.benefit-card {
+    border: 2px solid #f1f1f1;
+    border-radius: 25px;
+    padding: 30px 20px;
+    background: white;
+    transition: all .3s ease;
+    height: 100%;
+}
+
+    .benefit-card:hover {
+        transform: translateY(-8px);
+        border-color: #ff8c42;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+    }
+
+
+/* Icon lợi ích */
+
+.benefit-icon {
+    width: 75px;
+    height: 75px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #fff5ec;
+    font-size: 40px;
+    transition: all .3s ease;
+}
+
+.benefit-card:hover .benefit-icon {
+    transform: scale(1.1);
+    background: #fff0df;
+}

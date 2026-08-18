@@ -1,0 +1,45 @@
+@using Cuahangchamsocthucung.Web.Models.Common.Modals
+@model Cuahangchamsocthucung.Web.Models.LichChamSoc.LichChamSocListViewModel
+@{
+    Layout = null;
+}
+<div class="modal fade" id="LichChamSocCreateModal" tabindex="-1" role="dialog" aria-labelledby="LichChamSocCreateModalLabel" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            @await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("Thêm l?ch ch?m sóc"))
+            <form name="LichChamSocCreateForm" role="form" class="form-horizontal">
+                <div class="modal-body">
+                    <div class="form-group row required">
+                        <label class="col-md-3 col-form-label">Ngày</label>
+                        <div class="col-md-9">
+                            <input type="datetime-local" name="Ngay" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Khách hàng</label>
+                        <div class="col-md-9">
+                            <select name="KhachHangId" class="form-control">
+                                <option value="">-- Ch?n --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Nhân viên</label>
+                        <div class="col-md-9">
+                            <select name="NhanVienId" class="form-control">
+                                <option value="">-- Ch?n --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Mô t?</label>
+                        <div class="col-md-9">
+                            <textarea name="Mota" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                @await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
+            </form>
+        </div>
+    </div>
+</div>

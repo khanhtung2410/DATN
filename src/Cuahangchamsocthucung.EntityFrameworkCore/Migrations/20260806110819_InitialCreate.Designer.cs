@@ -1609,8 +1609,7 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<int>("DichVuId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DichVuId1")
-                        .HasColumnType("int");
+                    
 
                     b.Property<decimal>("Giadv")
                         .HasColumnType("decimal(18,2)");
@@ -1632,8 +1631,6 @@ namespace Cuahangchamsocthucung.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DichVuId");
-
-                    b.HasIndex("DichVuId1");
 
                     b.ToTable("BangGias");
                 });
@@ -2214,11 +2211,9 @@ namespace Cuahangchamsocthucung.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Cuahangchamsocthucung.Entities.DichVu", null)
-                        .WithMany("BangGias")
-                        .HasForeignKey("DichVuId1");
+                    
 
-                    b.Navigation("DichVu");
+                    
                 });
 
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.HoaDon", b =>
@@ -2403,7 +2398,7 @@ namespace Cuahangchamsocthucung.Migrations
 
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.DichVu", b =>
                 {
-                    b.Navigation("BangGias");
+                    
                 });
 
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.HoaDon", b =>

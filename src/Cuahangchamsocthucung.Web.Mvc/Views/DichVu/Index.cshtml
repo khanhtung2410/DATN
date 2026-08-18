@@ -43,7 +43,75 @@
                                         <th style="width: 200px">Hành động</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>
+                                    @if (Model?.DichVus != null)
+                                    {
+                                        foreach (var item in Model.DichVus)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <a class="btn btn-sm btn-info" data-toggle="collapse" href="#bg-@item.Id" role="button" aria-expanded="false" aria-controls="bg-@item.Id">
+                                                        Giá
+                                                    </a>
+                                                </td>
+                                                <td>@item.Tendichvu</td>
+                                                <td>@item.Mota</td>
+                                                <td>@(item.Trangthai ? "Hoạt động" : "Ngưng")</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-secondary edit-dichvu" data-id="@item.Id" data-toggle="modal" data-target="#DichVuEditModal">Sửa</button>
+                                                    <button class="btn btn-sm btn-warning toggle-status" data-id="@item.Id" data-status="@item.Trangthai">@(item.Trangthai ? "Ngưng" : "Kích hoạt")</button>
+                                                    <button class="btn btn-sm btn-danger delete-dichvu" data-id="@item.Id">Xóa</button>
+                                                </td>
+                                            </tr>
+
+                                            <tr class="collapse-row">
+                                                <td colspan="5" class="p-0">
+                                                    <div class="collapse" id="bg-@item.Id">
+                                                        <div class="p-3">
+                                                            <h6>Danh sách mức giá</h6>
+                                                            <div class="table-responsive">
+                                                                <table class="table table-sm table-bordered mb-0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Đối tượng</th>
+                                                                            <th class="text-center">Lông dài</th>
+                                                                            <th class="text-center">Cân nặng / Ghi chú</th>
+                                                                            <th class="text-right">Giá</th>
+                                                                            <th class="text-center">Hành động</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @if (item.BangGias != null && item.BangGias.Any())
+                                                                        {
+                                                                            foreach (var bg in item.BangGias)
+                                                                            {
+                                                                                // If service is 'Trông giữ thú cưng' we don't show lông dài column and treat price as per day
+                                                                                var isTrongGiu = item.Tendichvu != null && item.Tendichvu.Contains("Trông giữ");
+                                                                                <tr data-bg-id="@bg.Id">
+                                                                                    <td>@bg.Loaithucung</td>
+                                                                                    <td class="text-center">@(isTrongGiu ? "-" : (bg.Loailong ? "Có" : "Không"))</td>
+                                                                                    <td class="text-center">@(isTrongGiu ? $"≤ {bg.Cannangden} kg" : $"{bg.Cannangtu} - {bg.Cannangden} kg")</td>
+                                                                                    <td class="text-right">@string.Format("{0:N0}", bg.Giadv) ₫</td>
+                                                                                    <td class="text-center">
+                                                                                        <button class="btn btn-sm btn-secondary edit-banggia" data-id="@bg.Id" data-dichvu="@item.Id" data-dichvuname="@item.Tendichvu" data-trangthai="@item.Trangthai" data-loaithucung="@bg.Loaithucung" data-loailong="@bg.Loailong" data-cannangtu="@bg.Cannangtu" data-cannangden="@bg.Cannangden" data-giadv="@bg.Giadv" data-toggle="modal" data-target="#BangGiaEditModal">Sửa</button>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <tr><td colspan="4">Không có mức giá.</td></tr>
+                                                                        }
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -52,12 +120,142 @@
         </div>
     </div>
 </section>
-@* 
-@await Html.PartialAsync("~/Views/Books/_ImportModal.cshtml")
-@await Html.PartialAsync("~/Views/Books/_CreateModal.cshtml", new Bookstore.Web.Models.Books.BookCreateViewModel())
-@await Html.PartialAsync("~/Views/Books/_UpdateModal.cshtml", new Bookstore.Web.Models.Books.BookUpdateViewModel())
-@await Html.PartialAsync("~/Views/Books/_DetailModal.cshtml", new Bookstore.Web.Models.Books.BookDetailViewModel()) *@
 @section Scripts {
 
+    @await Html.PartialAsync("~/Views/DichVu/_BangGiaEditModal.cshtml", new Cuahangchamsocthucung.DichVu.Dto.SuaBangGiaDto())
 
+    <script>
+        (function () {
+            // Edit BangGia -> populate modal
+            $(document).on('click', '.edit-banggia', function () {
+                var btn = $(this);
+                $('#bg-id').val(btn.data('id'));
+                $('#bg-dichvu-id').val(btn.data('dichvu'));
+                $('#bg-loaithucung').val(btn.data('loaithucung'));
+                $('#bg-loailong').val(btn.data('loailong').toString());
+                $('#bg-cannangtu').val(btn.data('cannangtu'));
+                $('#bg-cannangden').val(btn.data('cannangden'));
+                $('#bg-giadv').val(btn.data('giadv'));
+                $('#BangGiaEditModal').modal('show');
+            });
+
+            // simple client-side validation when saving
+            $('#BangGiaEditModal').on('click', '.save-button', function (e) {
+                var giadv = parseFloat($('#bg-giadv').val() || 0);
+                var cannangtu = parseInt($('#bg-cannangtu').val() || 0);
+                var cannangden = parseInt($('#bg-cannangden').val() || 0);
+                var loaithucung = $('#bg-loaithucung').val();
+                if (!loaithucung || loaithucung.trim() === '') {
+                    abp.notify.error('Vui lòng nhập đối tượng.');
+                    e.preventDefault();
+                    return false;
+                }
+                if (giadv <= 0) {
+                    abp.notify.error('Giá phải lớn hơn 0.');
+                    e.preventDefault();
+                    return false;
+                }
+                if (cannangtu < 0 || cannangden <= 0 || cannangden <= cannangtu) {
+                    abp.notify.error('Khoảng cân nặng không hợp lệ.');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Save BangGia - use ABP app service
+            $(document).on('click', '#BangGiaEditModal .save-button', function (e) {
+                e.preventDefault();
+                var payload = {
+                    Id: parseInt($('#bg-id').val() || 0),
+                    DichVuId: parseInt($('#bg-dichvu-id').val() || 0),
+                    Loaithucung: $('#bg-loaithucung').val(),
+                    Loailong: $('#bg-loailong').val() === 'true',
+                    Cannangtu: parseInt($('#bg-cannangtu').val() || 0),
+                    Cannangden: parseInt($('#bg-cannangden').val() || 0),
+                    Giadv: parseFloat($('#bg-giadv').val() || 0)
+                };
+
+                abp.ui.setBusy($('#BangGiaEditModal'));
+                abp.services.app.dichVu.updateBangGia(payload).done(function (result) {
+                    abp.notify.info('Lưu thành công');
+                    $('#BangGiaEditModal').modal('hide');
+
+                    // Update row in-place without reload
+                    var row = $('tr[data-bg-id="' + payload.Id + '"]');
+                    if (row.length) {
+                        row.find('td').eq(0).text(payload.Loaithucung);
+                        // Lông dài column is second
+                        row.find('td').eq(1).text(payload.Loailong ? 'Có' : 'Không');
+                        // Cân nặng column
+                        row.find('td').eq(2).text(payload.Loailong && payload.Cannangtu == 0 ? ('≤ ' + payload.Cannangden + ' kg') : (payload.Cannangtu + ' - ' + payload.Cannangden + ' kg'));
+                        // Giá column
+                        row.find('td').eq(3).text(new Intl.NumberFormat('vi-VN').format(payload.Giadv) + ' ₫');
+                        // Update data attributes on edit button
+                        var editBtn = row.find('.edit-banggia');
+                        editBtn.data('loaithucung', payload.Loaithucung);
+                        editBtn.data('loailong', payload.Loailong);
+                        editBtn.data('cannangtu', payload.Cannangtu);
+                        editBtn.data('cannangden', payload.Cannangden);
+                        editBtn.data('giadv', payload.Giadv);
+                    } else {
+                        // fallback: reload
+                        location.reload();
+                    }
+                }).fail(function (err) {
+                    abp.notify.error(err && err.message ? err.message : 'Có lỗi');
+                }).always(function () {
+                    abp.ui.clearBusy($('#BangGiaEditModal'));
+                });
+            });
+
+                    $(document).on('click', '.toggle-status', function () {
+            var btn = $(this);
+            var id = parseInt(btn.data('id'));
+            var current = btn.data('status') === true || btn.data('status') === 'True';
+            var newStatus = !current;
+
+            abp.message.confirm(
+                newStatus
+                    ? 'Bạn có muốn kích hoạt dịch vụ này không?'
+                    : 'Bạn có muốn ngừng dịch vụ này không?',
+                'Xác nhận',
+                function (isConfirmed) {
+
+                    if (!isConfirmed) {
+                        return;
+                    }
+
+                    abp.ui.setBusy();
+
+                    abp.services.app.dichVu.changeTrangThai({
+                        id: id,
+                        trangthai: newStatus
+                    })
+                    .done(function () {
+
+                        abp.notify.success(
+                            newStatus
+                                ? 'Đã kích hoạt dịch vụ.'
+                                : 'Đã ngừng dịch vụ.'
+                        );
+
+                        location.reload();
+                    })
+                    .fail(function (error) {
+
+                        abp.notify.error(
+                            error.details ||
+                            error.message ||
+                            'Không thể thay đổi trạng thái dịch vụ.'
+                        );
+
+                    })
+                    .always(function () {
+                        abp.ui.clearBusy();
+                    });
+                }
+            );
+        });
+        })();
+    </script>
 }

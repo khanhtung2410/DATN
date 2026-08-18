@@ -41,7 +41,7 @@ namespace Cuahangchamsocthucung.Web.Startup
                         options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
                     }
                 );
-
+            services.AddHttpClient();
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, _appConfiguration);
 

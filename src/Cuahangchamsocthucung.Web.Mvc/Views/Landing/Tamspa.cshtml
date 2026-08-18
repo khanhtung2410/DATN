@@ -1,0 +1,747 @@
+﻿@model List<Cuahangchamsocthucung.Entities.BangGia>
+
+@{
+    Layout = "_LandingLayout";
+
+    ViewData["Title"] = "Tắm Spa cho chó mèo";
+
+    var choLongNgan = Model
+        .Where(x => x.Loaithucung == "Chó" && !x.Loailong)
+        .OrderBy(x => x.Cannangtu)
+        .ToList();
+
+    var choLongDai = Model
+        .Where(x => x.Loaithucung == "Chó" && x.Loailong)
+        .OrderBy(x => x.Cannangtu)
+        .ToList();
+
+    var meo = Model
+        .Where(x => x.Loaithucung == "Mèo")
+        .OrderBy(x => x.Cannangtu)
+        .ToList();
+}
+
+
+<!-- ===================================================== -->
+<!-- HERO -->
+<!-- ===================================================== -->
+
+<section class="service-detail-hero py-5">
+
+    <div class="container">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-7">
+
+                <span class="badge bg-warning text-dark mb-3">
+                    SPA THÚ CƯNG
+                </span>
+
+                <h1 class="display-4 fw-bold">
+                    Dịch vụ tắm Spa
+                    <br />
+                    cho chó mèo
+                </h1>
+
+                <p class="lead mt-4">
+                    Dịch vụ tắm Spa giúp thú cưng
+                    sạch sẽ, thơm tho và được chăm sóc
+                    toàn diện từ da, lông, tai đến móng.
+                </p>
+
+                <a class="btn btn-warning rounded-pill px-5 py-3 mt-3"
+                   asp-controller="Landing"
+                   asp-action="Create">
+
+                    Đặt lịch ngay
+
+                </a>
+
+            </div>
+
+
+            <div class="col-lg-5 mt-4 mt-lg-0">
+
+                <img src="/img/spa-1.jpg"
+                     class="img-fluid rounded-4 shadow"
+                     style="height:350px;
+                            width:100%;
+                            object-fit:cover;"
+                     alt="Tắm Spa cho chó mèo" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- GIỚI THIỆU -->
+<!-- ===================================================== -->
+
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <span class="text-warning fw-bold">
+            TẮM SPA
+        </span>
+
+        <h2 class="fw-bold mt-2">
+            Chăm sóc toàn diện cho thú cưng
+        </h2>
+
+        <p class="text-muted mx-auto"
+           style="max-width:750px;">
+
+            Dịch vụ tắm Spa được thực hiện theo
+            quy trình phù hợp với từng loại thú cưng,
+            trọng lượng và tình trạng lông.
+
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- TẮM GỘI -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1">
+                        🧼
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Tắm gội
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Làm sạch bụi bẩn và mùi hôi
+                        bằng sản phẩm chăm sóc phù hợp
+                        với da và lông của thú cưng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CHẢI LÔNG -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1">
+                        🪮
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Chải và gỡ rối
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Loại bỏ lông rụng và gỡ các
+                        vùng lông bị rối giúp bộ lông
+                        thông thoáng và sạch sẽ hơn.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- VỆ SINH -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1">
+                        ✂️
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Vệ sinh và chăm sóc
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Vệ sinh tai, cắt mài móng
+                        và hỗ trợ cạo lông theo
+                        nhu cầu của khách hàng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- QUY TRÌNH -->
+<!-- ===================================================== -->
+
+<section class="bg-light py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <span class="text-warning fw-bold">
+                QUY TRÌNH
+            </span>
+
+            <h2 class="fw-bold mt-2">
+                Quy trình tắm Spa
+            </h2>
+
+            <p class="text-muted">
+                Thú cưng được chăm sóc theo từng bước
+                phù hợp với tình trạng thực tế.
+            </p>
+
+        </div>
+
+
+        <div class="row g-4">
+
+
+            <!-- BƯỚC 1 -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    <div class="step-icon">
+                        1
+                    </div>
+
+                    <h5 class="fw-bold mt-3">
+                        Tắm gội
+                    </h5>
+
+                    <p class="text-muted">
+
+                        Làm sạch cơ thể và chăm sóc
+                        da lông cho thú cưng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- BƯỚC 2 -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    <div class="step-icon">
+                        2
+                    </div>
+
+                    <h5 class="fw-bold mt-3">
+                        Sấy và chải lông
+                    </h5>
+
+                    <p class="text-muted">
+
+                        Sấy khô và chải gỡ lông rối,
+                        loại bỏ lông rụng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- BƯỚC 3 -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    <div class="step-icon">
+                        3
+                    </div>
+
+                    <h5 class="fw-bold mt-3">
+                        Vệ sinh hoàn thiện
+                    </h5>
+
+                    <p class="text-muted">
+
+                        Vệ sinh tai, cắt móng và
+                        hỗ trợ cạo lông theo yêu cầu.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- BẢNG GIÁ -->
+<!-- ===================================================== -->
+
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <span class="text-warning fw-bold">
+            BẢNG GIÁ
+        </span>
+
+        <h2 class="fw-bold mt-2">
+            Giá dịch vụ tắm Spa
+        </h2>
+
+        <p class="text-muted">
+            Giá được lấy trực tiếp từ hệ thống.
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CHÓ LÔNG NGẮN -->
+    <!-- ================================================= -->
+
+    <h4 class="fw-bold mb-3">
+        🐶 Tắm Spa cho chó - Lông ngắn
+    </h4>
+
+
+    @if (choLongNgan.Any())
+    {
+        <div class="table-responsive mb-5">
+
+            <table class="table table-bordered table-hover text-center align-middle">
+
+                <thead class="table-warning">
+
+                    <tr>
+
+                        <th>
+                            Cân nặng
+                        </th>
+
+                        <th>
+                            Giá dịch vụ
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in choLongNgan)
+                    {
+                        <tr>
+
+                            <td>
+                                @($"{item.Cannangtu} - {item.Cannangden} kg")
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    @item.Giadv.ToString("N0") đ
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary mb-5">
+            Chưa có bảng giá cho chó lông ngắn.
+        </div>
+    }
+
+
+    <!-- ================================================= -->
+    <!-- CHÓ LÔNG DÀI -->
+    <!-- ================================================= -->
+
+    <h4 class="fw-bold mb-3">
+        🐶 Tắm Spa cho chó - Lông dài
+    </h4>
+
+
+    @if (choLongDai.Any())
+    {
+        <div class="table-responsive mb-5">
+
+            <table class="table table-bordered table-hover text-center align-middle">
+
+                <thead class="table-warning">
+
+                    <tr>
+
+                        <th>
+                            Cân nặng
+                        </th>
+
+                        <th>
+                            Giá dịch vụ
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in choLongDai)
+                    {
+                        <tr>
+
+                            <td>
+                                @($"{item.Cannangtu} - {item.Cannangden} kg")
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    @item.Giadv.ToString("N0") đ
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary mb-5">
+            Chưa có bảng giá cho chó lông dài.
+        </div>
+    }
+
+
+    <!-- ================================================= -->
+    <!-- MÈO -->
+    <!-- ================================================= -->
+
+    <h4 class="fw-bold mb-3">
+        🐱 Tắm Spa cho mèo
+    </h4>
+
+
+    @if (meo.Any())
+    {
+        <div class="table-responsive mb-5">
+
+            <table class="table table-bordered table-hover text-center align-middle">
+
+                <thead class="table-warning">
+
+                    <tr>
+
+                        <th>
+                            Cân nặng
+                        </th>
+
+                        <th>
+                            Giá dịch vụ
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in meo)
+                    {
+                        <tr>
+
+                            <td>
+                                @($"{item.Cannangtu} - {item.Cannangden} kg")
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    @item.Giadv.ToString("N0") đ
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary mb-5">
+            Chưa có bảng giá cho mèo.
+        </div>
+    }
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- LƯU Ý -->
+<!-- ===================================================== -->
+
+<section class="container pb-5">
+
+    <div class="alert alert-warning">
+
+        <h4 class="fw-bold">
+            Lưu ý khi sử dụng dịch vụ
+        </h4>
+
+        <ul class="mb-0">
+
+            <li>
+                Không nên để thú cưng quá đói hoặc quá no
+                trước khi sử dụng dịch vụ.
+            </li>
+
+            <li>
+                Thông báo cho nhân viên nếu thú cưng
+                có vấn đề về sức khỏe hoặc hành vi đặc biệt.
+            </li>
+
+            <li>
+                Thú cưng đang mang thai, đang điều trị bệnh
+                hoặc mới phẫu thuật cần được thông báo trước.
+            </li>
+
+            <li>
+                Nên cung cấp thông tin tiêm phòng
+                để đảm bảo an toàn trong quá trình chăm sóc.
+            </li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- FAQ -->
+<!-- ===================================================== -->
+
+<section class="bg-light py-5">
+
+    <div class="container">
+
+        <h2 class="text-center fw-bold mb-4">
+            Câu hỏi thường gặp
+        </h2>
+
+
+        <div class="accordion" id="spaFaq">
+
+
+            <!-- FAQ 1 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#spa1">
+
+                        Giá tắm Spa được tính như thế nào?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="spa1"
+                     class="accordion-collapse collapse show"
+                     data-bs-parent="#spaFaq">
+
+                    <div class="accordion-body">
+
+                        Giá dịch vụ được xác định dựa trên
+                        loại thú cưng, cân nặng và độ dài lông.
+                        Bảng giá trên trang được lấy trực tiếp
+                        từ dữ liệu trong hệ thống.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAQ 2 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#spa2">
+
+                        Dịch vụ tắm Spa gồm những gì?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="spa2"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#spaFaq">
+
+                    <div class="accordion-body">
+
+                        Dịch vụ bao gồm tắm gội, sấy khô,
+                        chải lông, vệ sinh tai và cắt mài móng.
+                        Một số yêu cầu có thể được thực hiện
+                        thêm theo nhu cầu.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAQ 3 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#spa3">
+
+                        Giá dịch vụ có thay đổi không?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="spa3"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#spaFaq">
+
+                    <div class="accordion-body">
+
+                        Giá được quản lý trong hệ thống.
+                        Khi bảng giá được cập nhật,
+                        thông tin hiển thị trên trang
+                        sẽ được cập nhật theo dữ liệu mới.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- CTA -->
+<!-- ===================================================== -->
+
+<section class="container my-5">
+
+    <div class="cta text-center">
+
+        <h2 class="fw-bold">
+            Đặt lịch tắm Spa cho thú cưng
+        </h2>
+
+        <p>
+            Chăm sóc sạch sẽ, an toàn và tận tâm.
+        </p>
+
+        <a class="btn btn-light rounded-pill px-5 py-3"
+           asp-controller="Landing"
+           asp-action="Create">
+
+            Đặt lịch ngay
+
+        </a>
+
+    </div>
+
+</section>

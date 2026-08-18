@@ -50,9 +50,16 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed.Tenants
                         StaticRoleNames.Tenants.Admin,
                         StaticRoleNames.Tenants.Admin)
                     {
-                        IsStatic = true
+                        IsStatic = true,
+                        NormalizedName = StaticRoleNames.Tenants.Admin.ToUpperInvariant()
                     }).Entity;
 
+                _context.SaveChanges();
+            }
+            else if (string.IsNullOrEmpty(adminRole.NormalizedName))
+            {
+                // Bổ sung NormalizedName nếu DB cũ bị NULL
+                adminRole.NormalizedName = StaticRoleNames.Tenants.Admin.ToUpperInvariant();
                 _context.SaveChanges();
             }
 
@@ -75,9 +82,16 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed.Tenants
                         "Khách hàng")
                     {
                         IsStatic = true,
-                        IsDefault = false
+                        IsDefault = false,
+                        NormalizedName = StaticRoleNames.Tenants.Customer.ToUpperInvariant()
                     }).Entity;
 
+                _context.SaveChanges();
+            }
+            else if (string.IsNullOrEmpty(customerRole.NormalizedName))
+            {
+                // Bổ sung NormalizedName nếu DB cũ bị NULL
+                customerRole.NormalizedName = StaticRoleNames.Tenants.Customer.ToUpperInvariant();
                 _context.SaveChanges();
             }
 
@@ -134,6 +148,9 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed.Tenants
                     _tenantId,
                     "admin@defaulttenant.com");
 
+                adminUser.NormalizedUserName = AbpUserBase.AdminUserName.ToUpperInvariant();
+                adminUser.NormalizedEmailAddress = adminUser.EmailAddress.ToUpperInvariant();
+
                 adminUser.Password =
                     new PasswordHasher<User>(
                         new OptionsWrapper<PasswordHasherOptions>(
@@ -156,6 +173,44 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed.Tenants
                         adminRole.Id));
 
                 _context.SaveChanges();
+            }
+            else
+            {
+                // Tự động fix NormalizedUserName/NormalizedEmailAddress nếu User đã tồn tại trong DB
+                bool isUserUpdated = false;
+
+                if (string.IsNullOrEmpty(adminUser.NormalizedUserName))
+                {
+                    adminUser.NormalizedUserName = adminUser.UserName.ToUpperInvariant();
+                    isUserUpdated = true;
+                }
+
+                if (string.IsNullOrEmpty(adminUser.NormalizedEmailAddress) && !string.IsNullOrEmpty(adminUser.EmailAddress))
+                {
+                    adminUser.NormalizedEmailAddress = adminUser.EmailAddress.ToUpperInvariant();
+                    isUserUpdated = true;
+                }
+
+                if (isUserUpdated)
+                {
+                    _context.SaveChanges();
+                }
+
+                // Kiểm tra và gán Role nếu bị thiếu gán trong AbpUserRoles
+                var hasAdminRole = _context.UserRoles
+                    .IgnoreQueryFilters()
+                    .Any(ur => ur.TenantId == _tenantId && ur.UserId == adminUser.Id && ur.RoleId == adminRole.Id);
+
+                if (!hasAdminRole)
+                {
+                    _context.UserRoles.Add(
+                        new UserRole(
+                            _tenantId,
+                            adminUser.Id,
+                            adminRole.Id));
+
+                    _context.SaveChanges();
+                }
             }
         }
     }

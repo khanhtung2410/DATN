@@ -6,7 +6,8 @@
     ViewBag.Title = "Danh sách khách hàng";
     ViewBag.CurrentPageName = "Khách hàng";
 }
-<section class="content-header">    
+
+<section class="content-header">
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-6">
@@ -20,6 +21,7 @@
         </div>
     </div>
 </section>
+
 <section class="content">
     <div class="container-fluid">
         <div class="row">
@@ -27,23 +29,152 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="row">
-                            <div class="col-md-6">
-                            </div>
+                            <div class="col-md-6"></div>
                         </div>
                     </div>
+
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="KhachHangTable" class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
-                                        <th></th>
+                                        <th style="width: 100px"></th>
                                         <th>Tên</th>
-                                        <th>Mô tả</th>
-                                        <th>Trạng thái</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Email</th>
                                         <th style="width: 200px">Hành động</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+
+                                <tbody>
+                                    @if (Model?.KhachHangs != null)
+                                    {
+                                        foreach (var item in Model.KhachHangs)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (item.ThuCungs != null && item.ThuCungs.Any())
+                                                    {
+                                                        <button class="btn btn-sm btn-info"
+                                                                data-toggle="collapse"
+                                                                href="#tc-@item.Id"
+                                                                role="button"
+                                                                aria-expanded="false"
+                                                                aria-controls="tc-@item.Id">
+                                                            <i class="fa fa-paw"></i> Thú cưng
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Không có</span>
+                                                    }
+                                                </td>
+
+                                                <td>@item.Hoten</td>
+                                                <td>@item.SDT</td>
+                                                <td>@item.Email</td>
+
+                                                <td>
+                                                    <button class="btn btn-sm btn-secondary edit-khachhang"
+                                                            data-id="@item.Id"
+                                                            data-toggle="modal"
+                                                            data-target="#KhachHangEditModal">
+                                                        Sửa
+                                                    </button>
+
+                                                    <button class="btn btn-sm btn-warning toggle-status"
+                                                            data-id="@item.Id"
+                                                            data-status="true">
+                                                        Kích hoạt
+                                                    </button>
+
+                                                    <button class="btn btn-sm btn-danger delete-khachhang"
+                                                            data-id="@item.Id">
+                                                        Xóa
+                                                    </button>
+                                                </td>
+                                            </tr>
+
+                                            <tr class="collapse-row">
+                                                <td colspan="5" class="p-0">
+                                                    <div class="collapse" id="tc-@item.Id">
+                                                        <div class="p-3">
+                                                            <h6 class="mb-3">
+                                                                <i class="fa fa-paw"></i>
+                                                                Danh sách thú cưng của @item.Hoten
+                                                            </h6>
+
+                                                            @if (item.ThuCungs != null && item.ThuCungs.Any())
+                                                            {
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-sm table-bordered mb-0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>Tên thú cưng</th>
+                                                                                <th>Loại</th>
+                                                                                <th>Ghi chú</th>
+                                                                                <th>Trạng thái</th>
+                                                                            </tr>
+                                                                        </thead>
+
+                                                                        <tbody>
+                                                                            @foreach (var tc in item.ThuCungs)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <strong>@tc.TenThuCung</strong>
+                                                                                    </td>
+
+                                                                                    <td>
+                                                                                        @if (tc.LoaiThuCung == "Chó")
+                                                                                        {
+                                                                                            <span>🐶 Chó</span>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <span>🐱 Mèo</span>
+                                                                                        }
+                                                                                </td>
+
+                                                                                <td>
+                                                                                    @(string.IsNullOrEmpty(tc.GhiChu)
+                                                                                                                                                            ? "-"
+                                                                                                                                                            : tc.GhiChu)
+                                                                    </td>
+
+                                                                                    <td>
+                                                                        @if (tc.TrangThai)
+                                                                                        {
+                                                                                            <span class="badge badge-success">
+                                                                                                Hoạt động
+                                                                                            </span>
+                                                                                        }
+                                                                                        else
+                                                                                        {
+                                                                                            <span class="badge badge-secondary">
+                                                                                                Không hoạt động
+                                                                                            </span>
+                                                                                        }
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="text-muted">
+                                                                    Khách hàng chưa có thú cưng.
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -52,13 +183,22 @@
         </div>
     </div>
 </section>
-@section Scripts {
 
+@section Scripts {
 }
 
-@await Html.PartialAsync("~/Views/KhachHang/_CreateModal.cshtml", Model)
+@await Html.PartialAsync(
+"~/Views/KhachHang/_CreateModal.cshtml",
+    Model
+)
 
-<div class="modal fade" id="KhachHangEditModal" tabindex="-1" role="dialog" aria-labelledby="KhachHangEditModalLabel" data-backdrop="static">
+<div class="modal fade"
+     id="KhachHangEditModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="KhachHangEditModalLabel"
+     data-backdrop="static">
+
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
         </div>

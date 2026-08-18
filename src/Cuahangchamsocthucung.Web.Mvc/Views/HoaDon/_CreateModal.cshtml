@@ -1,0 +1,43 @@
+﻿@using Cuahangchamsocthucung.Web.Models.Common.Modals
+@model Cuahangchamsocthucung.Web.Models.HoaDon.HoaDonListViewModel
+@{
+    Layout = null;
+}
+<div class="modal fade" id="HoaDonCreateModal" tabindex="-1" role="dialog" aria-labelledby="HoaDonCreateModalLabel" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            @await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("Thêm hóa ??n"))
+            <form name="HoaDonCreateForm" role="form" class="form-horizontal">
+                <div class="modal-body">
+                    <div class="form-group row required">
+                        <label class="col-md-3 col-form-label">Mã hóa đơn</label>
+                        <div class="col-md-9">
+                            <input type="text" name="Ma" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Khách hàng</label>
+                        <div class="col-md-9">
+                            <select name="KhachHangId" class="form-control">
+                                <option value="">-- Ch?n --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">Ngày</label>
+                        <div class="col-md-9">
+                            <input type="date" name="Ngay" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label">T?ng ti?n</label>
+                        <div class="col-md-9">
+                            <input type="number" name="TongTien" class="form-control" step="0.01" />
+                        </div>
+                    </div>
+                </div>
+                @await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
+            </form>
+        </div>
+    </div>
+</div>

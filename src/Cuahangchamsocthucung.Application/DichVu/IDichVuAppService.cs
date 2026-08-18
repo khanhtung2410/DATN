@@ -13,6 +13,7 @@ public interface IDichVuAppService : IApplicationService
     Task<int> Create(ThemDichVuDto input);
 
     Task Update(SuaDichVuDto input);
+    Task UpdateBangGia(SuaBangGiaDto input);
 
     Task ChangeTrangThai(SuaTrangThaiDichVuDto input);
 }

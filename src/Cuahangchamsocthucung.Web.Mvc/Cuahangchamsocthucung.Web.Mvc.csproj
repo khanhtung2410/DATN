@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cuahangchamsocthucung.Web.Core\Cuahangchamsocthucung.Web.Core.csproj" />
+    <ProjectReference Include="..\Cuahangchamsocthucung.Application\Cuahangchamsocthucung.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />

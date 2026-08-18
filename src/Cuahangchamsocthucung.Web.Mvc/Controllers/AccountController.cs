@@ -17,14 +17,16 @@ using Cuahangchamsocthucung.Controllers;
 using Cuahangchamsocthucung.Identity;
 using Cuahangchamsocthucung.KhachHang.Dto;
 using Cuahangchamsocthucung.MultiTenancy;
+using Cuahangchamsocthucung.Net.Sms;
 using Cuahangchamsocthucung.Sessions;
 using Cuahangchamsocthucung.Web.Models.Account;
 using Cuahangchamsocthucung.Web.Views.Shared.Components.TenantChange;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.AspNetCore.DataProtection;
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -53,6 +55,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
         private readonly IKhachHangAppService _khachHangAppService;
         private readonly IDistributedCache _distributedCache;
         private readonly IDataProtector _dataProtector;
+        private readonly ISmsSender _smsSender;
 
         public AccountController(
             UserManager userManager,
@@ -68,7 +71,8 @@ namespace Cuahangchamsocthucung.Web.Controllers
             INotificationPublisher notificationPublisher,
             IKhachHangAppService khachHangAppService,
             IDistributedCache distributedCache,
-            IDataProtectionProvider dataProtectionProvider) // added
+            IDataProtectionProvider dataProtectionProvider,
+            ISmsSender smsSender)
         {
             _userManager = userManager;
             _multiTenancyConfig = multiTenancyConfig;
@@ -83,7 +87,8 @@ namespace Cuahangchamsocthucung.Web.Controllers
             _notificationPublisher = notificationPublisher;
             _khachHangAppService = khachHangAppService;
             _distributedCache = distributedCache;
-            _dataProtector = dataProtectionProvider.CreateProtector("PendingRegistration.Protector"); // set
+            _dataProtector = dataProtectionProvider.CreateProtector("PendingRegistration.Protector");
+            _smsSender = smsSender;
         }
 
         #region Login / Logout
@@ -92,9 +97,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
         {
             if (string.IsNullOrWhiteSpace(returnUrl))
             {
-                returnUrl = Url.Action(
-                    "Index",
-                    "Landing");
+                returnUrl = Url.Action("Index", "Landing");
             }
 
             return View(new LoginFormViewModel
@@ -115,7 +118,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
             var loginResult = await GetLoginResultAsync(
                 loginModel.UsernameOrEmailAddress,
                 loginModel.Password,
-                null);
+                "Default");
 
             await _signInManager.SignInAsync(
                 loginResult.Identity,
@@ -123,11 +126,15 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
             await UnitOfWorkManager.Current.SaveChangesAsync();
 
-            var user = loginResult.User;
+            var roles = loginResult.Identity.Claims
+                .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var isAdmin = roles.Contains(StaticRoleNames.Host.Admin)
+                       || roles.Contains(StaticRoleNames.Tenants.Admin);
 
-            var targetUrl = roles.Contains(StaticRoleNames.Host.Admin)
+            var targetUrl = isAdmin
                 ? Url.Action("Index", "Home")
                 : Url.Action("Index", "Landing");
 
@@ -158,7 +165,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
         #endregion
 
-        #region Register
+        #region Register & OTP Flow
 
         public ActionResult Register()
         {
@@ -169,10 +176,8 @@ namespace Cuahangchamsocthucung.Web.Controllers
         {
             ViewBag.IsMultiTenancyEnabled = false;
             ViewBag.IsSelfRegistrationAllowed = true;
-
             return View("Register", model);
         }
-
 
         [HttpPost]
         [UnitOfWork]
@@ -186,39 +191,32 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     return View("Register", model);
                 }
 
-                var existedUser = await _userManager
-                    .Users
-                    .AnyAsync(x => x.UserName == model.SDT);
-
+                var existedUser = await _userManager.Users.AnyAsync(x => x.UserName == model.SDT);
                 if (existedUser)
                 {
                     ViewBag.ErrorMessage = "Số điện thoại đã được sử dụng.";
                     return View("Register", model);
                 }
 
-                // Tạo OTP (6 digits)
+                // Tạo OTP 6 chữ số
                 var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
 
-                // Hash OTP with a random salt for secure storage
+                // Tạo Salt và Hash OTP
                 var saltBytes = new byte[16];
                 RandomNumberGenerator.Fill(saltBytes);
                 var otpHash = ComputeOtpHash(otp, saltBytes);
 
-                // Protect the plain password before caching (do not store plain text)
+                // Mã hóa mật khẩu trước khi lưu vào Cache
                 var protectedPassword = _dataProtector.Protect(model.MatKhau);
 
-                // Create a safe lightweight model without passwords
-                var safeModel = new
-                {
-                    HoTen = model.HoTen,
-                    SDT = model.SDT,
-                    Email = model.Email
-                };
-
-                // Include LastSentAt, ResendCount so we can enforce resend cooldown and limits
                 var pending = new
                 {
-                    SafeModel = safeModel,
+                    SafeModel = new
+                    {
+                        HoTen = model.HoTen,
+                        SDT = model.SDT,
+                        Email = model.Email
+                    },
                     ProtectedPassword = protectedPassword,
                     OtpHash = otpHash,
                     OtpSalt = Convert.ToBase64String(saltBytes),
@@ -237,8 +235,8 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
                 await _distributedCache.SetStringAsync(cacheKey, json, cacheOptions);
 
-                // TODO: send OTP via SMS gateway. For demo/logging we'll write to logger (do NOT log in production).
-                Logger.Info($"OTP đăng ký tài khoản SDT={model.SDT}: {otp}");
+                // Gửi SMS OTP thực tế
+                await _smsSender.SendSmsAsync(model.SDT, $"Ma OTP dang ky tai khoan Cua Hang Cham Soc Thu Cung cua ban la: {otp}. Ma co hieu luc trong 5 phut.");
 
                 return RedirectToAction(nameof(ConfirmOtp), new { sdt = model.SDT });
             }
@@ -250,22 +248,15 @@ namespace Cuahangchamsocthucung.Web.Controllers
         }
 
         [HttpGet]
-        public  ActionResult ConfirmOtp(string sdt = null)
+        public async Task<ActionResult> ConfirmOtp(string sdt = null)
         {
-            // Show view where user enters OTP. SDT prefilled if provided.
-            var vm = new XacThucOtpDto
-            {
-                SDT = sdt
-            };
-
-            // compute remaining seconds for resend cooldown (if any)
+            var vm = new XacThucOtpDto { SDT = sdt };
             var remainingSeconds = 0;
+
             if (!string.IsNullOrWhiteSpace(sdt))
             {
                 var cacheKey = $"PendingRegistration:{sdt}";
-                var pendingJsonTask = _distributedCache.GetStringAsync(cacheKey);
-                pendingJsonTask.Wait(); // safe here because this is a short sync call in GET preparing view
-                var pendingJson = pendingJsonTask.Result;
+                var pendingJson = await _distributedCache.GetStringAsync(cacheKey);
 
                 if (!string.IsNullOrWhiteSpace(pendingJson))
                 {
@@ -283,7 +274,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     }
                     catch
                     {
-                        // ignore parsing errors, default to 0
+                        // Bỏ qua lỗi parse
                     }
                 }
             }
@@ -314,15 +305,13 @@ namespace Cuahangchamsocthucung.Web.Controllers
                 using var doc = JsonDocument.Parse(pendingJson);
                 var root = doc.RootElement;
 
-                // Read LastSentAt and ResendCount if present
                 DateTime? lastSentAt = null;
                 var resendCount = 0;
-                if (root.TryGetProperty("LastSentAt", out var lastSentAtProp))
+
+                if (root.TryGetProperty("LastSentAt", out var lastSentAtProp) &&
+                    DateTime.TryParse(lastSentAtProp.GetString(), out var parsed))
                 {
-                    if (DateTime.TryParse(lastSentAtProp.GetString(), out var parsed))
-                    {
-                        lastSentAt = parsed.ToUniversalTime();
-                    }
+                    lastSentAt = parsed.ToUniversalTime();
                 }
 
                 if (root.TryGetProperty("ResendCount", out var rcProp))
@@ -332,7 +321,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
                 if (resendCount >= MaxResendCount)
                 {
-                    // Remove pending registration and force re-register
                     await _distributedCache.RemoveAsync(cacheKey);
                     return Json(new { success = false, message = $"Bạn đã vượt quá {MaxResendCount} lần gửi lại mã. Vui lòng đăng ký lại." });
                 }
@@ -347,17 +335,14 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     }
                 }
 
-                // Generate new OTP and update cache (increment resend count, reset failed attempts)
+                // Tạo OTP mới
                 var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
                 var saltBytes = new byte[16];
                 RandomNumberGenerator.Fill(saltBytes);
                 var otpHash = ComputeOtpHash(otp, saltBytes);
 
-                // Recreate pending object using existing SafeModel and ProtectedPassword
                 var safeModelElement = root.GetProperty("SafeModel");
                 var safeModel = JsonSerializer.Deserialize<DangKyDto>(safeModelElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                // Read existing protected password
                 var protectedPassword = root.GetProperty("ProtectedPassword").GetString();
 
                 var updatedPending = new
@@ -380,14 +365,14 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
                 await _distributedCache.SetStringAsync(cacheKey, updatedJson, cacheOptions);
 
-                // TODO: call SMS provider. For demo we log.
-                Logger.Info($"Resent OTP đăng ký SDT={sdt}: {otp}");
+                // Gửi lại SMS
+                await _smsSender.SendSmsAsync(sdt, $"Ma OTP dang ky tai khoan moi cua ban la: {otp}. Ma co hieu luc trong 5 phut.");
 
                 return Json(new { success = true, message = "Mã OTP đã được gửi lại.", remainingSeconds = ResendCooldownSeconds, resendCount = updatedPending.ResendCount });
             }
             catch (Exception ex)
             {
-                Logger.Error("ResendOtp error", ex);
+                Logger.Error("Lỗi ResendOtp", ex);
                 return Json(new { success = false, message = "Không thể gửi lại mã OTP. Vui lòng thử lại sau." });
             }
         }
@@ -422,7 +407,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
                 var safeModelElement = root.GetProperty("SafeModel");
                 var protectedPassword = root.GetProperty("ProtectedPassword").GetString();
 
-                // safeModel contains HoTen, SDT, Email
                 var safeModel = JsonSerializer.Deserialize<DangKyDto>(safeModelElement.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (safeModel == null || otpHash == null || otpSaltB64 == null || protectedPassword == null)
@@ -445,13 +429,11 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     failedAttempts++;
                     if (failedAttempts >= MaxFailedOtpAttempts)
                     {
-                        // Exceeded allowed attempts: remove pending registration
                         await _distributedCache.RemoveAsync(cacheKey);
                         ViewBag.ErrorMessage = $"Bạn đã nhập OTP sai quá {MaxFailedOtpAttempts} lần. Vui lòng đăng ký lại.";
                         return View("ConfirmOtp", input);
                     }
 
-                    // Update failed attempts count in cache and reset expiry (preserve protected password and resend count)
                     var resendCount = root.TryGetProperty("ResendCount", out var rcProp) ? rcProp.GetInt32() : 0;
                     var updatedPending = new
                     {
@@ -464,6 +446,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
                         CreatedAt = DateTime.UtcNow,
                         LastSentAt = root.TryGetProperty("LastSentAt", out var lastSentAtProp) ? lastSentAtProp.GetString() : DateTime.UtcNow.ToString("o")
                     };
+
                     var updatedJson = JsonSerializer.Serialize(updatedPending);
                     var cacheOptions = new DistributedCacheEntryOptions
                     {
@@ -475,8 +458,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     return View("ConfirmOtp", input);
                 }
 
-                // OTP is valid -> finalize registration by delegating to application service.
-                // Reconstruct DangKyDto including the unprotected password
+                // OTP chính xác -> Giải mã mật khẩu và gọi AppService tạo tài khoản
                 var plainPassword = _dataProtector.Unprotect(protectedPassword);
 
                 var registrationDto = new DangKyDto
@@ -488,12 +470,11 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     XacNhanMatKhau = plainPassword
                 };
 
-                var result = await _khachHangAppService.DangKy(registrationDto);
+                await _khachHangAppService.DangKy(registrationDto);
 
-                // Clear cache after successful registration
+                // Xóa Cache đăng ký tạm
                 await _distributedCache.RemoveAsync(cacheKey);
 
-                // Redirect to login page with success message
                 TempData["SuccessMessage"] = "Đăng ký thành công. Vui lòng đăng nhập.";
                 return RedirectToAction("Login");
             }
@@ -506,31 +487,10 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
         #endregion
 
-        #region 403 Forbidden
-
-        [Route("/Account/Forbidden")]
-        public ActionResult Error403()
-        {
-            return View();
-        }
-
-        #endregion
-
         #region Helpers
-
-        public ActionResult RedirectToAppHome()
-        {
-            return RedirectToAction("Index", "Home");
-        }
-
-        public string GetAppHomeUrl()
-        {
-            return Url.Action("Index", "About");
-        }
 
         private static string ComputeOtpHash(string otp, byte[] salt)
         {
-            // Use HMACSHA256 with salt as key
             using var hmac = new HMACSHA256(salt);
             var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(otp));
             return Convert.ToBase64String(hashBytes);
@@ -548,84 +508,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
                 diff |= aBytes[i] ^ bBytes[i];
             }
             return diff == 0;
-        }
-
-        #endregion
-                
-        #region Change Tenant
-
-        public async Task<ActionResult> TenantChangeModal()
-        {
-            var loginInfo = await _sessionAppService.GetCurrentLoginInformations();
-            return View("/Views/Shared/Components/TenantChange/_ChangeModal.cshtml", new ChangeModalViewModel
-            {
-                TenancyName = loginInfo.Tenant?.TenancyName
-            });
-        }
-
-        #endregion
-
-        #region Common
-
-        private string GetTenancyNameOrNull()
-        {
-            if (!AbpSession.TenantId.HasValue)
-            {
-                return null;
-            }
-
-            return _tenantCache.GetOrNull(AbpSession.TenantId.Value)?.TenancyName;
-        }
-
-        private string NormalizeReturnUrl(string returnUrl, Func<string> defaultValueBuilder = null)
-        {
-            if (defaultValueBuilder == null)
-            {
-                defaultValueBuilder = GetAppHomeUrl;
-            }
-
-            if (returnUrl.IsNullOrEmpty())
-            {
-                return defaultValueBuilder();
-            }
-
-            if (Url.IsLocalUrl(returnUrl))
-            {
-                return returnUrl;
-            }
-
-            return defaultValueBuilder();
-        }
-
-        #endregion
-
-        #region Etc
-
-        /// <summary>
-        /// This is a demo code to demonstrate sending notification to default tenant admin and host admin uers.
-        /// Don't use this code in production !!!
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        [AbpMvcAuthorize]
-        public async Task<ActionResult> TestNotification(string message = "")
-        {
-            if (message.IsNullOrEmpty())
-            {
-                message = "This is a test notification, created at " + Clock.Now;
-            }
-
-            var defaultTenantAdmin = new UserIdentifier(1, 2);
-            var hostAdmin = new UserIdentifier(1, 1);
-
-            await _notificationPublisher.PublishAsync(
-                    "App.SimpleMessage",
-                    new MessageNotificationData(message),
-                    severity: NotificationSeverity.Info,
-                    userIds: new[] { defaultTenantAdmin, hostAdmin }
-                 );
-
-            return Content("Sent notification: " + message);
         }
 
         #endregion

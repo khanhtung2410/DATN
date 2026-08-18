@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cuahangchamsocthucung.ThuCung.Dto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -15,5 +16,6 @@ namespace Cuahangchamsocthucung.KhachHang.Dto
         [Required]
         public string SDT { get; set; }
         public string Email { get; set; }
+        public List<ThuCungDto> ThuCungs { get; set; }
     }
 }

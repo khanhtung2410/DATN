@@ -1,13 +1,33 @@
-using Microsoft.AspNetCore.Mvc;
+using Abp.Authorization;
+using Cuahangchamsocthucung.Authorization.Roles;
 using Cuahangchamsocthucung.Controllers;
+using Cuahangchamsocthucung.Web.Models.DichVu;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.Web.Controllers
 {
+    
+    [Authorize(Roles = StaticRoleNames.Tenants.Admin)]
+
     public class DichVuController : CuahangchamsocthucungControllerBase
     {
-        public IActionResult Index()
+        private readonly IDichVuAppService _dichVuAppService;
+
+        public DichVuController(IDichVuAppService dichVuAppService)
         {
-            return View();
+            _dichVuAppService = dichVuAppService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var dichVus = await _dichVuAppService.GetAll();
+            var model = new DichVuListViewModel
+            {
+                DichVus = dichVus
+            };
+            return View(model);
         }
     }
 }

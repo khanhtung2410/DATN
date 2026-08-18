@@ -1,0 +1,529 @@
+﻿@model Cuahangchamsocthucung.DichVu.Dto.SuaDichVuDto
+
+@{
+    Layout = null;
+}
+
+<div class="modal fade"
+     id="DichVuEditModal"
+     tabindex="-1"
+     aria-labelledby="DichVuEditModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+
+        <div class="modal-content">
+
+            @await Html.PartialAsync(
+            "~/Views/Shared/Modals/_ModalHeader.cshtml",
+                        new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel(
+                        "Sửa dịch vụ"
+                        )
+                        )
+
+            <form id="dichvu-edit-form"
+                  name="DichVuEditForm"
+                  role="form"
+                  class="form-horizontal">
+
+                <input type="hidden"
+                       id="dv-id"
+                       name="Id"
+                       value="@Model.Id" />
+
+                <div class="modal-body">
+
+                    <!-- Tên dịch vụ -->
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">
+                            Tên dịch vụ
+                        </label>
+
+                        <div class="col-md-9">
+                            <input type="text"
+                                   id="dv-tendichvu"
+                                   name="Tendichvu"
+                                   class="form-control"
+                                   value="@Model.Tendichvu" />
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">
+                            Mô tả
+                        </label>
+
+                        <div class="col-md-9">
+                            <textarea id="dv-mota"
+                                      name="Mota"
+                                      class="form-control"
+                                      rows="3">@Model.Mota</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Trạng thái -->
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">
+                            Trạng thái
+                        </label>
+
+                        <div class="col-md-9">
+                            <select id="dv-trangthai"
+                                    name="Trangthai"
+                                    class="form-control">
+
+                                <option value="true"
+                                        selected="@(Model.Trangthai)">
+                                    Đang hoạt động
+                                </option>
+
+                                <option value="false"
+                                        selected="@(!Model.Trangthai)">
+                                    Ngừng hoạt động
+                                </option>
+
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h5 class="mb-3">
+                        Bảng giá
+                    </h5>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered"
+                               id="bang-gia-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Đối tượng</th>
+                                    <th>Lông dài</th>
+                                    <th>Cân nặng từ</th>
+                                    <th>Cân nặng đến</th>
+                                    <th>Giá</th>
+                                    <th style="width: 80px;">
+                                        Xóa
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="bang-gia-container">
+
+                                @if (Model.BangGias != null)
+                                {
+                                    for (int i = 0;
+                                    i < Model.BangGias.Count;
+                                    i++)
+                                    {
+                                        <tr class="bang-gia-row">
+
+                                            <input type="hidden"
+                                                   class="bg-id"
+                                                   name="BangGias[@i].Id"
+                                                   value="@Model.BangGias[i].Id" />
+
+                                            <input type="hidden"
+                                                   class="bg-dichvu-id"
+                                                   name="BangGias[@i].DichVuId"
+                                                   value="@Model.Id" />
+
+                                            <td>
+                                                <input type="text"
+                                                       class="form-control bg-loaithucung"
+                                                       name="BangGias[@i].Loaithucung"
+                                                       value="@Model.BangGias[i].Loaithucung" />
+                                            </td>
+
+                                            <td>
+                                                <select class="form-control bg-loailong"
+                                                        name="BangGias[@i].Loailong">
+
+                                                    @if (Model.BangGias[i].Loailong)
+                                                    {
+                                                        <option value="false">
+                                                            Không
+                                                        </option>
+
+                                                        <option value="true"
+                                                                selected>
+                                                            Có
+                                                        </option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="false"
+                                                                selected>
+                                                            Không
+                                                        </option>
+
+                                                        <option value="true">
+                                                            Có
+                                                        </option>
+                                                    }
+
+                                                </select>
+                                            </td>
+
+                                            <td>
+                                                <input type="number"
+                                                       min="0"
+                                                       class="form-control bg-cannangtu"
+                                                       name="BangGias[@i].Cannangtu"
+                                                       value="@Model.BangGias[i].Cannangtu" />
+                                            </td>
+
+                                            <td>
+                                                <input type="number"
+                                                       min="0"
+                                                       class="form-control bg-cannangden"
+                                                       name="BangGias[@i].Cannangden"
+                                                       value="@Model.BangGias[i].Cannangden" />
+                                            </td>
+
+                                            <td>
+                                                <input type="number"
+                                                       min="1"
+                                                       step="0.01"
+                                                       class="form-control bg-giadv"
+                                                       name="BangGias[@i].Giadv"
+                                                       value="@Model.BangGias[i].Giadv" />
+                                            </td>
+
+                                            <td class="text-center">
+                                                <button type="button"
+                                                        class="btn btn-danger btn-sm btn-remove-banggia">
+                                                    Xóa
+                                                </button>
+                                            </td>
+
+                                        </tr>
+                                    }
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <button type="button"
+                            id="btn-add-banggia"
+                            class="btn btn-success btn-sm">
+                        + Thêm mức giá
+                    </button>
+
+                </div>
+
+                @await Html.PartialAsync(
+                "~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml"
+                                )
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    (function ($) {
+
+        var _dichVuService = abp.services.app.dichVu,
+            _$modal = $('#DichVuEditModal'),
+            _$form = $('#dichvu-edit-form');
+
+        // =========================
+        // Xóa mức giá
+        // =========================
+
+        _$modal.on('click', '.btn-remove-banggia', function () {
+
+            var rows = _$modal.find('.bang-gia-row');
+
+            if (rows.length <= 1) {
+                abp.notify.warn('Phải có ít nhất một mức giá.');
+                return;
+            }
+
+            $(this).closest('.bang-gia-row').remove();
+
+            updateIndexes();
+        });
+
+
+        // =========================
+        // Thêm mức giá
+        // =========================
+
+        $('#btn-add-banggia').click(function () {
+
+            var index = _$modal.find('.bang-gia-row').length;
+
+            var row = `
+                <tr class="bang-gia-row">
+
+                    <input type="hidden"
+                           class="bg-id"
+                           name="BangGias[${index}].Id"
+                           value="0" />
+
+                    <input type="hidden"
+                           name="BangGias[${index}].DichVuId"
+                           value="${$('#dv-id').val()}" />
+
+                    <td>
+                        <input type="text"
+                               class="form-control bg-loaithucung"
+                               name="BangGias[${index}].Loaithucung" />
+                    </td>
+
+                    <td>
+                        <select class="form-control bg-loailong"
+                                name="BangGias[${index}].Loailong">
+
+                            <option value="false">
+                                Không
+                            </option>
+
+                            <option value="true">
+                                Có
+                            </option>
+
+                        </select>
+                    </td>
+
+                    <td>
+                        <input type="number"
+                               min="0"
+                               class="form-control bg-cannangtu"
+                               name="BangGias[${index}].Cannangtu" />
+                    </td>
+
+                    <td>
+                        <input type="number"
+                               min="0"
+                               class="form-control bg-cannangden"
+                               name="BangGias[${index}].Cannangden" />
+                    </td>
+
+                    <td>
+                        <input type="number"
+                               min="1"
+                               step="0.01"
+                               class="form-control bg-giadv"
+                               name="BangGias[${index}].Giadv" />
+                    </td>
+
+                    <td class="text-center">
+                        <button type="button"
+                                class="btn btn-danger btn-sm btn-remove-banggia">
+                            Xóa
+                        </button>
+                    </td>
+
+                </tr>
+            `;
+
+            $('#bang-gia-container').append(row);
+        });
+
+
+        // =========================
+        // Cập nhật index
+        // =========================
+
+        function updateIndexes() {
+
+            $('#bang-gia-container .bang-gia-row').each(function (index) {
+
+                $(this).find('.bg-id')
+                    .attr('name', `BangGias[${index}].Id`);
+
+                $(this).find('.bg-dichvu-id')
+                    .attr('name', `BangGias[${index}].DichVuId`);
+
+                $(this).find('.bg-loaithucung')
+                    .attr('name', `BangGias[${index}].Loaithucung`);
+
+                $(this).find('.bg-loailong')
+                    .attr('name', `BangGias[${index}].Loailong`);
+
+                $(this).find('.bg-cannangtu')
+                    .attr('name', `BangGias[${index}].Cannangtu`);
+
+                $(this).find('.bg-cannangden')
+                    .attr('name', `BangGias[${index}].Cannangden`);
+
+                $(this).find('.bg-giadv')
+                    .attr('name', `BangGias[${index}].Giadv`);
+            });
+        }
+
+
+        // =========================
+        // Lưu
+        // =========================
+
+        async function save() {
+
+            if (!_$form.valid()) {
+                return;
+            }
+
+            var bangGias = [];
+
+            $('#bang-gia-container .bang-gia-row').each(function () {
+
+                var row = $(this);
+
+                bangGias.push({
+
+                    Id: parseInt(
+                        row.find('.bg-id').val() || 0,
+                        10
+                    ),
+
+                    DichVuId: parseInt(
+                        $('#dv-id').val(),
+                        10
+                    ),
+
+                    Loaithucung:
+                        row.find('.bg-loaithucung').val(),
+
+                    Loailong:
+                        row.find('.bg-loailong').val() === 'true',
+
+                    Cannangtu:
+                        parseInt(
+                            row.find('.bg-cannangtu').val(),
+                            10
+                        ),
+
+                    Cannangden:
+                        parseInt(
+                            row.find('.bg-cannangden').val(),
+                            10
+                        ),
+
+                    Giadv:
+                        parseFloat(
+                            row.find('.bg-giadv').val()
+                        )
+                });
+            });
+
+
+            var input = {
+
+                Id: parseInt(
+                    $('#dv-id').val(),
+                    10
+                ),
+
+                Tendichvu:
+                    $('#dv-tendichvu').val(),
+
+                Mota:
+                    $('#dv-mota').val(),
+
+                Trangthai:
+                    $('#dv-trangthai').val() === 'true',
+
+                BangGias:
+                    bangGias
+            };
+
+
+            console.log("Dữ liệu cập nhật:", input);
+
+
+            abp.ui.setBusy(_$form);
+
+            try {
+
+                await _dichVuService.update(input);
+
+                abp.notify.success(
+                    'Cập nhật dịch vụ thành công.'
+                );
+
+                _$modal.modal('hide');
+
+                abp.event.trigger(
+                    'dichVu.edited',
+                    input
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    'Lỗi cập nhật dịch vụ:',
+                    error
+                );
+
+                abp.notify.error(
+                    error.message ||
+                    'Có lỗi xảy ra khi cập nhật dịch vụ.'
+                );
+
+            }
+            finally {
+
+                abp.ui.clearBusy(_$form);
+            }
+        }
+
+
+        // =========================
+        // Nút Lưu
+        // =========================
+
+        _$modal
+            .find('.save-button')
+            .off('click')
+            .on('click', function (e) {
+
+                e.preventDefault();
+
+                save();
+            });
+
+
+        // =========================
+        // Enter để lưu
+        // =========================
+
+        _$form.find('input').on(
+            'keypress',
+            function (e) {
+
+                if (e.which === 13) {
+
+                    e.preventDefault();
+
+                    save();
+                }
+            }
+        );
+
+
+        // =========================
+        // Focus
+        // =========================
+
+        _$modal.on(
+            'shown.bs.modal',
+            function () {
+
+                $('#dv-tendichvu').focus();
+            }
+        );
+
+    })(jQuery);
+</script>

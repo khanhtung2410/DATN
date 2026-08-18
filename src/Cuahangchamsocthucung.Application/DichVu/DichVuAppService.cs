@@ -84,12 +84,21 @@ public class DichVuAppService :
     }
 
     [UnitOfWork]
-    public async Task ChangeTrangThai(
-        SuaTrangThaiDichVuDto input)
+    public async Task ChangeTrangThai(SuaTrangThaiDichVuDto input)
     {
-        var dichVu = await _dichVuRepository.GetAsync(input.Id);
+        var dichVu = await _dichVuRepository
+            .FirstOrDefaultAsync(input.Id);
+
+        if (dichVu == null)
+        {
+            throw new UserFriendlyException(
+                "Không tìm thấy dịch vụ.");
+        }
 
         dichVu.TrangThai = input.Trangthai;
+
+        await _dichVuRepository.UpdateAsync(dichVu);
+
         await CurrentUnitOfWork.SaveChangesAsync();
     }
 
@@ -201,5 +210,17 @@ public class DichVuAppService :
             }).ToList()
         };
         return dichVuDto;
+    }
+    public async Task UpdateBangGia(SuaBangGiaDto input)
+    {
+        var bangGia = await _bangGiaRepository.GetAsync(input.Id);
+
+        bangGia.Loailong = input.Loailong;
+        bangGia.Loaithucung = input.Loaithucung;
+        bangGia.Cannangtu = input.Cannangtu;
+        bangGia.Cannangden = input.Cannangden;
+        bangGia.Giadv = input.Giadv;
+
+        await CurrentUnitOfWork.SaveChangesAsync();
     }
 }

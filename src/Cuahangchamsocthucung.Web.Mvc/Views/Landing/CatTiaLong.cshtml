@@ -1,0 +1,757 @@
+﻿@model List<Cuahangchamsocthucung.Entities.BangGia>
+
+@{
+    Layout = "_LandingLayout";
+
+    ViewData["Title"] = "Cắt tỉa lông cho chó mèo";
+
+    var cho = Model
+        .Where(x => x.Loaithucung == "Chó")
+        .OrderBy(x => x.Cannangtu)
+        .ThenBy(x => x.Cannangden)
+        .ToList();
+
+    var meo = Model
+        .Where(x => x.Loaithucung == "Mèo")
+        .OrderBy(x => x.Cannangtu)
+        .ThenBy(x => x.Cannangden)
+        .ToList();
+}
+
+
+<!-- ===================================================== -->
+<!-- HERO -->
+<!-- ===================================================== -->
+
+<section class="service-detail-hero py-5">
+
+    <div class="container">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-7">
+
+                <span class="badge bg-warning text-dark mb-3">
+                    GROOMING
+                </span>
+
+                <h1 class="display-4 fw-bold">
+                    Cắt tỉa lông
+                    <br />
+                    cho chó mèo
+                </h1>
+
+                <p class="lead mt-4">
+
+                    Dịch vụ cắt tỉa lông giúp thú cưng
+                    gọn gàng, sạch sẽ và có diện mạo
+                    phù hợp với đặc điểm của từng bé.
+
+                </p>
+
+                <a class="btn btn-warning rounded-pill px-5 py-3 mt-3"
+                   asp-controller="Landing"
+                   asp-action="Create">
+
+                    Đặt lịch ngay
+
+                </a>
+
+            </div>
+
+
+            <div class="col-lg-5 mt-4 mt-lg-0">
+
+                <img src="/img/grooming.jpg"
+                     class="img-fluid rounded-4 shadow"
+                     style="height:350px;
+                            width:100%;
+                            object-fit:cover;"
+                     alt="Cắt tỉa lông cho chó mèo" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- GIỚI THIỆU -->
+<!-- ===================================================== -->
+
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <span class="text-warning fw-bold">
+            CẮT TỈA LÔNG
+        </span>
+
+        <h2 class="fw-bold mt-2">
+            Chăm sóc bộ lông gọn gàng
+        </h2>
+
+        <p class="text-muted mx-auto"
+           style="max-width:750px;">
+
+            Dịch vụ cắt tỉa giúp loại bỏ phần lông
+            dư thừa, giữ vệ sinh và tạo kiểu phù hợp
+            với đặc điểm của từng thú cưng.
+
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- CẮT TỈA -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1">
+                        ✂️
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Cắt tỉa lông
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Cắt tỉa phần lông dài và không cần
+                        thiết giúp thú cưng có bộ lông
+                        gọn gàng hơn.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- TẠO KIỂU -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1">
+                        🐶
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Tạo kiểu
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Tạo kiểu phù hợp với giống,
+                        kích thước và đặc điểm bộ lông
+                        của thú cưng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- VỆ SINH -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="fs-1">
+                        🧼
+                    </div>
+
+                    <h4 class="fw-bold">
+                        Vệ sinh
+                    </h4>
+
+                    <p class="text-muted">
+
+                        Hỗ trợ cắt tỉa các vùng lông
+                        cần thiết để giữ vệ sinh cho
+                        thú cưng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- QUY TRÌNH -->
+<!-- ===================================================== -->
+
+<section class="bg-light py-5">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <span class="text-warning fw-bold">
+                QUY TRÌNH
+            </span>
+
+            <h2 class="fw-bold mt-2">
+                Quy trình cắt tỉa lông
+            </h2>
+
+            <p class="text-muted">
+                Thú cưng được kiểm tra và chăm sóc
+                theo từng bước.
+            </p>
+
+        </div>
+
+
+        <div class="row g-4">
+
+
+            <!-- BƯỚC 1 -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    <div class="step-icon">
+                        1
+                    </div>
+
+                    <h5 class="fw-bold mt-3">
+                        Kiểm tra bộ lông
+                    </h5>
+
+                    <p class="text-muted">
+
+                        Kiểm tra tình trạng lông,
+                        độ rối và đặc điểm của
+                        thú cưng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- BƯỚC 2 -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    <div class="step-icon">
+                        2
+                    </div>
+
+                    <h5 class="fw-bold mt-3">
+                        Cắt tỉa
+                    </h5>
+
+                    <p class="text-muted">
+
+                        Cắt tỉa lông theo nhu cầu
+                        và kiểu dáng phù hợp.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- BƯỚC 3 -->
+
+            <div class="col-md-4">
+
+                <div class="text-center">
+
+                    <div class="step-icon">
+                        3
+                    </div>
+
+                    <h5 class="fw-bold mt-3">
+                        Hoàn thiện
+                    </h5>
+
+                    <p class="text-muted">
+
+                        Kiểm tra lại bộ lông và
+                        vệ sinh các khu vực cần thiết.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- BẢNG GIÁ -->
+<!-- ===================================================== -->
+
+<section class="container py-5">
+
+    <div class="text-center mb-5">
+
+        <span class="text-warning fw-bold">
+            BẢNG GIÁ
+        </span>
+
+        <h2 class="fw-bold mt-2">
+            Giá dịch vụ cắt tỉa lông
+        </h2>
+
+        <p class="text-muted">
+            Giá được lấy trực tiếp từ hệ thống.
+        </p>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CHÓ -->
+    <!-- ================================================= -->
+
+    <h4 class="fw-bold mb-3">
+        🐶 Cắt tỉa lông cho chó
+    </h4>
+
+
+    @if (cho.Any())
+    {
+        <div class="table-responsive mb-5">
+
+            <table class="table table-bordered table-hover text-center align-middle">
+
+                <thead class="table-warning">
+
+                    <tr>
+
+                        <th>
+                            Cân nặng
+                        </th>
+
+                        <th>
+                            Loại lông
+                        </th>
+
+                        <th>
+                            Giá dịch vụ
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in cho)
+                    {
+                        <tr>
+
+                            <td>
+                                @($"{item.Cannangtu} - {item.Cannangden} kg")
+                            </td>
+
+                            <td>
+
+                                @if (item.Loailong)
+                                {
+                                    <span>
+                                        Lông dài
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        Lông ngắn
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    @item.Giadv.ToString("N0") đ
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary mb-5">
+
+            Chưa có bảng giá cắt tỉa cho chó.
+
+        </div>
+    }
+
+
+    <!-- ================================================= -->
+    <!-- MÈO -->
+    <!-- ================================================= -->
+
+    <h4 class="fw-bold mb-3">
+        🐱 Cắt tỉa lông cho mèo
+    </h4>
+
+
+    @if (meo.Any())
+    {
+        <div class="table-responsive mb-5">
+
+            <table class="table table-bordered table-hover text-center align-middle">
+
+                <thead class="table-warning">
+
+                    <tr>
+
+                        <th>
+                            Cân nặng
+                        </th>
+
+                        <th>
+                            Loại lông
+                        </th>
+
+                        <th>
+                            Giá dịch vụ
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in meo)
+                    {
+                        <tr>
+
+                            <td>
+                                @($"{item.Cannangtu} - {item.Cannangden} kg")
+                            </td>
+
+                            <td>
+
+                                @if (item.Loailong)
+                                {
+                                    <span>
+                                        Lông dài
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        Lông ngắn
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    @item.Giadv.ToString("N0") đ
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-secondary mb-5">
+
+            Chưa có bảng giá cắt tỉa cho mèo.
+
+        </div>
+    }
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- LƯU Ý -->
+<!-- ===================================================== -->
+
+<section class="container pb-5">
+
+    <div class="alert alert-warning">
+
+        <h4 class="fw-bold">
+            Lưu ý khi sử dụng dịch vụ
+        </h4>
+
+        <ul class="mb-0">
+
+            <li>
+                Thông báo cho nhân viên nếu thú cưng
+                có vấn đề về sức khỏe hoặc hành vi đặc biệt.
+            </li>
+
+            <li>
+                Thú cưng có bộ lông bị rối nhiều có thể
+                cần xử lý thêm trước khi cắt tỉa.
+            </li>
+
+            <li>
+                Thông báo trước nếu khách hàng có yêu cầu
+                đặc biệt về kiểu cắt hoặc độ dài lông.
+            </li>
+
+            <li>
+                Thú cưng đang điều trị bệnh hoặc mới
+                phẫu thuật cần được thông báo trước.
+            </li>
+
+        </ul>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- FAQ -->
+<!-- ===================================================== -->
+
+<section class="bg-light py-5">
+
+    <div class="container">
+
+        <h2 class="text-center fw-bold mb-4">
+            Câu hỏi thường gặp
+        </h2>
+
+
+        <div class="accordion" id="groomingFaq">
+
+
+            <!-- FAQ 1 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#grooming1">
+
+                        Giá cắt tỉa được tính như thế nào?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="grooming1"
+                     class="accordion-collapse collapse show"
+                     data-bs-parent="#groomingFaq">
+
+                    <div class="accordion-body">
+
+                        Giá dịch vụ được xác định dựa trên
+                        cân nặng và các thông tin được thiết lập
+                        trong bảng giá của hệ thống.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAQ 2 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#grooming2">
+
+                        Có thể yêu cầu kiểu cắt riêng không?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="grooming2"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#groomingFaq">
+
+                    <div class="accordion-body">
+
+                        Khách hàng có thể trao đổi với nhân viên
+                        về kiểu cắt mong muốn trước khi thực hiện
+                        dịch vụ.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAQ 3 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#grooming3">
+
+                        Có cần tắm trước khi cắt tỉa không?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="grooming3"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#groomingFaq">
+
+                    <div class="accordion-body">
+
+                        Tùy tình trạng thực tế của thú cưng.
+                        Nhân viên có thể tư vấn thêm dịch vụ
+                        tắm Spa nếu cần thiết.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAQ 4 -->
+
+            <div class="accordion-item">
+
+                <h2 class="accordion-header">
+
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#grooming4">
+
+                        Giá trên trang có được cập nhật theo hệ thống không?
+
+                    </button>
+
+                </h2>
+
+
+                <div id="grooming4"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#groomingFaq">
+
+                    <div class="accordion-body">
+
+                        Có. Giá được lấy trực tiếp từ bảng giá
+                        trong cơ sở dữ liệu của hệ thống.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- CTA -->
+<!-- ===================================================== -->
+
+<section class="container my-5">
+
+    <div class="cta text-center">
+
+        <h2 class="fw-bold">
+            Đặt lịch cắt tỉa lông cho thú cưng
+        </h2>
+
+        <p>
+            Giúp thú cưng luôn sạch sẽ, gọn gàng và đáng yêu.
+        </p>
+
+        <a class="btn btn-light rounded-pill px-5 py-3"
+           asp-controller="Landing"
+           asp-action="Create">
+
+            Đặt lịch ngay
+
+        </a>
+
+    </div>
+
+</section>

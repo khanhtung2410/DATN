@@ -1,0 +1,128 @@
+﻿@using Cuahangchamsocthucung.ThuCung.Dto
+
+@{
+    Layout = null;
+}
+
+<div class="modal fade"
+     id="ThuCungEditModal"
+     tabindex="-1"
+     aria-labelledby="ThuCungEditModalLabel"
+     aria-hidden="true"
+     data-backdrop="static">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content">
+
+            @await Html.PartialAsync(
+            "~/Views/Shared/Modals/_ModalHeader.cshtml",
+                        new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel("Sửa thú cưng")
+                        )
+
+            <form id="thucung-edit-form"
+                  name="ThuCungEditForm"
+                  role="form"
+                  class="form-horizontal">
+
+                <input type="hidden"
+                       id="thucung-id"
+                       name="Id" />
+
+                <div class="modal-body">
+
+                    <div class="mb-3 row">
+
+                        <label class="col-md-3 col-form-label">
+                            Tên thú cưng
+                        </label>
+
+                        <div class="col-md-9">
+
+                            <input type="text"
+                                   id="thucung-edit-ten"
+                                   name="TenThuCung"
+                                   class="form-control"
+                                   required />
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3 row">
+
+                        <label class="col-md-3 col-form-label">
+                            Loại thú cưng
+                        </label>
+
+                        <div class="col-md-9">
+
+                            <select id="thucung-edit-loai"
+                                    name="LoaiThuCung"
+                                    class="form-control"
+                                    required>
+
+                                <option value="Chó">
+                                    🐶 Chó
+                                </option>
+
+                                <option value="Mèo">
+                                    🐱 Mèo
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3 row">
+
+                        <label class="col-md-3 col-form-label">
+                            Ghi chú
+                        </label>
+
+                        <div class="col-md-9">
+
+                            <textarea id="thucung-edit-ghichu"
+                                      name="GhiChu"
+                                      class="form-control"
+                                      rows="3"></textarea>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-3 row">
+
+                        <label class="col-md-3 col-form-label">
+                            Ảnh thú cưng
+                        </label>
+
+                        <div class="col-md-9">
+
+                            <input type="text"
+                                   id="thucung-edit-image"
+                                   name="ImageUrl"
+                                   class="form-control" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                @await Html.PartialAsync(
+                                "~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml"
+                                )
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,67 @@
+﻿using Abp.Authorization;
+using Cuahangchamsocthucung.Controllers;
+using Cuahangchamsocthucung.Landing;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+
+namespace Cuahangchamsocthucung.Web.Controllers
+{
+    public class LandingController : CuahangchamsocthucungControllerBase
+    {
+        private readonly LandingAppService _landingAppService;
+        private readonly IThuCungAppService _thuCungAppService;
+        public LandingController(
+            LandingAppService landingAppService, IThuCungAppService thuCungAppService)
+        {
+            _landingAppService = landingAppService;
+            _thuCungAppService = thuCungAppService;
+        }
+
+        [AllowAnonymous]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> KhachSan()
+        {
+            var bangGias = await _landingAppService
+                .GetBangGia("Trông giữ thú cưng");
+
+            return View(bangGias);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> TamSpa()
+        {
+            var bangGias = await _landingAppService
+                .GetBangGia("Tắm Spa");
+
+            return View(bangGias);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> CatTiaLong()
+        {
+            var bangGias = await _landingAppService
+                .GetBangGia("Cắt tỉa lông");
+
+            return View(bangGias);
+        }
+        [AbpAuthorize]
+        public async Task<IActionResult> ThuCung()
+        {
+            var thuCungs = await _thuCungAppService.GetCuaToi();
+
+            return View(thuCungs);
+        }
+        [AbpAuthorize]
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+    }
+}

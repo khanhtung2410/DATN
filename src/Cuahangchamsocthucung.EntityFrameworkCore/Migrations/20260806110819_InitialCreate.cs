@@ -858,7 +858,6 @@ namespace Cuahangchamsocthucung.Migrations
                     Cannangden = table.Column<int>(type: "int", nullable: false),
                     Loailong = table.Column<bool>(type: "bit", nullable: false),
                     Giadv = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DichVuId1 = table.Column<int>(type: "int", nullable: true),
                     CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatorUserId = table.Column<long>(type: "bigint", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -873,11 +872,7 @@ namespace Cuahangchamsocthucung.Migrations
                         principalTable: "DichVus",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_BangGias_DichVus_DichVuId1",
-                        column: x => x.DichVuId1,
-                        principalTable: "DichVus",
-                        principalColumn: "Id");
+                    
                 });
 
             migrationBuilder.CreateTable(
@@ -1453,10 +1448,7 @@ namespace Cuahangchamsocthucung.Migrations
                 table: "BangGias",
                 column: "DichVuId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_BangGias_DichVuId1",
-                table: "BangGias",
-                column: "DichVuId1");
+            
 
             migrationBuilder.CreateIndex(
                 name: "IX_HoaDonChiTiets_DichVuId",

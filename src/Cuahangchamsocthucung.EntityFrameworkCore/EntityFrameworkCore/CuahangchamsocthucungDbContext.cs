@@ -45,7 +45,7 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore
 
             modelBuilder.Entity<BangGia>()
     .HasOne(x => x.DichVu)
-    .WithMany()
+    .WithMany(d => d.BangGias)
     .HasForeignKey(x => x.DichVuId)
     .OnDelete(DeleteBehavior.Restrict);
 

@@ -5,6 +5,7 @@ using Abp.Dependency;
 using Abp.Domain.Uow;
 using Abp.EntityFrameworkCore.Uow;
 using Abp.MultiTenancy;
+using Cuahangchamsocthucung.Authorization.Users;
 using Cuahangchamsocthucung.EntityFrameworkCore.Seed.Host;
 using Cuahangchamsocthucung.EntityFrameworkCore.Seed.Tenants;
 
@@ -14,32 +15,87 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
     {
         public static void SeedHostDb(IIocResolver iocResolver)
         {
-            WithDbContext<CuahangchamsocthucungDbContext>(iocResolver, SeedHostDb);
+            WithDbContext<CuahangchamsocthucungDbContext>(
+                iocResolver,
+                context =>
+                {
+                    SeedHostDb(context, iocResolver);
+                });
         }
 
-        public static void SeedHostDb(CuahangchamsocthucungDbContext context)
+        public static void SeedHostDb(
+            CuahangchamsocthucungDbContext context,
+            IIocResolver iocResolver)
         {
             context.SuppressAutoSetTenantId = true;
 
-            // Host seed
+            // Host
             new InitialHostDbBuilder(context).Create();
 
-            // Default tenant seed (in host database).
+            // Tenant
             new DefaultTenantBuilder(context).Create();
-            new TenantRoleAndUserBuilder(context, 1).Create();
 
-            // Tenant-specific default data (tenant id 1)
-            new DefaultTenantDataCreator(context, 1).Create();
+            // Role + User mặc định
+            new TenantRoleAndUserBuilder(
+                context,
+                1
+            ).Create();
+
+            // Dữ liệu Tenant
+            new DefaultTenantDataCreator(
+                context,
+                1
+            ).Create();
+
+            // Dịch vụ
+            new DefaultDichVuCreator(context).Create();
+
+            // Bảng giá
+            new DefaultBangGiaCreator(context).Create();
+
+            // Mặt hàng
+            new DefaultMatHangCreator(context).Create();
+
+            // Nhân viên
+            new DefaultNhanVienCreator(context).Create();
+
+            // User khách hàng
+            using (var userManager =
+                iocResolver.ResolveAsDisposable<UserManager>())
+            using (var uowManager =
+                iocResolver.ResolveAsDisposable<IUnitOfWorkManager>())
+            {
+                new DefaultUserCreator(
+                    context,
+                    userManager.Object,
+                    uowManager.Object
+                ).Create();
+            }
+
+            // Khách hàng
+            new DefaultKhachHangCreator(context).Create();
+
+            // Thú cưng
+            new DefaultThuCungCreator(context).Create();
         }
 
-        private static void WithDbContext<TDbContext>(IIocResolver iocResolver, Action<TDbContext> contextAction)
+        private static void WithDbContext<TDbContext>(
+            IIocResolver iocResolver,
+            Action<TDbContext> contextAction)
             where TDbContext : DbContext
         {
-            using (var uowManager = iocResolver.ResolveAsDisposable<IUnitOfWorkManager>())
+            using (var uowManager =
+                iocResolver.ResolveAsDisposable<IUnitOfWorkManager>())
             {
-                using (var uow = uowManager.Object.Begin(TransactionScopeOption.Suppress))
+                using (var uow =
+                    uowManager.Object.Begin(
+                        TransactionScopeOption.Suppress))
                 {
-                    var context = uowManager.Object.Current.GetDbContext<TDbContext>(MultiTenancySides.Host);
+                    var context =
+                        uowManager.Object
+                            .Current
+                            .GetDbContext<TDbContext>(
+                                MultiTenancySides.Host);
 
                     contextAction(context);
 
