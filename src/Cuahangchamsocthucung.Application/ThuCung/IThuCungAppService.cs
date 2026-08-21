@@ -24,6 +24,6 @@ using System.Threading.Tasks;
     Task Update(SuaThuCungDto input);
 
     // Xóa thú cưng
-    Task Delete(int id);
+    Task ChangeStatus(int id);
 }
 

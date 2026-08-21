@@ -9,21 +9,13 @@
 <div class="container d-flex justify-content-center align-items-center py-5">
     <div class="card shadow-sm border-0" style="max-width: 450px; width: 100%;">
         <div class="card-body p-4 p-md-5">
-
             <div class="text-center mb-4">
                 <div class="mb-3">
                     <i class="fa fa-shield-alt fa-3x text-primary"></i>
                 </div>
-
                 <h3 class="fw-bold mb-2">Xác nhận OTP</h3>
-
-                <p class="text-muted mb-1">
-                    Chúng tôi đã gửi mã OTP đến số điện thoại
-                </p>
-
-                <strong class="text-primary fs-5">
-                    @Model.SDT
-                </strong>
+                <p class="text-muted mb-1">Chúng tôi đã gửi mã OTP đến số điện thoại</p>
+                <strong class="text-primary fs-5">@Model.SDT</strong>
             </div>
 
             <div class="alert alert-info text-center py-2 small">
@@ -41,14 +33,10 @@
 
             <form asp-action="ConfirmOtp" method="post" id="ConfirmOtpForm">
                 @Html.AntiForgeryToken()
-
                 <input asp-for="SDT" type="hidden" />
 
                 <div class="mb-4">
-                    <label asp-for="Otp" class="form-label fw-semibold">
-                        Mã OTP
-                    </label>
-
+                    <label asp-for="Otp" class="form-label fw-semibold">Mã OTP</label>
                     <input asp-for="Otp"
                            id="OtpInput"
                            class="form-control form-control-lg text-center fw-bold fs-4 letter-spacing-2"
@@ -57,7 +45,6 @@
                            autocomplete="one-time-code"
                            placeholder="------"
                            autofocus />
-
                     <span asp-validation-for="Otp" class="text-danger small d-block mt-1"></span>
                 </div>
 
@@ -70,18 +57,15 @@
             <div class="text-center mt-3">
                 <small class="text-muted">
                     Nhập sai số điện thoại?
-                    <a asp-action="Register" class="text-decoration-none fw-semibold">
-                        Đăng ký lại
-                    </a>
+                    <a asp-action="Register" class="text-decoration-none fw-semibold">Đăng ký lại</a>
                 </small>
             </div>
 
             <div class="text-center mt-2">
-                <button id="resendBtn" class="btn btn-link text-decoration-none small" disabled>
+                <button id="resendBtn" type="button" class="btn btn-link text-decoration-none small" disabled>
                     Gửi lại mã OTP <span id="resendCountdown"></span>
                 </button>
             </div>
-
         </div>
     </div>
 </div>
@@ -97,26 +81,18 @@
             var $btnSubmit = $('#btnSubmitOtp');
             var intervalId = null;
 
-            // 1. Tự động chuyển focus & chỉ cho nhập chữ số
             $otpInput.focus();
             $otpInput.on('input', function () {
-                this.value = this.value.replace(/[^0-9]/g, ''); // Loại bỏ ký tự không phải số
-
-                // Tự động submit khi nhập đủ 6 số
-                if (this.value.length === 6) {
-                    $form.submit();
-                }
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length === 6) $form.submit();
             });
 
-            // 2. Chống double-submit khi bấm xác nhận
             $form.on('submit', function () {
                 if ($otpInput.val().length === 6) {
-                    $btnSubmit.prop('disabled', true)
-                              .html('<i class="fa fa-spinner fa-spin me-1"></i> Đang xử lý...');
+                    $btnSubmit.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-1"></i> Đang xử lý...');
                 }
             });
 
-            // 3. Xử lý đếm ngược
             function setCountdown(seconds) {
                 remaining = seconds;
                 if (remaining > 0) {
@@ -149,7 +125,6 @@
                 $countdown.text('(' + timeStr + ')');
             }
 
-            // 4. Sự kiện Gửi lại mã OTP via AJAX
             $resendBtn.on('click', function (e) {
                 e.preventDefault();
                 if (remaining > 0) return;
@@ -166,41 +141,25 @@
                     data: { sdt: sdt },
                     success: function (resp) {
                         if (resp && resp.success) {
-                            var next = resp.remainingSeconds || 180;
-                            setCountdown(next);
-
-                            // Sử dụng thông báo ABP nếu có, nếu không fallback alert
-                            if (window.abp && abp.notify) {
-                                abp.notify.success(resp.message || 'Mã OTP đã được gửi lại.');
-                            } else {
-                                alert(resp.message || 'Mã OTP đã được gửi lại.');
-                            }
+                            setCountdown(resp.remainingSeconds || 180);
+                            if (window.abp && abp.notify) abp.notify.success(resp.message || 'Mã OTP đã được gửi lại.');
+                            else alert(resp.message || 'Mã OTP đã được gửi lại.');
                         } else {
-                            if (window.abp && abp.notify) {
-                                abp.notify.error(resp.message || 'Không thể gửi lại mã OTP.');
-                            } else {
-                                alert(resp.message || 'Không thể gửi lại mã OTP.');
-                            }
+                            if (window.abp && abp.notify) abp.notify.error(resp.message || 'Không thể gửi lại mã OTP.');
+                            else alert(resp.message || 'Không thể gửi lại mã OTP.');
 
-                            if (resp && resp.remainingSeconds) {
-                                setCountdown(resp.remainingSeconds);
-                            } else {
-                                $resendBtn.prop('disabled', false);
-                            }
+                            if (resp && resp.remainingSeconds) setCountdown(resp.remainingSeconds);
+                            else $resendBtn.prop('disabled', false);
                         }
                     },
                     error: function () {
-                        if (window.abp && abp.notify) {
-                            abp.notify.error('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
-                        } else {
-                            alert('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
-                        }
+                        if (window.abp && abp.notify) abp.notify.error('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
+                        else alert('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
                         $resendBtn.prop('disabled', false);
                     }
                 });
             });
 
-            // Khởi tạo đếm ngược ban đầu
             setCountdown(remaining);
         })(jQuery);
     </script>

@@ -12,6 +12,7 @@ namespace Cuahangchamsocthucung.Enum
         DaXacNhan = 1,    // Đã xác nhận lịch
         DangDienRa = 2,   // Đang thực hiện dịch vụ
         DaHuy = 3,        // Lịch bị hủy
-        HoanThanh = 4     // Đã hoàn thành dịch vụ
+        HoanThanh = 4,     // Đã hoàn thành dịch vụ
+        BiTuChoi = 5,       // Lịch bị từ chối
     }
 }

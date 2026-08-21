@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Cuahangchamsocthucung.ThuCung.Dto
 {
@@ -22,7 +17,6 @@ namespace Cuahangchamsocthucung.ThuCung.Dto
 
         public bool TrangThai { get; set; } = true;
 
-        [StringLength(400)]
         public string ImageUrl { get; set; }
     }
 }

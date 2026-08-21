@@ -178,7 +178,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
             ViewBag.IsSelfRegistrationAllowed = true;
             return View("Register", model);
         }
-
         [HttpPost]
         [UnitOfWork]
         public async Task<ActionResult> Register(DangKyDto model)
@@ -198,15 +197,12 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     return View("Register", model);
                 }
 
-                // Tạo OTP 6 chữ số
                 var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
 
-                // Tạo Salt và Hash OTP
                 var saltBytes = new byte[16];
                 RandomNumberGenerator.Fill(saltBytes);
                 var otpHash = ComputeOtpHash(otp, saltBytes);
 
-                // Mã hóa mật khẩu trước khi lưu vào Cache
                 var protectedPassword = _dataProtector.Protect(model.MatKhau);
 
                 var pending = new
@@ -227,7 +223,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
                 var cacheKey = $"PendingRegistration:{model.SDT}";
                 var json = JsonSerializer.Serialize(pending);
-
                 var cacheOptions = new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
@@ -235,8 +230,15 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
                 await _distributedCache.SetStringAsync(cacheKey, json, cacheOptions);
 
-                // Gửi SMS OTP thực tế
-                await _smsSender.SendSmsAsync(model.SDT, $"Ma OTP dang ky tai khoan Cua Hang Cham Soc Thu Cung cua ban la: {otp}. Ma co hieu luc trong 5 phut.");
+                Logger.Warn("========== ACCOUNT REGISTER ==========");
+                Logger.Warn($"SDT đăng ký: {model.SDT}");
+                Logger.Warn("Chuẩn bị gửi SMS OTP.");
+
+                await _smsSender.SendSmsAsync(
+                    model.SDT,
+                    $"Ma OTP dang ky tai khoan Cua Hang Cham Soc Thu Cung cua ban la: {otp}. Ma co hieu luc trong 5 phut.");
+
+                Logger.Warn("========== SMS ĐÃ GỬI XONG ==========");
 
                 return RedirectToAction(nameof(ConfirmOtp), new { sdt = model.SDT });
             }
@@ -246,7 +248,6 @@ namespace Cuahangchamsocthucung.Web.Controllers
                 return View("Register", model);
             }
         }
-
         [HttpGet]
         public async Task<ActionResult> ConfirmOtp(string sdt = null)
         {
@@ -264,6 +265,7 @@ namespace Cuahangchamsocthucung.Web.Controllers
                     {
                         using var doc = JsonDocument.Parse(pendingJson);
                         var root = doc.RootElement;
+
                         if (root.TryGetProperty("LastSentAt", out var lastSentAtProp) &&
                             DateTime.TryParse(lastSentAtProp.GetString(), out var lastSentAt))
                         {

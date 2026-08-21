@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.HoaDon.Dto
 {
@@ -17,5 +14,9 @@ namespace Cuahangchamsocthucung.HoaDon.Dto
         public decimal TongTien { get; set; }
         public string TrangThai { get; set; }
         public List<HoaDonChiTietDto> ChiTietHoaDons { get; set; }
+        public XemChiTietHoaDonDto()
+        {
+            ChiTietHoaDons = new List<HoaDonChiTietDto>();
+        }
     }
 }

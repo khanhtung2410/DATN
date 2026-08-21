@@ -1,128 +1,79 @@
 ﻿@using Cuahangchamsocthucung.ThuCung.Dto
-
 @{
     Layout = null;
 }
 
-<div class="modal fade"
-     id="ThuCungEditModal"
-     tabindex="-1"
-     aria-labelledby="ThuCungEditModalLabel"
-     aria-hidden="true"
-     data-backdrop="static">
-
+<div class="modal fade" id="ThuCungEditModal" tabindex="-1" aria-labelledby="ThuCungEditModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-
         <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="ThuCungEditModalLabel">Sửa thông tin thú cưng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
 
-            @await Html.PartialAsync(
-            "~/Views/Shared/Modals/_ModalHeader.cshtml",
-                        new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel("Sửa thú cưng")
-                        )
-
-            <form id="thucung-edit-form"
-                  name="ThuCungEditForm"
-                  role="form"
-                  class="form-horizontal">
-
-                <input type="hidden"
-                       id="thucung-id"
-                       name="Id" />
+            <form id="thucung-edit-form" name="ThuCungEditForm" role="form">
+                <input type="hidden" id="edit-thucung-id" />
 
                 <div class="modal-body">
-
-                    <div class="mb-3 row">
-
-                        <label class="col-md-3 col-form-label">
-                            Tên thú cưng
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Tên thú cưng <span class="text-danger">*</span>
                         </label>
-
-                        <div class="col-md-9">
-
-                            <input type="text"
-                                   id="thucung-edit-ten"
-                                   name="TenThuCung"
-                                   class="form-control"
-                                   required />
-
-                        </div>
-
+                        <input type="text"
+                               id="edit-thucung-ten"
+                               class="form-control"
+                               placeholder="Nhập tên thú cưng">
                     </div>
 
-
-                    <div class="mb-3 row">
-
-                        <label class="col-md-3 col-form-label">
-                            Loại thú cưng
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Loại thú cưng <span class="text-danger">*</span>
                         </label>
 
-                        <div class="col-md-9">
-
-                            <select id="thucung-edit-loai"
-                                    name="LoaiThuCung"
-                                    class="form-control"
-                                    required>
-
-                                <option value="Chó">
-                                    🐶 Chó
-                                </option>
-
-                                <option value="Mèo">
-                                    🐱 Mèo
-                                </option>
-
-                            </select>
-
-                        </div>
-
+                        <select id="edit-thucung-loai" class="form-select">
+                            <option value="">-- Chọn loại --</option>
+                            <option value="Chó">🐶 Chó</option>
+                            <option value="Mèo">🐱 Mèo</option>
+                        </select>
                     </div>
 
-
-                    <div class="mb-3 row">
-
-                        <label class="col-md-3 col-form-label">
-                            Ghi chú
-                        </label>
-
-                        <div class="col-md-9">
-
-                            <textarea id="thucung-edit-ghichu"
-                                      name="GhiChu"
-                                      class="form-control"
-                                      rows="3"></textarea>
-
-                        </div>
-
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ghi chú</label>
+                        <textarea id="edit-thucung-ghichu"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Nhập ghi chú nếu có"></textarea>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ảnh thú cưng</label>
 
-                    <div class="mb-3 row">
+                        <input type="file"
+                               id="edit-thucung-image"
+                               class="form-control"
+                               accept=".png,.jpg,.jpeg,image/png,image/jpeg">
 
-                        <label class="col-md-3 col-form-label">
-                            Ảnh thú cưng
-                        </label>
-
-                        <div class="col-md-9">
-
-                            <input type="text"
-                                   id="thucung-edit-image"
-                                   name="ImageUrl"
-                                   class="form-control" />
-
-                        </div>
-
+                        <small class="text-muted">
+                            Chọn ảnh mới nếu muốn thay ảnh hiện tại.
+                        </small>
                     </div>
 
+                    <div id="edit-thucung-image-preview" class="mt-3"></div>
                 </div>
 
-                @await Html.PartialAsync(
-                                "~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml"
-                                )
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">
+                        Hủy
+                    </button>
 
+                    <button type="submit"
+                            class="btn btn-warning rounded-pill px-4">
+                        Lưu thay đổi
+                    </button>
+                </div>
             </form>
-
         </div>
-
     </div>
-
 </div>

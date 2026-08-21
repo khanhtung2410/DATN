@@ -1615,6 +1615,10 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<long?>("LastModifierUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("LoaiPhong")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<bool>("Loailong")
                         .HasColumnType("bit");
 
@@ -1623,11 +1627,45 @@ namespace Cuahangchamsocthucung.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("ThoiGianPhut")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DichVuId");
 
                     b.ToTable("BangGias");
+                });
+
+            modelBuilder.Entity("Cuahangchamsocthucung.Entities.CauHinhVip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DenNgay")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PhanTramGiam")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TuNgay")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VipId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VipId");
+
+                    b.ToTable("CauHinhVips");
                 });
 
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.DichVu", b =>
@@ -1697,13 +1735,25 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<long?>("LastModifierUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<int>("LichChamSocId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("NgayLap")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("NhanVienId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("PhanTramGiam")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TienGiam")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("TongTien")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TongTienTruocGiam")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("TrangThai")
@@ -1712,6 +1762,8 @@ namespace Cuahangchamsocthucung.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("KhachHangId");
+
+                    b.HasIndex("LichChamSocId");
 
                     b.HasIndex("NhanVienId");
 
@@ -1773,12 +1825,17 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("VipId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SDT")
                         .IsUnique();
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("VipId");
 
                     b.ToTable("KhachHangs");
                 });
@@ -1977,6 +2034,30 @@ namespace Cuahangchamsocthucung.Migrations
                     b.HasIndex("KhachHangId");
 
                     b.ToTable("ThuCungs");
+                });
+
+            modelBuilder.Entity("Cuahangchamsocthucung.Entities.Vip", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CapVip")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TenVip")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Vips");
                 });
 
             modelBuilder.Entity("Cuahangchamsocthucung.MultiTenancy.Tenant", b =>
@@ -2272,21 +2353,40 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Navigation("DichVu");
                 });
 
+            modelBuilder.Entity("Cuahangchamsocthucung.Entities.CauHinhVip", b =>
+                {
+                    b.HasOne("Cuahangchamsocthucung.Entities.Vip", "Vip")
+                        .WithMany("CauHinhVips")
+                        .HasForeignKey("VipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Vip");
+                });
+
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.HoaDon", b =>
                 {
                     b.HasOne("Cuahangchamsocthucung.Entities.KhachHang", "KhachHang")
                         .WithMany()
                         .HasForeignKey("KhachHangId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Cuahangchamsocthucung.Entities.LichChamSoc", "LichChamSoc")
+                        .WithMany()
+                        .HasForeignKey("LichChamSocId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Cuahangchamsocthucung.Entities.NhanVien", "NhanVien")
                         .WithMany()
                         .HasForeignKey("NhanVienId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("KhachHang");
+
+                    b.Navigation("LichChamSoc");
 
                     b.Navigation("NhanVien");
                 });
@@ -2296,7 +2396,7 @@ namespace Cuahangchamsocthucung.Migrations
                     b.HasOne("Cuahangchamsocthucung.Entities.DichVu", "DichVu")
                         .WithMany()
                         .HasForeignKey("DichVuId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Cuahangchamsocthucung.Entities.HoaDon", "HoaDon")
@@ -2318,7 +2418,14 @@ namespace Cuahangchamsocthucung.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Cuahangchamsocthucung.Entities.Vip", "Vip")
+                        .WithMany("KhachHangs")
+                        .HasForeignKey("VipId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("User");
+
+                    b.Navigation("Vip");
                 });
 
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.LichChamSoc", b =>
@@ -2479,6 +2586,13 @@ namespace Cuahangchamsocthucung.Migrations
             modelBuilder.Entity("Cuahangchamsocthucung.Entities.HoaDon", b =>
                 {
                     b.Navigation("ChiTietHoaDons");
+                });
+
+            modelBuilder.Entity("Cuahangchamsocthucung.Entities.Vip", b =>
+                {
+                    b.Navigation("CauHinhVips");
+
+                    b.Navigation("KhachHangs");
                 });
 #pragma warning restore 612, 618
         }

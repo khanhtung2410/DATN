@@ -1,8 +1,11 @@
 ﻿@using Cuahangchamsocthucung.Sessions.Dto
+@using Abp.Web.Security.AntiForgery
 @inject Cuahangchamsocthucung.Sessions.ISessionAppService SessionAppService
+@inject IAbpAntiForgeryManager AbpAntiForgeryManager
 
 @{
     Layout = null;
+    AbpAntiForgeryManager.SetCookie(Context);
 
     GetCurrentLoginInformationsOutput loginInfo = null;
     string fullName = null;
@@ -37,118 +40,227 @@
 
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Cửa Hàng Chăm Sóc Thú Cưng</title>
 
     <!-- FAVICON -->
-    <link rel="icon" type="image/png" href="~/img/logo.png" asp-append-version="true" />
+    <link rel="icon"
+          type="image/png"
+          href="~/img/logo.png"
+          asp-append-version="true" />
 
     <!-- BOOTSTRAP -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 
-    <!-- SWEETALERT2 (Đảm bảo abp.message hiển thị đẹp và không bị lỗi) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <!-- SWEETALERT2 -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
 
-    <!-- CSS LANDING -->
-    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    <!-- LANDING CSS -->
+    <link rel="stylesheet"
+          href="~/css/landing.css"
+          asp-append-version="true" />
 
     @RenderSection("Styles", required: false)
 </head>
 
 <body>
 
+    <!-- ============================= -->
     <!-- HEADER -->
+    <!-- ============================= -->
+
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+
         <div class="container">
+
+            <!-- LOGO -->
             <a class="navbar-brand fw-bold d-flex align-items-center"
                asp-controller="Landing"
                asp-action="Index">
+
                 <img src="~/img/logo.png"
                      asp-append-version="true"
                      alt="Logo"
                      class="rounded-circle me-2"
-                     style="width:45px; height:45px; object-fit:cover;" />
-                <span>Cửa Hàng Chăm Sóc Thú Cưng</span>
+                     style="width:45px;height:45px;object-fit:cover;" />
+
+                <span>
+                    Cửa Hàng Chăm Sóc Thú Cưng
+                </span>
+
             </a>
 
+            <!-- MENU -->
             <div class="d-flex align-items-center ms-auto">
+
+                <!-- TRANG CHỦ -->
                 <a class="btn btn-outline-secondary rounded-pill px-4 me-2"
                    asp-controller="Landing"
-                   asp-action="Index">Trang chủ</a>
+                   asp-action="Index">
+                    Trang chủ
+                </a>
 
+                <!-- KHÁCH SẠN -->
                 <a class="btn btn-outline-secondary rounded-pill px-4 me-2"
                    asp-controller="Landing"
-                   asp-action="KhachSan">Khách sạn</a>
+                   asp-action="KhachSan">
+                    Khách sạn
+                </a>
 
+                <!-- TẮM SPA -->
                 <a class="btn btn-outline-secondary rounded-pill px-4 me-2"
                    asp-controller="Landing"
-                   asp-action="TamSpa">Tắm Spa</a>
+                   asp-action="TamSpa">
+                    Tắm Spa
+                </a>
 
+                <!-- CẮT TỈA -->
                 <a class="btn btn-outline-secondary rounded-pill px-4 me-3"
                    asp-controller="Landing"
-                   asp-action="CatTiaLong">Cắt tỉa lông</a>
+                   asp-action="CatTiaLong">
+                    Cắt tỉa lông
+                </a>
 
                 @if (User.Identity?.IsAuthenticated == true)
                 {
+                    <!-- ============================= -->
+                    <!-- TÀI KHOẢN -->
+                    <!-- ============================= -->
+
                     <div class="dropdown">
+
                         <button class="btn btn-light border rounded-pill px-4 dropdown-toggle"
                                 type="button"
                                 id="userDropdown"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false">
-                            👤 Xin chào, <strong>@(fullName ?? "Người dùng")</strong>
+
+                            👤 Xin chào,
+                            <strong>
+                                @(fullName ?? "Người dùng")
+                            </strong>
+
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                        <ul class="dropdown-menu dropdown-menu-end shadow"
+                            aria-labelledby="userDropdown">
+
+                            <!-- QUẢN LÝ THÚ CƯNG -->
                             <li>
-                                <a class="dropdown-item" asp-controller="Landing" asp-action="ThuCung">
+                                <a class="dropdown-item"
+                                   asp-controller="Landing"
+                                   asp-action="ThuCung">
+
                                     🐾 Quản lý thú cưng
+
                                 </a>
                             </li>
-                            <li><hr class="dropdown-divider" /></li>
+
+                            <!-- LỊCH CHĂM SÓC -->
                             <li>
-                                <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
-                                    🚪 Đăng xuất
+                                <a class="dropdown-item"
+                                   asp-controller="Landing"
+                                   asp-action="LichChamSoc">
+
+                                    🗓️ Lịch chăm sóc
+
                                 </a>
                             </li>
+
+                            <li>
+                                <hr class="dropdown-divider" />
+                            </li>
+
+                            <!-- ĐĂNG XUẤT -->
+                            <li>
+                                <a class="dropdown-item text-danger"
+                                   asp-controller="Account"
+                                   asp-action="Logout">
+
+                                    🚪 Đăng xuất
+
+                                </a>
+                            </li>
+
                         </ul>
+
                     </div>
                 }
                 else
                 {
-                    <a class="btn btn-warning rounded-pill px-4" asp-controller="Account" asp-action="Login">
+                    <!-- ĐĂNG NHẬP -->
+                    <a class="btn btn-warning rounded-pill px-4"
+                       asp-controller="Account"
+                       asp-action="Login">
+
                         Đăng nhập
+
                     </a>
                 }
+
             </div>
+
         </div>
+
     </nav>
 
-    <!-- NỘI DUNG -->
+
+    <!-- ============================= -->
+    <!-- CONTENT -->
+    <!-- ============================= -->
+
     <main>
         @RenderBody()
     </main>
 
+
+    <!-- ============================= -->
     <!-- FOOTER -->
+    <!-- ============================= -->
+
     <footer class="mt-5 bg-dark text-white">
+
         <div class="container py-4">
+
             <div class="row">
+
                 <div class="col-md-6">
-                    <h5>🐾 Cửa Hàng Chăm Sóc Thú Cưng</h5>
-                    <p class="mb-0">Dịch vụ chăm sóc, làm đẹp và lưu trú cho thú cưng.</p>
+
+                    <h5>
+                        🐾 Cửa Hàng Chăm Sóc Thú Cưng
+                    </h5>
+
+                    <p class="mb-0">
+                        Dịch vụ chăm sóc, làm đẹp và lưu trú cho thú cưng.
+                    </p>
+
                 </div>
+
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">© @DateTime.Now.Year Cửa Hàng Chăm Sóc Thú Cưng</p>
+
+                    <p class="mb-0">
+                        © @DateTime.Now.Year
+                        Cửa Hàng Chăm Sóc Thú Cưng
+                    </p>
+
                 </div>
+
             </div>
+
         </div>
+
     </footer>
 
-    <!-- ================================================================= -->
+
+    <!-- ============================= -->
     <!-- JQUERY -->
+    <!-- ============================= -->
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <!-- BOOTSTRAP -->
@@ -163,11 +275,11 @@
     <!-- ABP JQUERY -->
     <script src="~/libs/abp-web-resources/Abp/Framework/scripts/libs/abp.jquery.js"></script>
 
-    <!-- ABP SCRIPTS CỦA PROJECT -->
+    <!-- ABP PROJECT SCRIPTS -->
     <script src="~/AbpScripts/GetScripts"></script>
     <script src="~/AbpServiceProxies/GetAll"></script>
 
     @RenderSection("Scripts", required: false)
-</body>
 
+</body>
 </html>

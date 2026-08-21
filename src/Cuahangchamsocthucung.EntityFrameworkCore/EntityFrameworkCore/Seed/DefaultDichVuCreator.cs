@@ -18,30 +18,30 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
             CreateDichVu();
         }
 
-
         private void CreateDichVu()
         {
             if (_context.DichVus.Any())
-            {
                 return;
-            }
 
             var dichVus = new List<DichVu>
             {
                 new DichVu
                 {
                     TenDichVu = "Trông giữ thú cưng",
-                    MoTa = "Dịch vụ khách sạn lưu trú cho chó mèo"
+                    MoTa = "Dịch vụ khách sạn lưu trú cho chó mèo",
+                    TrangThai = true
                 },
                 new DichVu
                 {
                     TenDichVu = "Tắm Spa",
-                    MoTa = "Tắm vệ sinh, chăm sóc lông"
+                    MoTa = "Tắm vệ sinh, chăm sóc lông",
+                    TrangThai = true
                 },
                 new DichVu
                 {
                     TenDichVu = "Cắt tỉa lông",
-                    MoTa = "Cắt tỉa tạo kiểu cho thú cưng"
+                    MoTa = "Cắt tỉa tạo kiểu cho thú cưng",
+                    TrangThai = true
                 }
             };
 

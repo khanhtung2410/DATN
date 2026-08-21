@@ -142,4 +142,20 @@ public class NhanvienAppService :
          await _nhanVienRepository.UpdateAsync(nhanVien);
         await CurrentUnitOfWork.SaveChangesAsync();
     }
+    public async Task<List<NhanVienDto>> GetNhanVienDangLamViec()
+    {
+        return await _nhanVienRepository.GetAll()
+            .Where(x => x.Trangthai)
+            .Select(x => new NhanVienDto
+            {
+                Id = x.Id,
+                Hoten = x.Hoten,
+                Gioitinh = x.Gioitinh,
+                Ngaysinh = x.Ngaysinh,
+                Ngayvaolam = x.Ngayvaolam,
+                SDT = x.SDT,
+                Trangthai = x.Trangthai
+            })
+            .ToListAsync();
+    }
 }

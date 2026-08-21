@@ -23,9 +23,5 @@ namespace Cuahangchamsocthucung.ThuCung.Dto
         [StringLength(500)]
         public string GhiChu { get; set; }
 
-        public bool TrangThai { get; set; }
-
-        [StringLength(400)]
-        public string ImageUrl { get; set; }
     }
 }

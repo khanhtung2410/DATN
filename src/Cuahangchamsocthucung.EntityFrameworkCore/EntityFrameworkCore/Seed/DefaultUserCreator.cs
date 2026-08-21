@@ -26,48 +26,58 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
         {
             using (_unitOfWorkManager.Current.SetTenantId(1))
             {
-                CreateUser();
+                CreateUsers();
             }
         }
 
-        private void CreateUser()
+        private void CreateUsers()
         {
-            var existingUser = _context.Users
-                .IgnoreQueryFilters()
-                .FirstOrDefault(x =>
-                    x.UserName == "0912345678" &&
-                    x.TenantId == 1);
-
-            if (existingUser != null)
+            var users = new[]
             {
-                return;
-            }
-
-            var user = new User
-            {
-                TenantId = 1,
-                UserName = "0912345678",
-                Name = "Nguyễn",
-                Surname = "Văn Toàn",
-                EmailAddress = "khachhang@gmail.com",
-                IsActive = true,
-                IsEmailConfirmed = true
+                new { UserName = "0912345678", Name = "Nguyễn", Surname = "Văn Toàn", Email = "khachhang01@gmail.com" },
+                new { UserName = "0912345679", Name = "Trần", Surname = "Thị Lan", Email = "khachhang02@gmail.com" },
+                new { UserName = "0912345680", Name = "Lê", Surname = "Hoàng Nam", Email = "khachhang03@gmail.com" },
+                new { UserName = "0912345681", Name = "Phạm", Surname = "Minh Anh", Email = "khachhang04@gmail.com" },
+                new { UserName = "0912345682", Name = "Vũ", Surname = "Đức Minh", Email = "khachhang05@gmail.com" },
+                new { UserName = "0912345683", Name = "Đặng", Surname = "Thu Hà", Email = "khachhang06@gmail.com" },
+                new { UserName = "0912345684", Name = "Bùi", Surname = "Quang Huy", Email = "khachhang07@gmail.com" },
+                new { UserName = "0912345685", Name = "Đỗ", Surname = "Ngọc Mai", Email = "khachhang08@gmail.com" },
+                new { UserName = "0912345686", Name = "Hồ", Surname = "Gia Bảo", Email = "khachhang09@gmail.com" },
+                new { UserName = "0912345687", Name = "Ngô", Surname = "Phương Thảo", Email = "khachhang10@gmail.com" },
+                new { UserName = "0912345688", Name = "Dương", Surname = "Tuấn Anh", Email = "khachhang11@gmail.com" },
+                new { UserName = "0912345689", Name = "Mai", Surname = "Khánh Linh", Email = "khachhang12@gmail.com" },
+                new { UserName = "0912345690", Name = "Phan", Surname = "Hữu Phước", Email = "khachhang13@gmail.com" },
+                new { UserName = "0912345691", Name = "Tạ", Surname = "Thanh Tâm", Email = "khachhang14@gmail.com" },
+                new { UserName = "0912345692", Name = "Cao", Surname = "Minh Khang", Email = "khachhang15@gmail.com" }
             };
 
-            var result = _userManager
-                .CreateAsync(user, "Abc@123456")
-                .GetAwaiter()
-                .GetResult();
-
-            if (!result.Succeeded)
+            foreach (var item in users)
             {
-                var errors = string.Join(
-                    ", ",
-                    result.Errors.Select(x => x.Description)
-                );
+                var existingUser = _context.Users
+                    .IgnoreQueryFilters()
+                    .FirstOrDefault(x => x.UserName == item.UserName && x.TenantId == 1);
 
-                throw new Exception(
-                    "Không thể tạo User khách hàng: " + errors);
+                if (existingUser != null)
+                    continue;
+
+                var user = new User
+                {
+                    TenantId = 1,
+                    UserName = item.UserName,
+                    Name = item.Name,
+                    Surname = item.Surname,
+                    EmailAddress = item.Email,
+                    IsActive = true,
+                    IsEmailConfirmed = true
+                };
+
+                var result = _userManager.CreateAsync(user, "Abc@123456").GetAwaiter().GetResult();
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                    throw new Exception("Không thể tạo User " + item.UserName + ": " + errors);
+                }
             }
         }
     }

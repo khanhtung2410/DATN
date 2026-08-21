@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.Web.Controllers
 {
-    
     [Authorize(Roles = StaticRoleNames.Tenants.Admin)]
-
     public class NhanVienController : CuahangchamsocthucungControllerBase
     {
         private readonly INhanvienAppService _nhanVienAppService;
@@ -28,6 +26,12 @@ namespace Cuahangchamsocthucung.Web.Controllers
                 NhanViens = nhanViens
             };
             return View(model);
+        }
+
+        public async Task<IActionResult> EditModal(int id)
+        {
+            var nhanVien = await _nhanVienAppService.GetNhanVien(id);
+            return PartialView("~/Views/NhanVien/_EditModal.cshtml", nhanVien);
         }
     }
 }

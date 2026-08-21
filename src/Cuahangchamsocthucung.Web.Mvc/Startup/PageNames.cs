@@ -15,5 +15,6 @@
         public const string LichChamSoc = "LichChamSoc";
         public const string NhanVien = "NhanVien";
         public const string MatHang = "MatHang";
+        public const string Vip = "Vip";
     }
 }

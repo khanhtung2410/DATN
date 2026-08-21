@@ -11,8 +11,9 @@ namespace Cuahangchamsocthucung.LichChamSoc.Dto
     {
         public int Id { get; set; }
         public int DichVuId { get; set; }
-        public int? NhanVienId { get; set; }
+        public int BangGiaId { get; set; }
         public int KhachHangId { get; set; }
+        public int? NhanVienId { get; set; }
         public DateTime ThoiGian { get; set; }
         public TrangThaiLichChamSoc TrangThai { get; set; }
     }

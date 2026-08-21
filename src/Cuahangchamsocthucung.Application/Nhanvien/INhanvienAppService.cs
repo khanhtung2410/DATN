@@ -16,4 +16,5 @@ public interface INhanvienAppService : IApplicationService
     Task Update(SuaNhanVienDto input);
 
     Task ChangeTrangThai(SuaTrangThaiNhanVienDto input);
+    Task<List<NhanVienDto>> GetNhanVienDangLamViec();
 }

@@ -14,17 +14,11 @@ namespace Cuahangchamsocthucung.Entities
     public class LichChamSoc : FullAuditedEntity<int>
     {
         public int ThuCungId { get; set; }
-
         public int DichVuId { get; set; }
-
         public int BangGiaId { get; set; }
-
         public int? NhanVienId { get; set; }
-
         public int KhachHangId { get; set; }
-
         public DateTime ThoiGian { get; set; }
-
         public TrangThaiLichChamSoc TrangThai { get; set; }
 
         // =========================

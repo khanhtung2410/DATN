@@ -76,6 +76,7 @@
                                                                             <th>Đối tượng</th>
                                                                             <th class="text-center">Lông dài</th>
                                                                             <th class="text-center">Cân nặng / Ghi chú</th>
+                                                                            <th class="text-center">Thời gian</th>
                                                                             <th class="text-right">Giá</th>
                                                                             <th class="text-center">Hành động</th>
                                                                         </tr>
@@ -91,9 +92,26 @@
                                                                                     <td>@bg.Loaithucung</td>
                                                                                     <td class="text-center">@(isTrongGiu ? "-" : (bg.Loailong ? "Có" : "Không"))</td>
                                                                                     <td class="text-center">@(isTrongGiu ? $"≤ {bg.Cannangden} kg" : $"{bg.Cannangtu} - {bg.Cannangden} kg")</td>
+                                                                                    <td class="text-center">
+                                                                                        @bg.ThoiGianPhut phút
+                                                                                    </td>
                                                                                     <td class="text-right">@string.Format("{0:N0}", bg.Giadv) ₫</td>
                                                                                     <td class="text-center">
-                                                                                        <button class="btn btn-sm btn-secondary edit-banggia" data-id="@bg.Id" data-dichvu="@item.Id" data-dichvuname="@item.Tendichvu" data-trangthai="@item.Trangthai" data-loaithucung="@bg.Loaithucung" data-loailong="@bg.Loailong" data-cannangtu="@bg.Cannangtu" data-cannangden="@bg.Cannangden" data-giadv="@bg.Giadv" data-toggle="modal" data-target="#BangGiaEditModal">Sửa</button>
+                                                                                        <button class="btn btn-sm btn-secondary edit-banggia"
+                                                                                                data-id="@bg.Id"
+                                                                                                data-dichvu="@item.Id"
+                                                                                                data-dichvuname="@item.Tendichvu"
+                                                                                                data-trangthai="@item.Trangthai"
+                                                                                                data-loaithucung="@bg.Loaithucung"
+                                                                                                data-loailong="@bg.Loailong"
+                                                                                                data-cannangtu="@bg.Cannangtu"
+                                                                                                data-cannangden="@bg.Cannangden"
+                                                                                                data-giadv="@bg.Giadv"
+                                                                                                data-thoigianphut="@bg.ThoiGianPhut"
+                                                                                                data-toggle="modal"
+                                                                                                data-target="#BangGiaEditModal">
+                                                                                            Sửa
+                                                                                        </button>
                                                                                     </td>
                                                                                 </tr>
                                                                             }

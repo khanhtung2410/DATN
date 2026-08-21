@@ -11,6 +11,9 @@ using System.Threading.Tasks;
         Task<int> Create(ThemLichChamSocDto input);
         Task Update(SuaLichChamSocDto input);
         Task ChangeStatus(SuaTrangThaiLichChamSocDto input);
-    Task<List<LichChamSocDto>> GetLichChamSocCuaToi();
-    Task<List<LichChamSocDto>> GetLichSuLichChamSocCuaToi();
+        Task<List<LichChamSocDto>> GetLichChamSocCuaToi();
+        Task<List<LichChamSocDto>> GetLichSuLichChamSocCuaToi();
+        Task PhanCongNhanVien(int lichChamSocId, int nhanVienId);
+        Task HuyLichChamSoc(int id);
+        Task TuChoiLichChamSoc(int id);
 }

@@ -1,0 +1,291 @@
+﻿@using Cuahangchamsocthucung.LichChamSoc.Dto
+@using Cuahangchamsocthucung.Enum
+
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Lịch chăm sóc";
+
+    var lichDangXuLy = ViewBag.LichDangXuLy as List<LichChamSocDto>
+        ?? new List<LichChamSocDto>();
+
+    var lichSu = ViewBag.LichSu as List<LichChamSocDto>
+        ?? new List<LichChamSocDto>();
+
+    var thuCungs = lichSu
+       .Where(x => x.ThuCungId > 0 && !string.IsNullOrWhiteSpace(x.TenThuCung))
+       .GroupBy(x => x.ThuCungId)
+       .Select(x => new
+       {
+           Id = x.Key,
+           Ten = x.First().TenThuCung
+       })
+       .OrderBy(x => x.Ten)
+       .ToList();
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="text-warning fw-bold">LỊCH CHĂM SÓC</span>
+        <h1 class="fw-bold mt-2">Lịch chăm sóc thú cưng</h1>
+        <p class="text-muted">Theo dõi các lịch chăm sóc và lịch sử sử dụng dịch vụ của bạn.</p>
+    </div>
+
+    <!-- LỊCH ĐANG XỬ LÝ -->
+    <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h4 class="fw-bold mb-1">🗓️ Lịch đang xử lý</h4>
+            <p class="text-muted mb-0">Các lịch chưa hoàn thành</p>
+        </div>
+        <div class="card-body px-4 pb-4">
+            @if (lichDangXuLy.Any(x =>
+                        x.TrangThai == TrangThaiLichChamSoc.ChoXacNhan ||
+                        x.TrangThai == TrangThaiLichChamSoc.DaXacNhan ||
+                        x.TrangThai == TrangThaiLichChamSoc.DangDienRa))
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Thú cưng</th>
+                                <th>Dịch vụ</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in lichDangXuLy
+                                                    .Where(x =>
+                                                    x.TrangThai == TrangThaiLichChamSoc.ChoXacNhan ||
+                                                    x.TrangThai == TrangThaiLichChamSoc.DaXacNhan ||
+                                                    x.TrangThai == TrangThaiLichChamSoc.DangDienRa)
+                                                    .OrderBy(x => x.ThoiGian))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.ThoiGian.ToString("dd/MM/yyyy")</strong>
+                                        <br />
+                                        <small class="text-muted">@item.ThoiGian.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <strong>@(string.IsNullOrWhiteSpace(item.TenThuCung) ? "Chưa xác định" : item.TenThuCung)</strong>
+                                    </td>
+                                    <td>@item.TenDichVu</td>
+                                    <td>
+                                        @if (item.TrangThai == TrangThaiLichChamSoc.ChoXacNhan)
+                                        {
+                                            <span class="badge bg-warning text-dark px-3 py-2">Chờ xác nhận</span>
+                                        }
+                                        else if (item.TrangThai == TrangThaiLichChamSoc.DaXacNhan)
+                                        {
+                                            <span class="badge bg-success px-3 py-2">Đã xác nhận</span>
+                                        }
+                                        else if (item.TrangThai == TrangThaiLichChamSoc.DangDienRa)
+                                        {
+                                            <span class="badge bg-primary px-3 py-2">Đang diễn ra</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.TrangThai == TrangThaiLichChamSoc.ChoXacNhan ||
+                                                                        item.TrangThai == TrangThaiLichChamSoc.DaXacNhan)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger btn-huy-lich"
+                                                    data-id="@item.Id">
+                                                <i class="fa fa-times"></i>
+                                                Hủy lịch
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Không thể hủy</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="font-size:50px;">🐾</div>
+                    <h5 class="fw-bold mt-3">Chưa có lịch chăm sóc</h5>
+                    <p class="text-muted">Bạn chưa có lịch chăm sóc nào đang xử lý.</p>
+                    <a asp-controller="Landing"
+                       asp-action="Index"
+                       class="btn btn-warning rounded-pill px-4">
+                        Đặt lịch ngay
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- LỊCH SỬ -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h4 class="fw-bold mb-1">📋 Lịch sử chăm sóc</h4>
+            <p class="text-muted mb-3">Các lịch đã hoàn thành hoặc kết thúc</p>
+
+            @if (lichSu.Any())
+            {
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Thú cưng</label>
+                        <select id="filterThuCung" class="form-select">
+                            <option value="">Tất cả thú cưng</option>
+                            @foreach (var thuCung in thuCungs)
+                            {
+                                <option value="@thuCung.Id">@thuCung.Ten</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Trạng thái</label>
+                        <select id="filterTrangThai" class="form-select">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="HoanThanh">Hoàn thành</option>
+                            <option value="BiTuChoi">Bị từ chối</option>
+                            <option value="DaHuy">Đã hủy</option>
+                        </select>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card-body px-4 pb-4">
+            @if (lichSu.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle" id="lichSuTable">
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Thú cưng</th>
+                                <th>Dịch vụ</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in lichSu.OrderByDescending(x => x.ThoiGian))
+                            {
+                                var trangThai = item.TrangThai.ToString();
+
+                                <tr class="lich-su-row"
+                                    data-thu-cung="@item.ThuCungId"
+                                    data-trang-thai="@trangThai">
+                                    <td>
+                                        <strong>@item.ThoiGian.ToString("dd/MM/yyyy")</strong>
+                                        <br />
+                                        <small class="text-muted">@item.ThoiGian.ToString("HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <strong>@(string.IsNullOrWhiteSpace(item.TenThuCung) ? "Chưa xác định" : item.TenThuCung)</strong>
+                                    </td>
+                                    <td>@item.TenDichVu</td>
+                                    <td>
+                                        @if (item.TrangThai == TrangThaiLichChamSoc.HoanThanh)
+                                        {
+                                            <span class="badge bg-success px-3 py-2">Hoàn thành</span>
+                                        }
+                                        else if (item.TrangThai == TrangThaiLichChamSoc.BiTuChoi)
+                                        {
+                                            <span class="badge bg-danger px-3 py-2">Bị từ chối</span>
+                                        }
+                                        else if (item.TrangThai == TrangThaiLichChamSoc.DaHuy)
+                                        {
+                                            <span class="badge bg-secondary px-3 py-2">Đã hủy</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noFilterResult" class="text-center py-4 d-none">
+                    <div style="font-size:40px;">🔍</div>
+                    <p class="text-muted mb-0">Không tìm thấy lịch phù hợp.</p>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div style="font-size:50px;">📋</div>
+                    <h5 class="fw-bold mt-3">Chưa có lịch sử</h5>
+                    <p class="text-muted mb-0">Bạn chưa có lịch chăm sóc đã hoàn thành hoặc kết thúc.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function locLichSu() {
+                var thuCungId = $('#filterThuCung').val();
+                var trangThai = $('#filterTrangThai').val();
+                var visible = 0;
+
+                $('.lich-su-row').each(function () {
+                    var row = $(this);
+                    var rowThuCung = String(row.data('thu-cung'));
+                    var rowTrangThai = String(row.data('trang-thai'));
+
+                    var dungThuCung = !thuCungId || rowThuCung === thuCungId;
+                    var dungTrangThai = !trangThai || rowTrangThai === trangThai;
+
+                    if (dungThuCung && dungTrangThai) {
+                        row.show();
+                        visible++;
+                    } else {
+                        row.hide();
+                    }
+                });
+
+                if (visible === 0) {
+                    $('#noFilterResult').removeClass('d-none');
+                } else {
+                    $('#noFilterResult').addClass('d-none');
+                }
+            }
+
+            $('#filterThuCung, #filterTrangThai').on('change', locLichSu);
+
+            $(document).on('click', '.btn-huy-lich', function () {
+                var button = $(this);
+                var id = parseInt(button.data('id'), 10);
+
+                if (!id) {
+                    abp.message.error('Không xác định được lịch chăm sóc.');
+                    return;
+                }
+
+                button.prop('disabled', true);
+
+                abp.services.app.lichChamSoc.huyLichChamSoc(id)
+                    .done(function () {
+                        location.reload();
+                    })
+                    .fail(function (error) {
+                        var message = 'Không thể hủy lịch chăm sóc.';
+
+                        if (error &&
+                            error.responseJSON &&
+                            error.responseJSON.error) {
+                            message = error.responseJSON.error.message ||
+                                      error.responseJSON.error.details ||
+                                      message;
+                        }
+
+                        abp.message.error(message);
+                        button.prop('disabled', false);
+                    });
+            });
+        });
+    </script>
+}

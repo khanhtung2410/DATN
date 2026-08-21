@@ -37,7 +37,7 @@ namespace Cuahangchamsocthucung.Web.Startup
             services.AddControllersWithViews(
                     options =>
                     {
-                        options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+                        //options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
                         options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
                     }
                 );

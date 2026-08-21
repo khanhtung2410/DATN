@@ -11,11 +11,13 @@ namespace Cuahangchamsocthucung.Web.Controllers
     {
         private readonly LandingAppService _landingAppService;
         private readonly IThuCungAppService _thuCungAppService;
+        private readonly ILichChamSocAppService _lichChamSocAppService;
         public LandingController(
-            LandingAppService landingAppService, IThuCungAppService thuCungAppService)
+            LandingAppService landingAppService, IThuCungAppService thuCungAppService, ILichChamSocAppService lichChamSocAppService)
         {
             _landingAppService = landingAppService;
             _thuCungAppService = thuCungAppService;
+            _lichChamSocAppService = lichChamSocAppService;
         }
 
         [AllowAnonymous]
@@ -61,6 +63,17 @@ namespace Cuahangchamsocthucung.Web.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            return View();
+        }
+        [Authorize]
+        public async Task<IActionResult> LichChamSoc()
+        {
+            var lichDangXuLy = await _lichChamSocAppService.GetLichChamSocCuaToi();
+            var lichSu = await _lichChamSocAppService.GetLichSuLichChamSocCuaToi();
+
+            ViewBag.LichDangXuLy = lichDangXuLy;
+            ViewBag.LichSu = lichSu;
+
             return View();
         }
     }

@@ -1,0 +1,51 @@
+﻿@using Cuahangchamsocthucung.ThuCung.Dto
+@{
+    Layout = null;
+}
+
+<div class="modal fade" id="ThuCungViewModal" tabindex="-1" aria-labelledby="ThuCungViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="ThuCungViewModalLabel">🐾 Thông tin thú cưng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div id="view-thucung-image"></div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tên thú cưng</label>
+                            <div id="view-thucung-ten" class="form-control bg-light">-</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Loại thú cưng</label>
+                            <div id="view-thucung-loai" class="form-control bg-light">-</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Trạng thái</label>
+                            <div>
+                                <span id="view-thucung-trangthai" class="badge">-</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Thông tin thú cưng</label>
+                            <div id="view-thucung-ghichu" class="form-control bg-light" style="min-height:100px;white-space:pre-wrap;">Chưa có ghi chú.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

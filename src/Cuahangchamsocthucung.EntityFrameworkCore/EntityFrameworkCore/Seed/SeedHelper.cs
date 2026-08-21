@@ -77,6 +77,8 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
 
             // Thú cưng
             new DefaultThuCungCreator(context).Create();
+            // Lịch chăm sóc
+            new DefaultLichChamSocCreator(context).Create();
         }
 
         private static void WithDbContext<TDbContext>(
