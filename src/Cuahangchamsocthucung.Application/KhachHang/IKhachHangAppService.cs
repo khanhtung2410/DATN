@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 public interface IKhachHangAppService : IApplicationService
 {
-     Task<List<KhachHangDto>> GetAllKhachHangAsync();
-     Task<KhachHangDto> GetKhachHangByIdAsync(int id);
+    Task<List<KhachHangDto>> GetAllKhachHangAsync();
+    Task<KhachHangDto> GetKhachHangByIdAsync(int id);
     Task<KhachHangDto> DangKy(DangKyDto input);
+    Task<KhachHangDto> GetThongTinCaNhanAsync();
 }

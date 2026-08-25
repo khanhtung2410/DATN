@@ -33,12 +33,11 @@
                             <table id="NhanVienTable" class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
-                                        <th></th>
                                         <th>Họ và tên</th>
                                         <th>Số điện thoại</th>
                                         <th>Ngày vào làm</th>
                                         <th>Trạng thái</th>
-                                        <th style="width: 180px">Hành động</th>
+                                        <th style="width:260px">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -47,7 +46,6 @@
                                         foreach (var item in Model.NhanViens)
                                         {
                                             <tr>
-                                                <td></td>
                                                 <td>@item.Hoten</td>
                                                 <td>@item.SDT</td>
                                                 <td>@item.Ngayvaolam.ToString("dd/MM/yyyy")</td>
@@ -63,9 +61,15 @@
                                                 </td>
                                                 <td>
                                                     <button type="button"
+                                                            class="btn btn-sm btn-info xem-nhanvien"
+                                                            data-id="@item.Id">
+                                                        <i class="fa fa-eye"></i> Xem
+                                                    </button>
+
+                                                    <button type="button"
                                                             class="btn btn-sm btn-secondary edit-nhanvien"
                                                             data-id="@item.Id">
-                                                        Sửa
+                                                        <i class="fa fa-edit"></i> Sửa
                                                     </button>
 
                                                     <button type="button"
@@ -90,15 +94,89 @@
 
 @await Html.PartialAsync("~/Views/NhanVien/_CreateModal.cshtml", Model)
 
-<div class="modal fade"
-     id="NhanVienEditModal"
-     tabindex="-1"
-     role="dialog"
-     aria-labelledby="NhanVienEditModalLabel"
-     data-backdrop="static">
+<div class="modal fade" id="NhanVienEditModal" tabindex="-1" role="dialog" aria-labelledby="NhanVienEditModalLabel" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content"></div>
+    </div>
+</div>
 
+<!-- MODAL CHI TIẾT NHÂN VIÊN -->
+<div class="modal fade" id="NhanVienDetailModal" tabindex="-1" role="dialog" aria-labelledby="NhanVienDetailModalLabel">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="NhanVienDetailModalLabel">
+                    <i class="fa fa-user"></i> Chi tiết nhân viên
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="NhanVienDetailLoading" class="text-center p-4">
+                    <i class="fa fa-spinner fa-spin"></i> Đang tải...
+                </div>
+
+                <div id="NhanVienDetailContent" style="display:none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Họ và tên</label>
+                                <input type="text" id="DetailHoten" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Số điện thoại</label>
+                                <input type="text" id="DetailSDT" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Giới tính</label>
+                                <input type="text" id="DetailGioitinh" class="form-control" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Ngày sinh</label>
+                                <input type="text" id="DetailNgaysinh" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Ngày vào làm</label>
+                                <input type="text" id="DetailNgayvaolam" class="form-control" readonly />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Lương tháng</label>
+                                <input type="text" id="DetailLuong" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <div id="DetailTrangthai" class="pt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    Đóng
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -106,204 +184,585 @@
 @section Scripts {
     <script>
         $(function () {
+
             var _nhanVienService = abp.services.app.nhanvien;
 
+            // Lương tối thiểu
+            var LUONG_TOI_THIEU = 3700000;
+
             // =========================
+            // FORMAT TIỀN
+            // =========================
+            function formatTien(value) {
+                var number = Number(value);
+
+                if (isNaN(number)) {
+                    number = 0;
+                }
+
+                return number.toLocaleString('vi-VN') + ' ₫';
+            }
+
+            // =========================
+            // LẤY LƯƠNG TỪ FORM
+            // =========================
+            function getLuong(form) {
+                var value = form.find('[name="Luong"]').val();
+
+                if (value === undefined || value === null || value === '') {
+                    return 0;
+                }
+
+                // Loại bỏ dấu chấm/phẩy nếu input có format tiền
+                value = String(value)
+                    .replace(/\./g, '')
+                    .replace(/,/g, '');
+
+                return Number(value);
+            }
+
+            // =========================
+            // VALIDATE LƯƠNG
+            // =========================
+                   function validateLuong(luong) {
+            if (isNaN(luong) || luong <= 0) {
+                abp.message.warn('Vui lòng nhập lương.');
+                return false;
+            }
+            if (luong < LUONG_TOI_THIEU) {
+                abp.message.warn('Lương không được thấp hơn 3.700.000 ₫.');
+                return false;
+            }
+            if (luong % 1000 !== 0) {
+                abp.message.warn('Lương phải là bội số của 1.000 ₫.');
+                return false;
+            }
+            return true;
+        }
+
+            // =========================================================
             // THÊM NHÂN VIÊN
-            // =========================
-            $('#NhanVienCreateModal form[name="NhanVienCreateForm"]').on('submit', function (e) {
-                e.preventDefault();
+            // =========================================================
+            $('#NhanVienCreateModal form[name="NhanVienCreateForm"]')
+                .on('submit', function (e) {
 
-                var form = $(this);
+                    e.preventDefault();
 
-                var input = {
-                    hoten: form.find('[name="Hoten"]').val().trim(),
-                    gioitinh: form.find('[name="Gioitinh"]').val() === 'true',
-                    ngaysinh: form.find('[name="Ngaysinh"]').val(),
-                    ngayvaolam: form.find('[name="Ngayvaolam"]').val(),
-                    sdt: form.find('[name="SDT"]').val().trim()
-                };
+                    var form = $(this);
 
-                if (!input.hoten) {
-                    abp.message.warn('Vui lòng nhập họ và tên.');
-                    return;
-                }
+                    var ngaySinh =
+                        form.find('[name="Ngaysinh"]').val();
 
-                if (!input.sdt) {
-                    abp.message.warn('Vui lòng nhập số điện thoại.');
-                    return;
-                }
+                    var luong = getLuong(form);
 
-                if (!input.ngayvaolam) {
-                    abp.message.warn('Vui lòng nhập ngày vào làm.');
-                    return;
-                }
+                    var input = {
 
-                abp.ui.setBusy($('#NhanVienCreateModal'));
+                        hoten:
+                            form.find('[name="Hoten"]')
+                                .val()
+                                .trim(),
 
-                _nhanVienService.create(input)
-                    .done(function () {
-                        abp.notify.success('Thêm nhân viên thành công.');
-                        $('#NhanVienCreateModal').modal('hide');
+                        gioitinh:
+                            form.find('[name="Gioitinh"]')
+                                .val() === 'true',
 
-                        setTimeout(function () {
-                            location.reload();
-                        }, 500);
-                    })
-                    .fail(function (error) {
-                        abp.message.error(
-                            getErrorMessage(error, 'Không thể thêm nhân viên.')
+                        ngaysinh:
+                            ngaySinh
+                                ? ngaySinh
+                                : null,
+
+                        ngayvaolam:
+                            form.find('[name="Ngayvaolam"]')
+                                .val(),
+
+                        sdt:
+                            form.find('[name="SDT"]')
+                                .val()
+                                .trim(),
+
+                        luong: luong
+                    };
+
+                    // =========================
+                    // VALIDATION HỌ TÊN
+                    // =========================
+                    if (!input.hoten) {
+                        abp.message.warn(
+                            'Vui lòng nhập họ và tên.'
                         );
-                    })
-                    .always(function () {
-                        abp.ui.clearBusy($('#NhanVienCreateModal'));
-                    });
-            });
+                        return;
+                    }
 
-            // =========================
-            // MỞ MODAL SỬA
-            // =========================
-            $(document).on('click', '.edit-nhanvien', function () {
-                var id = parseInt($(this).data('id'), 10);
-                var modal = $('#NhanVienEditModal');
-
-                modal.find('.modal-content').html(
-                    '<div class="modal-body text-center p-5">' +
-                    '<i class="fa fa-spinner fa-spin"></i> Đang tải...' +
-                    '</div>'
-                );
-
-                modal.modal('show');
-
-                modal.find('.modal-content').load(
-                    '@Url.Action("EditModal", "NhanVien")?id=' + id
-                );
-            });
-
-            // =========================
-            // SỬA NHÂN VIÊN
-            // =========================
-            $(document).on('submit', 'form[name="NhanVienEditForm"]', function (e) {
-                e.preventDefault();
-
-                var form = $(this);
-
-                var input = {
-                    id: parseInt(form.find('[name="Id"]').val(), 10),
-                    hoten: form.find('[name="Hoten"]').val().trim(),
-                    gioitinh: form.find('[name="Gioitinh"]').val() === 'true',
-                    ngaysinh: form.find('[name="Ngaysinh"]').val(),
-                    ngayvaolam: form.find('[name="Ngayvaolam"]').val(),
-                    sdt: form.find('[name="SDT"]').val().trim(),
-                    trangthai: form.find('[name="Trangthai"]').val() === 'true'
-                };
-
-                if (!input.hoten) {
-                    abp.message.warn('Vui lòng nhập họ và tên.');
-                    return;
-                }
-
-                if (!input.sdt) {
-                    abp.message.warn('Vui lòng nhập số điện thoại.');
-                    return;
-                }
-
-                if (!input.ngayvaolam) {
-                    abp.message.warn('Vui lòng nhập ngày vào làm.');
-                    return;
-                }
-
-                abp.ui.setBusy($('#NhanVienEditModal'));
-
-                _nhanVienService.update(input)
-                    .done(function () {
-                        abp.notify.success('Cập nhật nhân viên thành công.');
-                        $('#NhanVienEditModal').modal('hide');
-
-                        setTimeout(function () {
-                            location.reload();
-                        }, 500);
-                    })
-                    .fail(function (error) {
-                        abp.message.error(
-                            getErrorMessage(error, 'Không thể cập nhật nhân viên.')
+                    // =========================
+                    // VALIDATION SĐT
+                    // =========================
+                    if (!input.sdt) {
+                        abp.message.warn(
+                            'Vui lòng nhập số điện thoại.'
                         );
-                    })
-                    .always(function () {
-                        abp.ui.clearBusy($('#NhanVienEditModal'));
-                    });
-            });
+                        return;
+                    }
 
-            // =========================
-            // NGƯNG / KÍCH HOẠT
-            // =========================
-            $(document).on('click', '.toggle-status', function () {
-                var button = $(this);
-                var id = parseInt(button.data('id'), 10);
-                var currentStatus = String(button.data('status')).toLowerCase() === 'true';
-                var newStatus = !currentStatus;
+                    // =========================
+                    // VALIDATION NGÀY VÀO LÀM
+                    // =========================
+                    if (!input.ngayvaolam) {
+                        abp.message.warn(
+                            'Vui lòng nhập ngày vào làm.'
+                        );
+                        return;
+                    }
 
-                var message = newStatus
-                    ? 'Bạn có muốn kích hoạt nhân viên này?'
-                    : 'Bạn có muốn ngưng nhân viên này?';
+                    // =========================
+                    // VALIDATION LƯƠNG
+                    // =========================
+                    if (!validateLuong(input.luong)) return;
 
-                abp.message.confirm(
-                    message,
-                    'Xác nhận',
-                    function (confirmed) {
-                        if (!confirmed) {
-                            return;
-                        }
 
-                        _nhanVienService.changeTrangThai({
-                            id: id,
-                            trangthai: newStatus
-                        })
-                        .done(function () {
-                            abp.notify.success(
-                                newStatus
-                                    ? 'Đã kích hoạt nhân viên.'
-                                    : 'Đã ngưng nhân viên.'
+                            abp.ui.setBusy($('#NhanVienCreateModal'));
+
+        _nhanVienService.create(input).done(function () {
+            abp.notify.success('Thêm nhân viên thành công.');
+            $('#NhanVienCreateModal').modal('hide');
+            setTimeout(function () { location.reload(); }, 500);
+        }).fail(function (error) {
+            abp.message.error(getErrorMessage(error, 'Không thể thêm nhân viên.'));
+        }).always(function () {
+            abp.ui.clearBusy($('#NhanVienCreateModal'));
+        });
+                });
+
+
+            // =========================================================
+            // XEM CHI TIẾT NHÂN VIÊN
+            // =========================================================
+            $(document).on(
+                'click',
+                '.xem-nhanvien',
+                function () {
+
+                    var id = parseInt(
+                        $(this).data('id'),
+                        10
+                    );
+                    $('#NhanVienDetailLoading').show();
+                    $('#NhanVienDetailContent').hide();
+                    $('#NhanVienDetailModal')
+                        .modal('show');
+                    _nhanVienService.getNhanVien(id).done(function (data) {
+
+                            // =========================
+                            // HỌ TÊN
+                            // =========================
+                            $('#DetailHoten').val(
+                                data.hoten || ''
                             );
+
+                            // =========================
+                            // SỐ ĐIỆN THOẠI
+                            // =========================
+                            $('#DetailSDT').val(
+                                data.sdt || ''
+                            );
+
+                            // =========================
+                            // GIỚI TÍNH
+                            // =========================
+                            $('#DetailGioitinh').val(
+                                data.gioitinh
+                                    ? 'Nam'
+                                    : 'Nữ'
+                            );
+
+                            // =========================
+                            // NGÀY SINH
+                            // =========================
+                            $('#DetailNgaysinh').val(
+                                formatDateOnly(
+                                    data.ngaysinh,
+                                    'Chưa cập nhật'
+                                )
+                            );
+
+                            // =========================
+                            // NGÀY VÀO LÀM
+                            // =========================
+                            $('#DetailNgayvaolam').val(
+                                formatDateOnly(
+                                    data.ngayvaolam,
+                                    'Chưa cập nhật'
+                                )
+                            );
+
+                            // =========================
+                            // LƯƠNG
+                            // =========================
+                            $('#DetailLuong').val(
+                                formatTien(data.luong)
+                            );
+
+                            // =========================
+                            // TRẠNG THÁI
+                            // =========================
+                            if (data.trangthai) {
+
+                                $('#DetailTrangthai').html(
+                                    '<span class="badge badge-success">' +
+                                    '<i class="fa fa-check mr-1"></i>' +
+                                    'Hoạt động' +
+                                    '</span>'
+                                );
+
+                            } else {
+
+                                $('#DetailTrangthai').html(
+                                    '<span class="badge badge-secondary">' +
+                                    '<i class="fa fa-times mr-1"></i>' +
+                                    'Ngưng' +
+                                    '</span>'
+                                );
+                            }
+
+                            $('#NhanVienDetailLoading')
+                                .hide();
+
+                            $('#NhanVienDetailContent')
+                                .show();
+                        })
+
+                        .fail(function (error) {
+
+                            $('#NhanVienDetailModal')
+                                .modal('hide');
+
+                            abp.message.error(
+                                getErrorMessage(
+                                    error,
+                                    'Không thể tải thông tin nhân viên.'
+                                )
+                            );
+                        });
+                });
+
+
+            // =========================================================
+            // MỞ MODAL SỬA
+            // =========================================================
+            $(document).on(
+                'click',
+                '.edit-nhanvien',
+                function () {
+
+                    var id = parseInt(
+                        $(this).data('id'),
+                        10
+                    );
+
+                    var modal =
+                        $('#NhanVienEditModal');
+
+                    modal.find('.modal-content').html(
+                        '<div class="modal-body text-center p-5">' +
+                        '<i class="fa fa-spinner fa-spin"></i>' +
+                        '<div class="mt-2">Đang tải...</div>' +
+                        '</div>'
+                    );
+
+                    modal.modal('show');
+
+                    modal.find('.modal-content')
+                        .load(
+                            '@Url.Action("EditModal", "NhanVien")?id=' + id
+                        );
+                });
+
+
+            // =========================================================
+            // SỬA NHÂN VIÊN
+            // =========================================================
+            $(document).on(
+                'submit',
+                'form[name="NhanVienEditForm"]',
+                function (e) {
+
+                    e.preventDefault();
+
+                    var form = $(this);
+
+                    var ngaySinh =
+                        form.find('[name="Ngaysinh"]').val();
+
+                    var luong = getLuong(form);
+
+                    var input = {
+
+                        id:
+                            parseInt(
+                                form.find('[name="Id"]')
+                                    .val(),
+                                10
+                            ),
+
+                        hoten:
+                            form.find('[name="Hoten"]')
+                                .val()
+                                .trim(),
+
+                        gioitinh:
+                            form.find('[name="Gioitinh"]')
+                                .val() === 'true',
+
+                        ngaysinh:
+                            ngaySinh
+                                ? ngaySinh
+                                : null,
+
+                        ngayvaolam:
+                            form.find('[name="Ngayvaolam"]')
+                                .val(),
+
+                        sdt:
+                            form.find('[name="SDT"]')
+                                .val()
+                                .trim(),
+
+                        luong:
+                            luong,
+
+                        trangthai:
+                            form.find('[name="Trangthai"]')
+                                .val() === 'true'
+                    };
+
+                    // =========================
+                    // VALIDATION HỌ TÊN
+                    // =========================
+                    if (!input.hoten) {
+
+                        abp.message.warn(
+                            'Vui lòng nhập họ và tên.'
+                        );
+
+                        return;
+                    }
+
+                    // =========================
+                    // VALIDATION SĐT
+                    // =========================
+                    if (!input.sdt) {
+
+                        abp.message.warn(
+                            'Vui lòng nhập số điện thoại.'
+                        );
+
+                        return;
+                    }
+
+                    // =========================
+                    // VALIDATION NGÀY VÀO LÀM
+                    // =========================
+                    if (!input.ngayvaolam) {
+
+                        abp.message.warn(
+                            'Vui lòng nhập ngày vào làm.'
+                        );
+
+                        return;
+                    }
+
+                    // =========================
+                    // VALIDATION LƯƠNG
+                    // =========================
+                    if (!validateLuong(input.luong))  return;
+
+
+                    abp.ui.setBusy(
+                        $('#NhanVienEditModal')
+                    );
+
+                    _nhanVienService
+                        .update(input)
+
+                        .done(function () {
+
+                            abp.notify.success(
+                                'Cập nhật nhân viên thành công.'
+                            );
+
+                            $('#NhanVienEditModal')
+                                .modal('hide');
 
                             setTimeout(function () {
                                 location.reload();
                             }, 500);
                         })
+
                         .fail(function (error) {
+
                             abp.message.error(
                                 getErrorMessage(
                                     error,
-                                    'Không thể thay đổi trạng thái nhân viên.'
+                                    'Không thể cập nhật nhân viên.'
                                 )
                             );
+                        })
+
+                        .always(function () {
+
+                            abp.ui.clearBusy(
+                                $('#NhanVienEditModal')
+                            );
                         });
+                });
+
+
+            // =========================================================
+            // NGƯNG / KÍCH HOẠT
+            // =========================================================
+            $(document).on(
+                'click',
+                '.toggle-status',
+                function () {
+
+                    var button = $(this);
+
+                    var id = parseInt(
+                        button.data('id'),
+                        10
+                    );
+
+                    var currentStatus =
+                        String(
+                            button.data('status')
+                        ).toLowerCase() === 'true';
+
+                    var newStatus =
+                        !currentStatus;
+
+                    var message =
+                        newStatus
+                            ? 'Bạn có muốn kích hoạt nhân viên này?'
+                            : 'Bạn có muốn ngưng nhân viên này?';
+
+                    abp.message.confirm(
+                        message,
+                        'Xác nhận',
+                        function (confirmed) {
+
+                            if (!confirmed) {
+                                return;
+                            }
+
+                            _nhanVienService
+                                .changeTrangThai({
+                                    id: id,
+                                    trangthai: newStatus
+                                })
+
+                                .done(function () {
+
+                                    abp.notify.success(
+                                        newStatus
+                                            ? 'Đã kích hoạt nhân viên.'
+                                            : 'Đã ngưng nhân viên.'
+                                    );
+
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 500);
+                                })
+
+                                .fail(function (error) {
+
+                                    abp.message.error(
+                                        getErrorMessage(
+                                            error,
+                                            'Không thể thay đổi trạng thái nhân viên.'
+                                        )
+                                    );
+                                });
+                        }
+                    );
+                });
+
+
+            // =========================================================
+            // FORMAT DATE ONLY
+            // =========================================================
+            function formatDateOnly(
+                value,
+                emptyText
+            ) {
+
+                if (!value) {
+                    return emptyText;
+                }
+
+                if (typeof value === 'string') {
+
+                    var parts =
+                        value
+                            .substring(0, 10)
+                            .split('-');
+
+                    if (parts.length === 3) {
+
+                        return parts[2] +
+                            '/' +
+                            parts[1] +
+                            '/' +
+                            parts[0];
                     }
-                );
-            });
+                }
 
-            // =========================
-            // XỬ LÝ LỖI
-            // =========================
-            function getErrorMessage(error, defaultMessage) {
-                if (error && error.responseJSON && error.responseJSON.error) {
-                    return error.responseJSON.error.message ||
+                return value;
+            }
+
+
+            // =========================================================
+            // XỬ LÝ LỖI ABP
+            // =========================================================
+            function getErrorMessage(
+                error,
+                defaultMessage
+            ) {
+
+                if (
+                    error &&
+                    error.responseJSON &&
+                    error.responseJSON.error
+                ) {
+
+                    return (
+                        error.responseJSON.error.message ||
                         error.responseJSON.error.details ||
-                        defaultMessage;
+                        defaultMessage
+                    );
                 }
 
-                if (error && error.error) {
-                    return error.error.message ||
+                if (
+                    error &&
+                    error.error
+                ) {
+
+                    return (
+                        error.error.message ||
                         error.error.details ||
-                        defaultMessage;
+                        defaultMessage
+                    );
                 }
 
-                if (error && error.message) {
+                if (
+                    error &&
+                    error.message
+                ) {
+
                     return error.message;
                 }
 
                 return defaultMessage;
             }
+
         });
     </script>
 }

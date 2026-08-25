@@ -1648,6 +1648,9 @@ namespace Cuahangchamsocthucung.Migrations
                     b.Property<DateTime?>("DenNgay")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("MucChiTieu")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("PhanTramGiam")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
@@ -1687,6 +1690,9 @@ namespace Cuahangchamsocthucung.Migrations
 
                     b.Property<long?>("LastModifierUserId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("LoaiDichVu")
+                        .HasColumnType("int");
 
                     b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
@@ -1959,7 +1965,10 @@ namespace Cuahangchamsocthucung.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateOnly>("Ngaysinh")
+                    b.Property<decimal>("Luong")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly?>("Ngaysinh")
                         .HasColumnType("date");
 
                     b.Property<DateOnly>("Ngayvaolam")

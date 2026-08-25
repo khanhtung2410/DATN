@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Cuahangchamsocthucung.Entities;
+using Cuahangchamsocthucung.Enum;
+using System.Collections.Generic;
 using System.Linq;
-using Cuahangchamsocthucung.Entities;
 
 namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
 {
@@ -29,19 +30,22 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
                 {
                     TenDichVu = "Trông giữ thú cưng",
                     MoTa = "Dịch vụ khách sạn lưu trú cho chó mèo",
-                    TrangThai = true
+                    TrangThai = true,
+                    LoaiDichVu = LoaiDichVu.LuuTru
                 },
                 new DichVu
                 {
                     TenDichVu = "Tắm Spa",
                     MoTa = "Tắm vệ sinh, chăm sóc lông",
-                    TrangThai = true
+                    TrangThai = true,
+                    LoaiDichVu = LoaiDichVu.ChamSoc
                 },
                 new DichVu
                 {
                     TenDichVu = "Cắt tỉa lông",
                     MoTa = "Cắt tỉa tạo kiểu cho thú cưng",
-                    TrangThai = true
+                    TrangThai = true,
+                    LoaiDichVu = LoaiDichVu.ChamSoc
                 }
             };
 

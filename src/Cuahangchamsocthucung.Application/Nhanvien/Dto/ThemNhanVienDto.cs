@@ -11,8 +11,9 @@ namespace Cuahangchamsocthucung.NhanVien.Dto
         public string Hoten { get; set; }
         public string SDT { get; set; }
         public bool Gioitinh { get; set; }
-        public DateOnly Ngaysinh { get; set; }
+        public DateOnly? Ngaysinh { get; set; }
         public DateOnly Ngayvaolam { get; set; }
+        public decimal Luong { get; set; }
         public bool Trangthai { get; set; }
     }
 }

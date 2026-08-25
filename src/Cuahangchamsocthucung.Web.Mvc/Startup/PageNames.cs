@@ -13,6 +13,7 @@
         public const string KhachHang = "KhachHang";
         public const string DichVu = "DichVu";
         public const string LichChamSoc = "LichChamSoc";
+        public const string LichChamSocTimeline = "LichChamSoc/Timeline";
         public const string NhanVien = "NhanVien";
         public const string MatHang = "MatHang";
         public const string Vip = "Vip";

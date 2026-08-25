@@ -1,95 +1,760 @@
-﻿$(function () {
+﻿(function () {
 
-    'use strict';
+    var doanhThuChart = null;
+    var dichVuChart = null;
 
-    /* ChartJS
-     * -------
-     * Here we will create a few charts using ChartJS
-     */
+    // =========================
+    // FORMAT TIỀN
+    // =========================
 
-    //-----------------------
-    //- MONTHLY SALES CHART -
-    //-----------------------
+    function formatTien(value) {
 
-    // Get context with jQuery - using jQuery's .get() method.
-    var salesChartCanvas = $('#salesChart').get(0).getContext('2d');
-    // This will get the first returned node in the jQuery collection.
+        return Number(value || 0)
+            .toLocaleString('vi-VN') + ' ₫';
 
-    var salesChartData = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-        datasets: [
+    }
+
+    // =========================
+    // KHỞI TẠO NĂM
+    // =========================
+
+    function khoiTaoNam() {
+
+        var namHienTai = moment().year();
+
+        var html = '';
+
+        // Cho phép chọn 5 năm trước
+        // đến 2 năm sau
+
+        for (var nam = namHienTai - 5;
+            nam <= namHienTai + 2;
+            nam++) {
+
+            html += '<option value="' +
+                nam +
+                '">' +
+                nam +
+                '</option>';
+        }
+
+        $('#nam').html(html);
+
+        $('#nam').val(namHienTai);
+    }
+
+    // =========================
+    // KHỞI TẠO THÁNG
+    // =========================
+
+    function khoiTaoThang() {
+
+        var thangHienTai =
+            moment().month() + 1;
+
+        $('#thang').val(thangHienTai);
+    }
+
+    // =========================
+    // LOAD BÁO CÁO
+    // =========================
+
+    function loadBaoCao() {
+
+        var thang =
+            parseInt($('#thang').val());
+
+        var nam =
+            parseInt($('#nam').val());
+
+        if (!thang || thang < 1 || thang > 12) {
+
+            abp.notify.warn(
+                'Vui lòng chọn tháng.'
+            );
+
+            return;
+        }
+
+        if (!nam) {
+
+            abp.notify.warn(
+                'Vui lòng chọn năm.'
+            );
+
+            return;
+        }
+
+        abp.ui.setBusy($('.content'));
+
+        abp.services.app.baoCao
+            .getBaoCao({
+
+                thang: thang,
+
+                nam: nam
+
+            })
+            .done(function (result) {
+
+                hienThiBaoCao(result);
+
+            })
+            .fail(function (error) {
+
+                abp.notify.error(
+                    error.message ||
+                    'Không thể tải báo cáo.'
+                );
+
+            })
+            .always(function () {
+
+                abp.ui.clearBusy($('.content'));
+
+            });
+    }
+
+    // =========================
+    // HIỂN THỊ BÁO CÁO
+    // =========================
+
+    function hienThiBaoCao(result) {
+
+        result = result || {};
+
+        var doanhThuDaThanhToan =
+            Number(
+                result.doanhThuDaThanhToan || 0
+            );
+
+        var tongDoanhThu =
+            Number(
+                result.tongDoanhThu || 0
+            );
+
+        var chiPhiLuong =
+            Number(
+                result.tongChiPhiLuong || 0
+            );
+
+        var loiNhuan =
+            Number(
+                result.loiNhuan || 0
+            );
+
+        var doanhThuChuaThanhToan =
+            Math.max(
+                0,
+                tongDoanhThu -
+                doanhThuDaThanhToan
+            );
+
+        var doanhThuTheoNgay =
+            result.doanhThuTheoNgay || [];
+
+        var doanhThuTheoDichVu =
+            result.doanhThuTheoDichVu || [];
+
+        // =========================
+        // KPI
+        // =========================
+
+        $('#doanhThu')
+            .text(
+                formatTien(
+                    doanhThuDaThanhToan
+                )
+            );
+
+        $('#chiPhiLuong')
+            .text(
+                formatTien(
+                    chiPhiLuong
+                )
+            );
+
+        $('#loiNhuan')
+            .text(
+                formatTien(
+                    loiNhuan
+                )
+            );
+
+        $('#doanhThuChuaThanhToan')
+            .text(
+                formatTien(
+                    doanhThuChuaThanhToan
+                )
+            );
+
+        // =========================
+        // THỐNG KÊ
+        // =========================
+
+        $('#tongLichChamSoc')
+            .text(
+                result.tongLichChamSoc || 0
+            );
+
+        $('#tongKhachHang')
+            .text(
+                result.tongKhachHang || 0
+            );
+
+        $('#tongThuCung')
+            .text(
+                result.tongThuCung || 0
+            );
+
+        $('#lichHoanThanh')
+            .text(
+                result.lichHoanThanh || 0
+            );
+
+        $('#lichDangDienRa')
+            .text(
+                result.lichDangDienRa || 0
+            );
+
+        $('#lichChoXacNhan')
+            .text(
+                result.lichChoXacNhan || 0
+            );
+
+        $('#lichDaXacNhan')
+            .text(
+                result.lichDaXacNhan || 0
+            );
+
+        $('#lichDaHuy')
+            .text(
+                result.lichDaHuy || 0
+            );
+
+        $('#lichBiTuChoi')
+            .text(
+                result.lichBiTuChoi || 0
+            );
+
+        // =========================
+        // BIỂU ĐỒ
+        // =========================
+
+        veBieuDoDoanhThu(
+            doanhThuTheoNgay
+        );
+
+        veBieuDoDichVu(
+            doanhThuTheoDichVu
+        );
+
+        // =========================
+        // BẢNG
+        // =========================
+
+        hienThiBangDichVu(
+            doanhThuTheoDichVu
+        );
+    }
+
+    // =========================
+    // BIỂU ĐỒ DOANH THU
+    // =========================
+
+    function veBieuDoDoanhThu(data) {
+
+        var labels =
+            data.map(function (x) {
+
+                return moment(x.ngay)
+                    .format('DD/MM');
+
+            });
+
+        var values =
+            data.map(function (x) {
+
+                return Number(
+                    x.doanhThu || 0
+                );
+
+            });
+
+        if (doanhThuChart) {
+
+            doanhThuChart.destroy();
+
+        }
+
+        doanhThuChart = new Chart(
+            $('#doanhThuChart'),
             {
-                label: 'Electronics',
-                fill: '#dee2e6',
-                borderColor: '#ced4da',
-                pointBackgroundColor: '#ced4da',
-                pointBorderColor: '#c1c7d1',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(220,220,220)',
-                spanGaps: true,
-                data: [65, 59, 80, 81, 56, 55, 40]
-            },
-            {
-                label: 'Digital Goods',
-                fill: 'rgba(0, 123, 255, 0.9)',
-                borderColor: 'rgba(0, 123, 255, 1)',
-                pointBackgroundColor: '#3b8bba',
-                pointBorderColor: 'rgba(0, 123, 255, 1)',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(0, 123, 255, 1)',
-                spanGaps: true,
-                data: [28, 48, 40, 19, 86, 27, 90]
+                type: 'line',
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [{
+
+                        label: 'Doanh thu',
+
+                        data: values,
+
+                        borderColor: '#007bff',
+
+                        backgroundColor:
+                            'rgba(0, 123, 255, 0.12)',
+
+                        pointBackgroundColor:
+                            '#007bff',
+
+                        pointBorderColor:
+                            '#fff',
+
+                        pointBorderWidth: 2,
+
+                        pointRadius: 4,
+
+                        pointHoverRadius: 7,
+
+                        borderWidth: 3,
+
+                        fill: true,
+
+                        lineTension: 0.35
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    legend: {
+
+                        display: false
+
+                    },
+
+                    tooltips: {
+
+                        displayColors: false,
+
+                        backgroundColor:
+                            'rgba(0,0,0,0.8)',
+
+                        titleFontSize: 13,
+
+                        bodyFontSize: 13,
+
+                        xPadding: 12,
+
+                        yPadding: 10,
+
+                        callbacks: {
+
+                            title: function (
+                                tooltipItems
+                            ) {
+
+                                return 'Ngày ' +
+                                    tooltipItems[0]
+                                        .label;
+
+                            },
+
+                            label: function (
+                                tooltipItem
+                            ) {
+
+                                return 'Doanh thu: ' +
+                                    formatTien(
+                                        tooltipItem.yLabel
+                                    );
+
+                            }
+
+                        }
+
+                    },
+
+                    scales: {
+
+                        xAxes: [{
+
+                            gridLines: {
+
+                                display: false
+
+                            },
+
+                            ticks: {
+
+                                autoSkip: true,
+
+                                maxTicksLimit: 15,
+
+                                fontSize: 12
+
+                            }
+
+                        }],
+
+                        yAxes: [{
+
+                            gridLines: {
+
+                                color:
+                                    'rgba(0,0,0,0.06)',
+
+                                drawBorder: false
+
+                            },
+
+                            ticks: {
+
+                                beginAtZero: true,
+
+                                padding: 10,
+
+                                callback: function (
+                                    value
+                                ) {
+
+                                    if (
+                                        value >=
+                                        1000000
+                                    ) {
+
+                                        return (
+                                            value /
+                                            1000000
+                                        ).toFixed(
+                                            value %
+                                                1000000 ===
+                                                0
+                                                ? 0
+                                                : 1
+                                        ) + ' Tr';
+
+                                    }
+
+                                    if (
+                                        value >=
+                                        1000
+                                    ) {
+
+                                        return (
+                                            value /
+                                            1000
+                                        ).toFixed(0)
+                                            + 'K';
+
+                                    }
+
+                                    return value;
+
+                                }
+
+                            }
+
+                        }]
+
+                    },
+
+                    elements: {
+
+                        line: {
+
+                            tension: 0.35
+
+                        }
+
+                    }
+
+                }
+
             }
-        ]
-    };
+        );
+    }
 
-    var salesChartOptions = {
-        //Boolean - If we should show the scale at all
-        showScale: true,
-        //Boolean - Whether grid lines are shown across the chart
-        scaleShowGridLines: false,
-        //String - Colour of the grid lines
-        scaleGridLineColor: 'rgba(0,0,0,.05)',
-        //Number - Width of the grid lines
-        scaleGridLineWidth: 1,
-        //Boolean - Whether to show horizontal lines (except X axis)
-        scaleShowHorizontalLines: true,
-        //Boolean - Whether to show vertical lines (except Y axis)
-        scaleShowVerticalLines: true,
-        //Boolean - Whether the line is curved between points
-        bezierCurve: true,
-        //Number - Tension of the bezier curve between points
-        bezierCurveTension: 0.3,
-        //Boolean - Whether to show a dot for each point
-        pointDot: false,
-        //Number - Radius of each point dot in pixels
-        pointDotRadius: 4,
-        //Number - Pixel width of point dot stroke
-        pointDotStrokeWidth: 1,
-        //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-        pointHitDetectionRadius: 20,
-        //Boolean - Whether to show a stroke for datasets
-        datasetStroke: true,
-        //Number - Pixel width of dataset stroke
-        datasetStrokeWidth: 2,
-        //Boolean - Whether to fill the dataset with a color
-        datasetFill: true,
-        //String - A legend template
-        legendTemplate: '<ul class="<%=name.toLowerCase()%>-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].lineColor%>"></span><%=datasets[i].label%></li><%}%></ul>',
-        //Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
-        maintainAspectRatio: false,
-        //Boolean - whether to make the chart responsive to window resizing
-        responsive: true
-    };
+    // =========================
+    // BIỂU ĐỒ DỊCH VỤ
+    // =========================
 
-    //Create the line chart
-    var salesChart = new Chart(salesChartCanvas, {
-        type: 'line',
-        data: salesChartData,
-        options: salesChartOptions
+    function veBieuDoDichVu(data) {
+
+        var labels =
+            data.map(function (x) {
+
+                return x.tenDichVu;
+
+            });
+
+        var values =
+            data.map(function (x) {
+
+                return Number(
+                    x.doanhThu || 0
+                );
+
+            });
+
+        var colors = [
+
+            '#007bff',
+            '#28a745',
+            '#ffc107',
+            '#dc3545',
+            '#17a2b8',
+            '#6f42c1',
+            '#fd7e14',
+            '#20c997'
+
+        ];
+
+        if (dichVuChart) {
+
+            dichVuChart.destroy();
+
+        }
+
+        dichVuChart = new Chart(
+            $('#dichVuChart'),
+            {
+                type: 'doughnut',
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [{
+
+                        data: values,
+
+                        backgroundColor:
+                            colors.slice(
+                                0,
+                                values.length
+                            ),
+
+                        borderColor: '#fff',
+
+                        borderWidth: 3,
+
+                        hoverBorderColor: '#fff',
+
+                        hoverBorderWidth: 4
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutoutPercentage: 62,
+
+                    legend: {
+
+                        position: 'right',
+
+                        labels: {
+
+                            padding: 15,
+
+                            boxWidth: 18,
+
+                            fontSize: 13
+
+                        }
+
+                    },
+
+                    tooltips: {
+
+                        backgroundColor:
+                            'rgba(0,0,0,0.8)',
+
+                        displayColors: true,
+
+                        callbacks: {
+
+                            label: function (
+                                tooltipItem,
+                                data
+                            ) {
+
+                                var index =
+                                    tooltipItem.index;
+
+                                return data.labels[index] +
+                                    ': ' +
+                                    formatTien(
+                                        data.datasets[0]
+                                            .data[index]
+                                    );
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+    }
+
+    // =========================
+    // HTML ENCODE
+    // =========================
+
+    function htmlEncode(value) {
+
+        return $('<div>')
+            .text(value || '')
+            .html();
+
+    }
+
+    // =========================
+    // BẢNG DỊCH VỤ
+    // =========================
+
+    function hienThiBangDichVu(data) {
+
+        var html = '';
+
+        var tongSoLuong = 0;
+
+        var tongDoanhThu = 0;
+
+        if (!data.length) {
+
+            html =
+                '<tr>' +
+                '<td colspan="4" ' +
+                'class="text-center text-muted py-4">' +
+                'Chưa có dữ liệu doanh thu dịch vụ.' +
+                '</td>' +
+                '</tr>';
+
+        }
+        else {
+
+            data.forEach(function (
+                item,
+                index
+            ) {
+
+                var soLuong =
+                    Number(
+                        item.soLuong || 0
+                    );
+
+                var doanhThu =
+                    Number(
+                        item.doanhThu || 0
+                    );
+
+                tongSoLuong +=
+                    soLuong;
+
+                tongDoanhThu +=
+                    doanhThu;
+
+                html +=
+
+                    '<tr>' +
+
+                    '<td class="text-center text-muted">' +
+                    (index + 1) +
+                    '</td>' +
+
+                    '<td>' +
+                    '<strong>' +
+                    htmlEncode(
+                        item.tenDichVu ||
+                        'Không xác định'
+                    ) +
+                    '</strong>' +
+                    '</td>' +
+
+                    '<td class="text-center">' +
+
+                    '<span class="badge badge-light px-3 py-2">' +
+                    soLuong +
+                    '</span>' +
+
+                    '</td>' +
+
+                    '<td class="text-right font-weight-bold">' +
+                    formatTien(
+                        doanhThu
+                    ) +
+                    '</td>' +
+
+                    '</tr>';
+
+            });
+
+        }
+
+        $('#baoCaoDichVuBody')
+            .html(html);
+
+        $('#tongSoLuongDichVu')
+            .text(tongSoLuong);
+
+        $('#tongDoanhThuDichVu')
+            .text(
+                formatTien(
+                    tongDoanhThu
+                )
+            );
+    }
+
+    // =========================
+    // SỰ KIỆN
+    // =========================
+
+    $('#btnBaoCao').click(function () {
+
+        loadBaoCao();
+
     });
 
-    //---------------------------
-    //- END MONTHLY SALES CHART -
-    //---------------------------
-});
+    // Cho phép Enter
+    // sau khi chọn tháng/năm
+
+    $('#thang, #nam').change(function () {
+
+        loadBaoCao();
+
+    });
+
+    // =========================
+    // KHỞI TẠO
+    // =========================
+
+    $(function () {
+
+        khoiTaoNam();
+
+        khoiTaoThang();
+
+        loadBaoCao();
+
+    });
+
+})();

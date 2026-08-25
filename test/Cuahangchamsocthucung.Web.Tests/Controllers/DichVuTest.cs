@@ -30,7 +30,6 @@ namespace Cuahangchamsocthucung.Web.Tests.Controllers
                 {
                     new ThemBangGiaDto
                     {
-                        DichVuId = 0,
                         Loaithucung = "Chó",
                         Loailong = false,
                         Cannangtu = 0,
@@ -64,7 +63,6 @@ namespace Cuahangchamsocthucung.Web.Tests.Controllers
                 {
                     new ThemBangGiaDto
                     {
-                        DichVuId = 0,
                         Loaithucung = "Mèo",
                         Loailong = false,
                         Cannangtu = 1,

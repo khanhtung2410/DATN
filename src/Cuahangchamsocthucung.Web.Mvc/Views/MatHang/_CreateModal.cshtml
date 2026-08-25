@@ -1,40 +1,95 @@
-@using Cuahangchamsocthucung.Web.Models.Common.Modals
+﻿@using Cuahangchamsocthucung.Web.Models.Common.Modals
 @model Cuahangchamsocthucung.Web.Models.MatHang.MatHangListViewModel
+
 @{
     Layout = null;
 }
-<div class="modal fade" id="MatHangCreateModal" tabindex="-1" role="dialog" aria-labelledby="MatHangCreateModalLabel" data-backdrop="static">
+
+<div class="modal fade"
+     id="MatHangCreateModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="MatHangCreateModalLabel"
+     data-backdrop="static">
+
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            @await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml", new ModalHeaderViewModel("Th�m m?t h�ng"))
-            <form name="MatHangCreateForm" role="form" class="form-horizontal">
+
+            @await Html.PartialAsync(
+            "~/Views/Shared/Modals/_ModalHeader.cshtml",
+                        new ModalHeaderViewModel("Thêm mặt hàng")
+                        )
+
+            <form name="MatHangCreateForm"
+                  role="form"
+                  class="form-horizontal">
+
                 <div class="modal-body">
+
                     <div class="form-group row required">
-                        <label class="col-md-3 col-form-label">T�n</label>
+                        <label class="col-md-3 col-form-label">
+                            Tên mặt hàng
+                        </label>
+
                         <div class="col-md-9">
-                            <input type="text" name="Ten" class="form-control" required />
+                            <input type="text"
+                                   name="Tenmathang"
+                                   class="form-control"
+                                   maxlength="200"
+                                   required />
                         </div>
                     </div>
+
                     <div class="form-group row">
-                        <label class="col-md-3 col-form-label">M� t?</label>
+                        <label class="col-md-3 col-form-label">
+                            Mô tả
+                        </label>
+
                         <div class="col-md-9">
-                            <textarea name="Mota" class="form-control"></textarea>
+                            <textarea name="Mota"
+                                      class="form-control"
+                                      rows="3"></textarea>
                         </div>
                     </div>
+
+                    <div class="form-group row required">
+                        <label class="col-md-3 col-form-label">
+                            Số lượng
+                        </label>
+
+                        <div class="col-md-9">
+                            <input type="number"
+                                   name="Soluong"
+                                   class="form-control"
+                                   min="0"
+                                   step="1"
+                                   value="0"
+                                   required />
+                        </div>
+                    </div>
+
                     <div class="form-group row">
-                        <label class="col-md-3 col-form-label">Gi�</label>
-                        <div class="col-md-9">
-                            <input type="number" name="Gia" class="form-control" step="0.01" />
+                        <label class="col-md-3 col-form-label">
+                            Trạng thái
+                        </label>
+
+                        <div class="col-md-9 pt-2">
+                            <input type="checkbox"
+                                   name="Trangthai"
+                                   value="true"
+                                   checked />
+                            <label class="ml-1">
+                                Hoạt động
+                            </label>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label">Tr?ng th�i</label>
-                        <div class="col-md-9">
-                            <input type="checkbox" name="Trangthai" value="true" checked />
-                        </div>
-                    </div>
+
                 </div>
-                @await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
+
+                @await Html.PartialAsync(
+                                "~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml"
+                                )
+
             </form>
         </div>
     </div>

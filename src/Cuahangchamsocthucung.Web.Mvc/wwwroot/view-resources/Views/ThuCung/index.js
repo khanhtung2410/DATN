@@ -123,44 +123,68 @@
 
     // ==================== ĐỔI TRẠNG THÁI ====================
     $(document).on('click', '.toggle-thucung', function () {
-        var id = parseInt($(this).data('id'));
-        var tenThuCung = $(this).data('name');
-        var trangThaiHienTai = String($(this).data('status')).toLowerCase() === 'true';
+        var $btn = $(this);
 
-        var hanhDong = trangThaiHienTai ? 'ngừng hoạt động' : 'kích hoạt';
+        var id = parseInt($btn.data('id'));
+        var tenThuCung = $btn.data('name');
+        var trangThaiHienTai =
+            String($btn.data('status')).toLowerCase() === 'true';
 
-        abp.message.confirm(
-            'Bạn có chắc muốn ' + hanhDong + ' thú cưng "' + tenThuCung + '" không?',
-            'Xác nhận',
-            async function (isConfirmed) {
-                if (!isConfirmed) return;
+        var hanhDong = trangThaiHienTai
+            ? 'ngừng hoạt động'
+            : 'kích hoạt';
 
-                abp.ui.setBusy();
+        Swal.fire({
+            title: 'Xác nhận',
+            text: 'Bạn có chắc muốn ' + hanhDong +
+                ' thú cưng "' + tenThuCung + '" không?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true
+        }).then(function (result) {
 
-                try {
-                    await _thuCungService.changeStatus(id);
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            abp.ui.setBusy($btn);
+
+            _thuCungService.changeStatus(id)
+                .done(function () {
 
                     abp.notify.success(
                         trangThaiHienTai
-                            ? 'Đã ngừng hoạt động thú cưng "' + tenThuCung + '".'
-                            : 'Đã kích hoạt thú cưng "' + tenThuCung + '".'
+                            ? 'Đã ngừng hoạt động thú cưng "' +
+                            tenThuCung + '".'
+                            : 'Đã kích hoạt thú cưng "' +
+                            tenThuCung + '".'
                     );
 
                     setTimeout(function () {
                         window.location.reload();
                     }, 500);
-                } catch (error) {
-                    console.error('Lỗi đổi trạng thái thú cưng:', error);
-                    abp.notify.error(
-                        getErrorMessage(error, 'Không thể đổi trạng thái thú cưng.')
-                    );
-                } finally {
-                    abp.ui.clearBusy();
-                }
-            }
-        );
-    });
+                })
+                .fail(function (error) {
 
+                    console.error(
+                        'Lỗi đổi trạng thái thú cưng:',
+                        error
+                    );
+
+                    abp.notify.error(
+                        getErrorMessage(
+                            error,
+                            'Không thể đổi trạng thái thú cưng.'
+                        )
+                    );
+                })
+                .always(function () {
+                    abp.ui.clearBusy($btn);
+                });
+        });
+    });
     // ==================== SỬA THÚ CƯNG ====================
     var editSelectedFile = null;
 

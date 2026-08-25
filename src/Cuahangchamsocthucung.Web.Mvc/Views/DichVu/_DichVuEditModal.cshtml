@@ -1,4 +1,5 @@
 ﻿@model Cuahangchamsocthucung.DichVu.Dto.SuaDichVuDto
+@using Cuahangchamsocthucung.Enum
 
 @{
     Layout = null;
@@ -7,212 +8,88 @@
 <div class="modal fade"
      id="DichVuEditModal"
      tabindex="-1"
-     aria-labelledby="DichVuEditModalLabel"
      aria-hidden="true"
      data-backdrop="static">
 
     <div class="modal-dialog modal-dialog-centered modal-xl">
-
         <div class="modal-content">
 
             @await Html.PartialAsync(
             "~/Views/Shared/Modals/_ModalHeader.cshtml",
-                        new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel(
-                        "Sửa dịch vụ"
-                        )
-                        )
+                        new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel("Sửa dịch vụ"))
 
-            <form id="dichvu-edit-form"
-                  name="DichVuEditForm"
-                  role="form"
-                  class="form-horizontal">
+            <form id="dichvu-edit-form" class="form-horizontal">
 
-                <input type="hidden"
-                       id="dv-id"
-                       name="Id"
-                       value="@Model.Id" />
+                <input type="hidden" id="dv-edit-id" value="@Model.Id" />
 
                 <div class="modal-body">
 
-                    <!-- Tên dịch vụ -->
                     <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label">
-                            Tên dịch vụ
-                        </label>
-
+                        <label class="col-md-3 col-form-label">Tên dịch vụ</label>
                         <div class="col-md-9">
                             <input type="text"
-                                   id="dv-tendichvu"
-                                   name="Tendichvu"
+                                   id="dv-edit-tendichvu"
                                    class="form-control"
-                                   value="@Model.Tendichvu" />
+                                   value="@Model.Tendichvu"
+                                   placeholder="Nhập tên dịch vụ" />
                         </div>
                     </div>
 
-                    <!-- Mô tả -->
                     <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label">
-                            Mô tả
-                        </label>
-
+                        <label class="col-md-3 col-form-label">Loại dịch vụ</label>
                         <div class="col-md-9">
-                            <textarea id="dv-mota"
-                                      name="Mota"
+                            <select id="dv-edit-loaidichvu" class="form-control">
+                                <option value="">-- Chọn loại dịch vụ --</option>
+                                <option value="1">Chăm sóc</option>
+                                <option value="2">Lưu trú</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Mô tả</label>
+                        <div class="col-md-9">
+                            <textarea id="dv-edit-mota"
                                       class="form-control"
-                                      rows="3">@Model.Mota</textarea>
+                                      rows="3"
+                                      placeholder="Nhập mô tả dịch vụ">@Model.Mota</textarea>
                         </div>
                     </div>
 
-                    <!-- Trạng thái -->
                     <div class="mb-3 row">
-                        <label class="col-md-3 col-form-label">
-                            Trạng thái
-                        </label>
-
+                        <label class="col-md-3 col-form-label">Trạng thái</label>
                         <div class="col-md-9">
-                            <select id="dv-trangthai"
-                                    name="Trangthai"
-                                    class="form-control">
-
-                                <option value="true"
-                                        selected="@(Model.Trangthai)">
-                                    Đang hoạt động
-                                </option>
-
-                                <option value="false"
-                                        selected="@(!Model.Trangthai)">
-                                    Ngừng hoạt động
-                                </option>
-
+                            <select id="dv-edit-trangthai" class="form-control">
+                                <option value="true">Đang hoạt động</option>
+                                <option value="false">Ngừng hoạt động</option>
                             </select>
                         </div>
                     </div>
 
                     <hr />
 
-                    <h5 class="mb-3">
-                        Bảng giá
-                    </h5>
+                    <h5 class="mb-3">Bảng giá</h5>
 
                     <div class="table-responsive">
-
-                        <table class="table table-bordered"
-                               id="bang-gia-table">
-
+                        <table class="table table-bordered" id="bang-gia-edit-table">
                             <thead>
                                 <tr>
                                     <th>Đối tượng</th>
+                                    <th>Loại phòng</th>
                                     <th>Lông dài</th>
                                     <th>Cân nặng từ</th>
                                     <th>Cân nặng đến</th>
+                                    <th>Thời gian (phút)</th>
                                     <th>Giá</th>
-                                    <th style="width: 80px;">
-                                        Xóa
-                                    </th>
+                                    <th style="width:80px">Xóa</th>
                                 </tr>
                             </thead>
-
-                            <tbody id="bang-gia-container">
-
-                                @if (Model.BangGias != null)
-                                {
-                                    for (int i = 0;
-                                    i < Model.BangGias.Count;
-                                    i++)
-                                    {
-                                        <tr class="bang-gia-row">
-
-                                            <input type="hidden"
-                                                   class="bg-id"
-                                                   name="BangGias[@i].Id"
-                                                   value="@Model.BangGias[i].Id" />
-
-                                            <input type="hidden"
-                                                   class="bg-dichvu-id"
-                                                   name="BangGias[@i].DichVuId"
-                                                   value="@Model.Id" />
-
-                                            <td>
-                                                <input type="text"
-                                                       class="form-control bg-loaithucung"
-                                                       name="BangGias[@i].Loaithucung"
-                                                       value="@Model.BangGias[i].Loaithucung" />
-                                            </td>
-
-                                            <td>
-                                                <select class="form-control bg-loailong"
-                                                        name="BangGias[@i].Loailong">
-
-                                                    @if (Model.BangGias[i].Loailong)
-                                                    {
-                                                        <option value="false">
-                                                            Không
-                                                        </option>
-
-                                                        <option value="true"
-                                                                selected>
-                                                            Có
-                                                        </option>
-                                                    }
-                                                    else
-                                                    {
-                                                        <option value="false"
-                                                                selected>
-                                                            Không
-                                                        </option>
-
-                                                        <option value="true">
-                                                            Có
-                                                        </option>
-                                                    }
-
-                                                </select>
-                                            </td>
-
-                                            <td>
-                                                <input type="number"
-                                                       min="0"
-                                                       class="form-control bg-cannangtu"
-                                                       name="BangGias[@i].Cannangtu"
-                                                       value="@Model.BangGias[i].Cannangtu" />
-                                            </td>
-
-                                            <td>
-                                                <input type="number"
-                                                       min="0"
-                                                       class="form-control bg-cannangden"
-                                                       name="BangGias[@i].Cannangden"
-                                                       value="@Model.BangGias[i].Cannangden" />
-                                            </td>
-
-                                            <td>
-                                                <input type="number"
-                                                       min="1"
-                                                       step="0.01"
-                                                       class="form-control bg-giadv"
-                                                       name="BangGias[@i].Giadv"
-                                                       value="@Model.BangGias[i].Giadv" />
-                                            </td>
-
-                                            <td class="text-center">
-                                                <button type="button"
-                                                        class="btn btn-danger btn-sm btn-remove-banggia">
-                                                    Xóa
-                                                </button>
-                                            </td>
-
-                                        </tr>
-                                    }
-                                }
-
-                            </tbody>
-
+                            <tbody id="bang-gia-edit-container"></tbody>
                         </table>
-
                     </div>
 
                     <button type="button"
-                            id="btn-add-banggia"
+                            id="btn-add-banggia-edit"
                             class="btn btn-success btn-sm">
                         + Thêm mức giá
                     </button>
@@ -220,79 +97,49 @@
                 </div>
 
                 @await Html.PartialAsync(
-                "~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml"
-                                )
-
+                                "~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
             </form>
-
         </div>
     </div>
 </div>
 
 <script>
     (function ($) {
+        var modal = $('#DichVuEditModal');
+        if (!modal.length) return;
 
-        var _dichVuService = abp.services.app.dichVu,
-            _$modal = $('#DichVuEditModal'),
-            _$form = $('#dichvu-edit-form');
+        var service = abp.services.app.dichVu;
+        var form = modal.find('#dichvu-edit-form');
 
-        // =========================
-        // Xóa mức giá
-        // =========================
+        function taoRow(data) {
+            data = data || {};
 
-        _$modal.on('click', '.btn-remove-banggia', function () {
+            var loaiPhong = data.loaiPhong ?? data.LoaiPhong ?? '';
+            var loaiLong = data.loailong === true || data.Loailong === true || data.loailong === 'true' || data.Loailong === 'true';
 
-            var rows = _$modal.find('.bang-gia-row');
-
-            if (rows.length <= 1) {
-                abp.notify.warn('Phải có ít nhất một mức giá.');
-                return;
-            }
-
-            $(this).closest('.bang-gia-row').remove();
-
-            updateIndexes();
-        });
-
-
-        // =========================
-        // Thêm mức giá
-        // =========================
-
-        $('#btn-add-banggia').click(function () {
-
-            var index = _$modal.find('.bang-gia-row').length;
-
-            var row = `
-                <tr class="bang-gia-row">
-
-                    <input type="hidden"
-                           class="bg-id"
-                           name="BangGias[${index}].Id"
-                           value="0" />
-
-                    <input type="hidden"
-                           name="BangGias[${index}].DichVuId"
-                           value="${$('#dv-id').val()}" />
-
+            return `
+                <tr class="bang-gia-edit-row">
                     <td>
-                        <input type="text"
-                               class="form-control bg-loaithucung"
-                               name="BangGias[${index}].Loaithucung" />
+                        <input type="hidden" class="bg-id" value="${data.id ?? data.Id ?? 0}">
+                        <select class="form-control bg-loaithucung">
+                            <option value="">-- Chọn --</option>
+                            <option value="Chó" ${data.loaithucung === 'Chó' || data.Loaithucung === 'Chó' ? 'selected' : ''}>Chó</option>
+                            <option value="Mèo" ${data.loaithucung === 'Mèo' || data.Loaithucung === 'Mèo' ? 'selected' : ''}>Mèo</option>
+                        </select>
                     </td>
 
                     <td>
-                        <select class="form-control bg-loailong"
-                                name="BangGias[${index}].Loailong">
+                        <select class="form-control bg-loaiphong">
+                            <option value="">-- Chọn phòng --</option>
+                            <option value="Thường" ${loaiPhong === 'Thường' ? 'selected' : ''}>Phòng thường</option>
+                            <option value="VIP" ${loaiPhong === 'VIP' ? 'selected' : ''}>Phòng VIP</option>
+                        </select>
+                    </td>
 
-                            <option value="false">
-                                Không
-                            </option>
-
-                            <option value="true">
-                                Có
-                            </option>
-
+                    <td>
+                        <select class="form-control bg-loailong">
+                            <option value="false" ${!loaiLong ? 'selected' : ''}>Không</option>
+                            <option value="true" ${loaiLong ? 'selected' : ''}>Có</option>
                         </select>
                     </td>
 
@@ -300,22 +147,30 @@
                         <input type="number"
                                min="0"
                                class="form-control bg-cannangtu"
-                               name="BangGias[${index}].Cannangtu" />
-                    </td>
-
-                    <td>
-                        <input type="number"
-                               min="0"
-                               class="form-control bg-cannangden"
-                               name="BangGias[${index}].Cannangden" />
+                               value="${data.cannangtu ?? data.Cannangtu ?? 0}">
                     </td>
 
                     <td>
                         <input type="number"
                                min="1"
+                               class="form-control bg-cannangden"
+                               value="${data.cannangden ?? data.Cannangden ?? 1}">
+                    </td>
+
+                    <td>
+                        <input type="number"
+                               min="1"
+                               max="1440"
+                               class="form-control bg-thoigian"
+                               value="${data.thoigianphut ?? data.ThoiGianPhut ?? 30}">
+                    </td>
+
+                    <td>
+                        <input type="number"
+                               min="0.01"
                                step="0.01"
                                class="form-control bg-giadv"
-                               name="BangGias[${index}].Giadv" />
+                               value="${data.giadv ?? data.Giadv ?? ''}">
                     </td>
 
                     <td class="text-center">
@@ -324,206 +179,270 @@
                             Xóa
                         </button>
                     </td>
+                </tr>`;
+        }
 
-                </tr>
-            `;
+        function updateLoaiPhong() {
+            var loaiDichVu = parseInt(modal.find('#dv-edit-loaidichvu').val()) || 0;
+            var laLuuTru = loaiDichVu === 2;
 
-            $('#bang-gia-container').append(row);
-        });
+            modal.find('.bg-loaiphong').each(function () {
+                $(this).prop('disabled', !laLuuTru);
 
-
-        // =========================
-        // Cập nhật index
-        // =========================
-
-        function updateIndexes() {
-
-            $('#bang-gia-container .bang-gia-row').each(function (index) {
-
-                $(this).find('.bg-id')
-                    .attr('name', `BangGias[${index}].Id`);
-
-                $(this).find('.bg-dichvu-id')
-                    .attr('name', `BangGias[${index}].DichVuId`);
-
-                $(this).find('.bg-loaithucung')
-                    .attr('name', `BangGias[${index}].Loaithucung`);
-
-                $(this).find('.bg-loailong')
-                    .attr('name', `BangGias[${index}].Loailong`);
-
-                $(this).find('.bg-cannangtu')
-                    .attr('name', `BangGias[${index}].Cannangtu`);
-
-                $(this).find('.bg-cannangden')
-                    .attr('name', `BangGias[${index}].Cannangden`);
-
-                $(this).find('.bg-giadv')
-                    .attr('name', `BangGias[${index}].Giadv`);
+                if (!laLuuTru) {
+                    $(this).val('');
+                }
             });
         }
 
-
-        // =========================
-        // Lưu
-        // =========================
-
-        async function save() {
-
-            if (!_$form.valid()) {
+        function populateForm(data) {
+            if (!data) {
+                abp.notify.error('Không tìm thấy dữ liệu dịch vụ.');
                 return;
             }
 
-            var bangGias = [];
+            modal.find('#dv-edit-id').val(data.id);
+            modal.find('#dv-edit-tendichvu').val(data.tendichvu || '');
+            modal.find('#dv-edit-mota').val(data.mota || '');
 
-            $('#bang-gia-container .bang-gia-row').each(function () {
+            var loaiDichVu = data.loaiDichVu ?? data.loaidichvu ?? data.LoaiDichVu ?? '';
+            modal.find('#dv-edit-loaidichvu').val(String(loaiDichVu));
+
+            modal.find('#dv-edit-trangthai')
+                .val(data.trangthai ? 'true' : 'false');
+
+            var container = modal.find('#bang-gia-edit-container');
+            container.empty();
+
+            if (data.bangGias && data.bangGias.length > 0) {
+                $.each(data.bangGias, function (index, bg) {
+                    console.log('Bảng giá ' + index + ':', bg);
+                    console.log('LoaiPhong:', bg.loaiphong);
+                    container.append(taoRow(bg));
+                });
+            } else {
+                container.append(taoRow());
+            }
+
+            updateLoaiPhong();
+        }
+
+        function loadDichVu(id) {
+            if (!id || id <= 0) {
+                abp.notify.error('Không xác định được dịch vụ cần sửa.');
+                return;
+            }
+
+            console.log('Đang load dịch vụ ID:', id);
+
+            abp.ui.setBusy(form);
+
+            service.getDichVu(id)
+                .done(function (data) {
+                    console.log('Dữ liệu dịch vụ lấy được:', data);
+                    populateForm(data);
+                })
+                .fail(function (error) {
+                    console.error('Lỗi lấy dịch vụ:', error);
+                    console.error('Response:', error.responseJSON);
+
+                    var message =
+                        error.message ||
+                        (error.responseJSON &&
+                         error.responseJSON.error &&
+                         error.responseJSON.error.message) ||
+                        'Không thể lấy dữ liệu dịch vụ.';
+
+                    abp.notify.error(message);
+                })
+                .always(function () {
+                    abp.ui.clearBusy(form);
+                });
+        }
+
+        modal.off('.dichvuEdit');
+
+        modal.on('click.dichvuEdit', '#btn-add-banggia-edit', function (e) {
+            e.preventDefault();
+
+            modal.find('#bang-gia-edit-container')
+                .append(taoRow());
+
+            updateLoaiPhong();
+        });
+
+        modal.on('change.dichvuEdit', '#dv-edit-loaidichvu', function () {
+            updateLoaiPhong();
+        });
+
+        modal.on('click.dichvuEdit', '.btn-remove-banggia', function () {
+            if (modal.find('.bang-gia-edit-row').length <= 1) {
+                abp.notify.warn('Phải có ít nhất một mức giá.');
+                return;
+            }
+
+            $(this).closest('.bang-gia-edit-row').remove();
+        });
+
+        modal.on('click.dichvuEdit', '.save-button', function (e) {
+            e.preventDefault();
+
+            var id = parseInt(modal.find('#dv-edit-id').val()) || 0;
+            var tenDichVu = (modal.find('#dv-edit-tendichvu').val() || '').trim();
+            var loaiDichVu = parseInt(modal.find('#dv-edit-loaidichvu').val()) || 0;
+            var bangGias = [];
+            var valid = true;
+
+            if (!id) {
+                abp.notify.error('Không xác định được dịch vụ.');
+                return;
+            }
+
+            if (!tenDichVu) {
+                abp.notify.error('Vui lòng nhập tên dịch vụ.');
+                return;
+            }
+
+            if (loaiDichVu !== 1 && loaiDichVu !== 2) {
+                abp.notify.error('Vui lòng chọn loại dịch vụ.');
+                return;
+            }
+
+            var rows = modal.find('.bang-gia-edit-row');
+
+            if (!rows.length) {
+                abp.notify.error('Vui lòng thêm ít nhất một mức giá.');
+                return;
+            }
+
+            rows.each(function () {
+                if (!valid) return;
 
                 var row = $(this);
 
+                var doiTuong = row.find('.bg-loaithucung').val();
+                var loaiPhong = row.find('.bg-loaiphong').val() || null;
+                var loaiLong = row.find('.bg-loailong').val() === 'true';
+                var canNangTu = parseInt(row.find('.bg-cannangtu').val()) || 0;
+                var canNangDen = parseInt(row.find('.bg-cannangden').val()) || 0;
+                var thoiGian = parseInt(row.find('.bg-thoigian').val()) || 0;
+                var gia = parseFloat(row.find('.bg-giadv').val()) || 0;
+
+                if (!doiTuong) {
+                    abp.notify.error('Vui lòng chọn đối tượng Chó hoặc Mèo.');
+                    valid = false;
+                    return;
+                }
+
+                if (loaiDichVu === 2 && !loaiPhong) {
+                    abp.notify.error('Vui lòng chọn loại phòng cho dịch vụ lưu trú.');
+                    valid = false;
+                    return;
+                }
+
+                if (loaiDichVu === 1) {
+                    loaiPhong = null;
+                }
+
+                if (canNangDen <= canNangTu) {
+                    abp.notify.error('Cân nặng đến phải lớn hơn cân nặng từ.');
+                    valid = false;
+                    return;
+                }
+
+                if (thoiGian < 1 || thoiGian > 1440) {
+                    abp.notify.error('Thời gian phải từ 1 đến 1440 phút.');
+                    valid = false;
+                    return;
+                }
+
+                if (gia <= 0) {
+                    abp.notify.error('Giá phải lớn hơn 0.');
+                    valid = false;
+                    return;
+                }
+
+                var trung = bangGias.some(function (x) {
+                    return x.Loaithucung === doiTuong &&
+                        x.LoaiPhong === loaiPhong &&
+                        x.Loailong === loaiLong &&
+                        x.Cannangtu === canNangTu &&
+                        x.Cannangden === canNangDen;
+                });
+
+                if (trung) {
+                    abp.notify.error('Không được nhập trùng mức giá.');
+                    valid = false;
+                    return;
+                }
+
                 bangGias.push({
-
-                    Id: parseInt(
-                        row.find('.bg-id').val() || 0,
-                        10
-                    ),
-
-                    DichVuId: parseInt(
-                        $('#dv-id').val(),
-                        10
-                    ),
-
-                    Loaithucung:
-                        row.find('.bg-loaithucung').val(),
-
-                    Loailong:
-                        row.find('.bg-loailong').val() === 'true',
-
-                    Cannangtu:
-                        parseInt(
-                            row.find('.bg-cannangtu').val(),
-                            10
-                        ),
-
-                    Cannangden:
-                        parseInt(
-                            row.find('.bg-cannangden').val(),
-                            10
-                        ),
-
-                    Giadv:
-                        parseFloat(
-                            row.find('.bg-giadv').val()
-                        )
+                    Id: parseInt(row.find('.bg-id').val()) || 0,
+                    DichVuId: id,
+                    Loaithucung: doiTuong,
+                    LoaiPhong: loaiPhong,
+                    Loailong: loaiLong,
+                    Cannangtu: canNangTu,
+                    Cannangden: canNangDen,
+                    ThoiGianPhut: thoiGian,
+                    Giadv: gia
                 });
             });
 
+            if (!valid) return;
 
             var input = {
-
-                Id: parseInt(
-                    $('#dv-id').val(),
-                    10
-                ),
-
-                Tendichvu:
-                    $('#dv-tendichvu').val(),
-
-                Mota:
-                    $('#dv-mota').val(),
-
-                Trangthai:
-                    $('#dv-trangthai').val() === 'true',
-
-                BangGias:
-                    bangGias
+                Id: id,
+                Tendichvu: tenDichVu,
+                Mota: (modal.find('#dv-edit-mota').val() || '').trim(),
+                LoaiDichVu: loaiDichVu,
+                Trangthai: modal.find('#dv-edit-trangthai').val() === 'true',
+                BangGias: bangGias
             };
 
+            console.log('Dữ liệu sửa:', JSON.stringify(input, null, 2));
 
-            console.log("Dữ liệu cập nhật:", input);
+            abp.ui.setBusy(form);
 
+            service.update(input)
+                .done(function () {
+                    abp.notify.success('Cập nhật dịch vụ thành công.');
+                    modal.modal('hide');
+                    location.reload();
+                })
+                .fail(function (error) {
+                    console.error('Lỗi cập nhật:', error);
+                    console.error(error.responseJSON);
 
-            abp.ui.setBusy(_$form);
+                    var message =
+                        error.message ||
+                        (error.responseJSON &&
+                         error.responseJSON.error &&
+                         error.responseJSON.error.message) ||
+                        'Không thể cập nhật dịch vụ.';
 
-            try {
+                    abp.notify.error(message);
+                })
+                .always(function () {
+                    abp.ui.clearBusy(form);
+                });
+        });
 
-                await _dichVuService.update(input);
+        // Khi modal mở -> lấy ID từ data-id -> gọi API
+        modal.on('shown.bs.modal.dichvuEdit', function () {
+            var id = parseInt(modal.attr('data-id')) ||
+                     parseInt(modal.data('id')) ||
+                     parseInt(modal.find('#dv-edit-id').val()) ||
+                     0;
 
-                abp.notify.success(
-                    'Cập nhật dịch vụ thành công.'
-                );
+            console.log('Modal mở - ID dịch vụ:', id);
 
-                _$modal.modal('hide');
-
-                abp.event.trigger(
-                    'dichVu.edited',
-                    input
-                );
-
+            if (id > 0) {
+                loadDichVu(id);
+            } else {
+                abp.notify.error('Không xác định được ID dịch vụ.');
             }
-            catch (error) {
-
-                console.error(
-                    'Lỗi cập nhật dịch vụ:',
-                    error
-                );
-
-                abp.notify.error(
-                    error.message ||
-                    'Có lỗi xảy ra khi cập nhật dịch vụ.'
-                );
-
-            }
-            finally {
-
-                abp.ui.clearBusy(_$form);
-            }
-        }
-
-
-        // =========================
-        // Nút Lưu
-        // =========================
-
-        _$modal
-            .find('.save-button')
-            .off('click')
-            .on('click', function (e) {
-
-                e.preventDefault();
-
-                save();
-            });
-
-
-        // =========================
-        // Enter để lưu
-        // =========================
-
-        _$form.find('input').on(
-            'keypress',
-            function (e) {
-
-                if (e.which === 13) {
-
-                    e.preventDefault();
-
-                    save();
-                }
-            }
-        );
-
-
-        // =========================
-        // Focus
-        // =========================
-
-        _$modal.on(
-            'shown.bs.modal',
-            function () {
-
-                $('#dv-tendichvu').focus();
-            }
-        );
+        });
 
     })(jQuery);
 </script>

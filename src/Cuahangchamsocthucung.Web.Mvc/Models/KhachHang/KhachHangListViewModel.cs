@@ -5,6 +5,6 @@ namespace Cuahangchamsocthucung.Web.Models.KhachHang
 {
     public class KhachHangListViewModel
     {
-        public IReadOnlyList<KhachHangDto> KhachHangs { get; set; }
+        public List<KhachHangDto> KhachHangs { get; set; } = new List<KhachHangDto>();
     }
 }

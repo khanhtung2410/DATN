@@ -1,5 +1,6 @@
 using Cuahangchamsocthucung.Enum;
 using Cuahangchamsocthucung.LichChamSoc.Dto;
+using System;
 using System.Collections.Generic;
 
 namespace Cuahangchamsocthucung.Web.Models.LichChamSoc
@@ -11,5 +12,16 @@ namespace Cuahangchamsocthucung.Web.Models.LichChamSoc
         public TrangThaiLichChamSoc? TrangThai { get; set; }
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
+        public DateTime? TuNgay { get; set; }
+        public DateTime? DenNgay { get; set; }
+    }
+    public class LichChamSocTimelineViewModel
+    {
+        public DateTime Ngay { get; set; }
+
+        public int? NhanVienId { get; set; }
+
+        public List<LichChamSocTimelineDto> LichChamSocs { get; set; }
+            = new List<LichChamSocTimelineDto>();
     }
 }

@@ -1,0 +1,48 @@
+﻿@using Cuahangchamsocthucung.Web.Models.Common.Modals
+@using Cuahangchamsocthucung.MatHang.Dto
+@model MatHangDto
+@{
+    Layout = null;
+}
+
+<div class="modal-header">
+    <h5 class="modal-title"><i class="fa fa-edit"></i> Sửa mặt hàng</h5>
+    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+</div>
+
+<form name="MatHangEditForm" role="form" class="form-horizontal">
+    <div class="modal-body">
+        <input type="hidden" name="Id" value="@Model.Id" />
+
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label">Tên mặt hàng</label>
+            <div class="col-md-9">
+                <input type="text" name="Tenmathang" class="form-control" value="@Model.Tenmathang" maxlength="200" required />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label">Mô tả</label>
+            <div class="col-md-9">
+                <textarea name="Mota" class="form-control" rows="3">@Model.Mota</textarea>
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label">Số lượng</label>
+            <div class="col-md-9">
+                <input type="number" name="Soluong" class="form-control" min="0" step="1" value="@Model.Soluong" required />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label">Trạng thái</label>
+            <div class="col-md-9 pt-2">
+                <input type="checkbox" name="Trangthai" value="true" @(Model.Trangthai ? "checked" : "") />
+                <label class="ml-1">Hoạt động</label>
+            </div>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
+</form>

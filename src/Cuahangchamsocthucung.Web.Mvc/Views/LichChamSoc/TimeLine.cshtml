@@ -1,0 +1,549 @@
+﻿@model Cuahangchamsocthucung.Web.Models.LichChamSoc.LichChamSocTimelineViewModel
+
+@{
+    ViewBag.Title = "Lịch chăm sóc trong ngày";
+    ViewBag.CurrentPageName = "Lịch chăm sóc";
+
+    var startHour = 7;
+    var endHour = 21;
+    var totalHours = endHour - startHour;
+
+    // Lọc nhân viên nếu có chọn
+    var lichChamSocs = Model.LichChamSocs;
+
+    if (Model.NhanVienId.HasValue)
+    {
+        lichChamSocs = lichChamSocs
+            .Where(x => x.NhanVienId == Model.NhanVienId.Value)
+            .ToList();
+    }
+
+    // Danh sách nhân viên xuất hiện trong timeline
+    var nhanViens = lichChamSocs
+        .GroupBy(x => new
+        {
+            x.NhanVienId,
+            x.TenNhanVien
+        })
+        .OrderBy(x => x.Key.TenNhanVien)
+        .ToList();
+
+    // Danh sách nhân viên cho dropdown
+    var danhSachNhanVien = Model.LichChamSocs
+        .Where(x => x.NhanVienId.HasValue)
+        .GroupBy(x => new
+        {
+            x.NhanVienId,
+            x.TenNhanVien
+        })
+        .OrderBy(x => x.Key.TenNhanVien)
+        .ToList();
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+
+            <div class="col-sm-5">
+                <h1>
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    Lịch chăm sóc trong ngày
+                </h1>
+            </div>
+
+            <div class="col-sm-7">
+                <form method="get"
+                      action="@Url.Action("Timeline", "LichChamSoc")"
+                      class="form-inline justify-content-end">
+
+                    <!-- LỌC NHÂN VIÊN -->
+                    <select name="nhanVienId"
+                            class="form-control mr-2">
+
+                        <option value="">
+                            -- Tất cả nhân viên --
+                        </option>
+
+                        @foreach (var nv in danhSachNhanVien)
+                        {
+                            <option value="@nv.Key.NhanVienId"
+                                    selected="@(Model.NhanVienId == nv.Key.NhanVienId)">
+                                @nv.Key.TenNhanVien
+                            </option>
+                        }
+                    </select>
+
+                    <!-- CHỌN NGÀY -->
+                    <input type="date"
+                           name="ngay"
+                           value="@Model.Ngay.ToString("yyyy-MM-dd")"
+                           class="form-control mr-2" />
+
+                    <!-- NÚT XEM -->
+                    <button type="submit"
+                            class="btn btn-primary">
+                        <i class="fas fa-search mr-1"></i>
+                        Xem
+                    </button>
+
+                    <!-- XÓA LỌC -->
+                    @if (Model.NhanVienId.HasValue)
+                    {
+                        <a href="@Url.Action(
+                                                       "Timeline",
+                                                       "LichChamSoc",
+                                                       new { ngay = Model.Ngay.ToString("yyyy-MM-dd") })"
+                       class="btn btn-secondary ml-2">
+
+                            <i class="fas fa-redo mr-1"></i>
+                            Xóa lọc
+                        </a>
+                                        }
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="content">
+    <div class="container-fluid">
+
+        <div class="card">
+
+            <!-- CARD HEADER -->
+            <div class="card-header">
+
+                <h3 class="card-title">
+                    <i class="fas fa-calendar-day mr-2"></i>
+
+                    Ngày @Model.Ngay.ToString("dd/MM/yyyy")
+
+                    @if (Model.NhanVienId.HasValue)
+                    {
+                        var tenNhanVien =
+                        danhSachNhanVien
+                        .FirstOrDefault(x =>
+                        x.Key.NhanVienId == Model.NhanVienId)
+                        ?.Key.TenNhanVien;
+
+                        if (!string.IsNullOrEmpty(tenNhanVien))
+                        {
+                            <span class="text-muted ml-2">
+                                -
+                                @tenNhanVien
+                            </span>
+                        }
+                    }
+
+                </h3>
+
+            </div>
+
+
+            <!-- CARD BODY -->
+            <div class="card-body">
+
+                @if (!lichChamSocs.Any())
+                {
+                    <div class="alert alert-info mb-0">
+
+                        <i class="fas fa-info-circle mr-1"></i>
+
+                        @if (Model.NhanVienId.HasValue)
+                        {
+                            <span>
+                                Nhân viên này không có lịch chăm sóc
+                                trong ngày @Model.Ngay.ToString("dd/MM/yyyy").
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                Không có lịch chăm sóc trong ngày này.
+                            </span>
+                        }
+
+                    </div>
+                }
+                else
+                {
+
+                    <div class="timeline-wrapper">
+
+                        <!-- ========================= -->
+                        <!-- HEADER GIỜ -->
+                        <!-- ========================= -->
+
+                        <div class="timeline-header">
+
+                            <div class="employee-header">
+                                Nhân viên
+                            </div>
+
+                            <div class="hours">
+
+                                @for (
+                                                            var hour = startHour;
+                                                            hour <= endHour;
+                                                            hour++)
+                                {
+                                    <div class="hour">
+                                        @hour.ToString("00"):00
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================= -->
+                        <!-- CÁC NHÂN VIÊN -->
+                        <!-- ========================= -->
+                        @foreach (var group in nhanViens)
+                        {
+                            <div class="timeline-row">
+
+                                <!-- TÊN NHÂN VIÊN -->
+                                <div class="employee-name">
+
+                                    @if (group.Key.NhanVienId.HasValue)
+                                    {
+                                        <strong>
+                                            @group.Key.TenNhanVien
+                                        </strong>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Chưa phân công
+                                        </span>
+                                    }
+
+                                </div>
+
+
+                                <!-- TIMELINE -->
+                                <div class="timeline">
+
+                                    <!-- ========================= -->
+                                    <!-- ĐƯỜNG DỌC THEO GIỜ -->
+                                    <!-- ========================= -->
+                                    @for (
+                                                                var hour = startHour;
+                                                                hour <= endHour;
+                                                                hour++)
+                                    {
+                                        <div class="grid-line"
+                                             style="
+                                                            left:@(
+                                             ((hour - startHour)
+                                             * 100.0
+                                             / totalHours)
+                                             .ToString(
+                                                 System.Globalization.CultureInfo.InvariantCulture
+                                             )
+                                                                                                )%;
+                                                     ">
+                                    </div>
+                                }
+
+
+                                <!-- ========================= -->
+                                <!-- LỊCH CHĂM SÓC -->
+                                <!-- ========================= -->
+                                @foreach (var item in group)
+                                {
+                                    var startMinutes =
+                                    (item.ThoiGian.Hour - startHour) * 60
+                                    + item.ThoiGian.Minute;
+
+                                    var left =
+                                    startMinutes
+                                    / (totalHours * 60.0)
+                                    * 100;
+
+                                    var width =
+                                    item.ThoiGianPhut
+                                    / (totalHours * 60.0)
+                                    * 100;
+
+                                    <div class="schedule-item"
+                                         style="
+                                                        left:@left.ToString(
+                                                                                             "0.##",
+                                                                                             System.Globalization.CultureInfo.InvariantCulture
+                                                                                         )%;
+                                                width:@width.ToString(
+                                                                                     "0.##",
+                                                                                     System.Globalization.CultureInfo.InvariantCulture
+                                                                                 )%;
+                                             "
+                                 title="@item.TenDichVu">
+
+                                        <!-- TÊN DỊCH VỤ -->
+                                        <div class="schedule-title">
+
+                                            <i class="fas fa-cut mr-1"></i>
+
+                                            @item.TenDichVu
+
+                                        </div>
+
+
+                                        <!-- THÚ CƯNG -->
+                                        <div class="schedule-info">
+
+                                            <i class="fas fa-paw mr-1"></i>
+
+                                            @item.TenThuCung
+
+                                        </div>
+
+
+                                        <!-- THỜI GIAN -->
+                                        <div class="schedule-time">
+
+                                            <i class="far fa-clock mr-1"></i>
+
+                                            @item.ThoiGian.ToString("HH:mm")
+                                            -
+                                            @item.ThoiGianKetThuc.ToString("HH:mm")
+
+                                        </div>
+
+
+                                        <!-- THỜI LƯỢNG -->
+                                        <div class="schedule-duration">
+
+                                            @item.ThoiGianPhut phút
+
+                                        </div>
+
+                                    </div>
+                                                        }
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+                                }
+
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<style>
+
+    /* ========================================= */
+    /* WRAPPER */
+    /* ========================================= */
+
+    .timeline-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+
+    /* ========================================= */
+    /* HEADER + ROW */
+    /* ========================================= */
+
+    .timeline-header,
+    .timeline-row {
+        display: flex;
+        min-width: 1100px;
+    }
+
+
+    /* ========================================= */
+    /* NHÂN VIÊN */
+    /* ========================================= */
+
+    .employee-header,
+    .employee-name {
+        width: 180px;
+        min-width: 180px;
+        padding: 12px;
+        border-right: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+
+
+    .employee-header {
+        font-weight: 600;
+        text-align: center;
+    }
+
+
+    .employee-name {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+    }
+
+
+    /* ========================================= */
+    /* GIỜ */
+    /* ========================================= */
+
+    .hours,
+    .timeline {
+        flex: 1;
+        position: relative;
+    }
+
+
+    .hours {
+        display: flex;
+        height: 45px;
+        background: #f8f9fa;
+    }
+
+
+    .hour {
+        flex: 1;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        padding-top: 12px;
+        border-right: 1px solid #dee2e6;
+    }
+
+
+    /* ========================================= */
+    /* ROW */
+    /* ========================================= */
+
+    .timeline-row {
+        min-height: 90px;
+        border-top: 1px solid #dee2e6;
+    }
+
+
+    .timeline {
+        min-height: 90px;
+        background: #fff;
+    }
+
+
+    /* ========================================= */
+    /* GRID */
+    /* ========================================= */
+
+    .grid-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: #e9ecef;
+        pointer-events: none;
+    }
+
+
+    /* ========================================= */
+    /* LỊCH */
+    /* ========================================= */
+
+    .schedule-item {
+        position: absolute;
+        top: 10px;
+        height: 70px;
+        min-width: 90px;
+        background: #17a2b8;
+        color: white;
+        border-radius: 6px;
+        padding: 7px 10px;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, .15);
+        transition: .15s;
+    }
+
+
+        .schedule-item:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .2);
+        }
+
+
+    /* ========================================= */
+    /* TÊN DỊCH VỤ */
+    /* ========================================= */
+
+    .schedule-title {
+        font-weight: 600;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+
+
+    /* ========================================= */
+    /* THÚ CƯNG */
+    /* ========================================= */
+
+    .schedule-info {
+        font-size: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    /* ========================================= */
+    /* THỜI GIAN */
+    /* ========================================= */
+
+    .schedule-time {
+        font-size: 11px;
+        margin-top: 3px;
+        white-space: nowrap;
+    }
+
+
+    /* ========================================= */
+    /* THỜI LƯỢNG */
+    /* ========================================= */
+
+    .schedule-duration {
+        font-size: 10px;
+        opacity: .85;
+        white-space: nowrap;
+    }
+
+
+    /* ========================================= */
+    /* RESPONSIVE */
+    /* ========================================= */
+
+    @@media (max-width: 768px) {
+
+        .employee-header,
+        .employee-name {
+            width: 140px;
+            min-width: 140px;
+        }
+
+        .timeline-header,
+        .timeline-row {
+            min-width: 1000px;
+        }
+    }
+
+</style>

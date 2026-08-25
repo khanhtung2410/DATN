@@ -12,8 +12,11 @@ namespace Cuahangchamsocthucung.Web.Controllers
         private readonly LandingAppService _landingAppService;
         private readonly IThuCungAppService _thuCungAppService;
         private readonly ILichChamSocAppService _lichChamSocAppService;
+
         public LandingController(
-            LandingAppService landingAppService, IThuCungAppService thuCungAppService, ILichChamSocAppService lichChamSocAppService)
+            LandingAppService landingAppService,
+            IThuCungAppService thuCungAppService,
+            ILichChamSocAppService lichChamSocAppService)
         {
             _landingAppService = landingAppService;
             _thuCungAppService = thuCungAppService;
@@ -29,51 +32,57 @@ namespace Cuahangchamsocthucung.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> KhachSan()
         {
-            var bangGias = await _landingAppService
-                .GetBangGia("Trông giữ thú cưng");
-
+            var bangGias = await _landingAppService.GetBangGia("Trông giữ thú cưng");
             return View(bangGias);
         }
 
         [AllowAnonymous]
         public async Task<IActionResult> TamSpa()
         {
-            var bangGias = await _landingAppService
-                .GetBangGia("Tắm Spa");
-
+            var bangGias = await _landingAppService.GetBangGia("Tắm Spa");
             return View(bangGias);
         }
 
         [AllowAnonymous]
         public async Task<IActionResult> CatTiaLong()
         {
-            var bangGias = await _landingAppService
-                .GetBangGia("Cắt tỉa lông");
-
+            var bangGias = await _landingAppService.GetBangGia("Cắt tỉa lông");
             return View(bangGias);
         }
+
         [AbpAuthorize]
         public async Task<IActionResult> ThuCung()
         {
             var thuCungs = await _thuCungAppService.GetCuaToi();
-
             return View(thuCungs);
         }
+
         [AbpAuthorize]
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
-        [Authorize]
+
+        [AbpAuthorize]
         public async Task<IActionResult> LichChamSoc()
         {
             var lichDangXuLy = await _lichChamSocAppService.GetLichChamSocCuaToi();
             var lichSu = await _lichChamSocAppService.GetLichSuLichChamSocCuaToi();
-
             ViewBag.LichDangXuLy = lichDangXuLy;
             ViewBag.LichSu = lichSu;
+            return View();
+        }
 
+        [AbpAuthorize]
+        [HttpGet]
+        public IActionResult ThongTinCaNhan()
+        {
+            return View();
+        }
+        [AbpAuthorize]
+        public async Task<IActionResult> ThongBao()
+        {
             return View();
         }
     }

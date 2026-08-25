@@ -39,20 +39,20 @@
                 <div class="card">
                     <div class="card-header"></div>
                     <div class="card-body">
+
                         <!-- FILTER -->
                         <form method="get" asp-action="Index" class="mb-4">
                             <div class="row">
-                                <div class="col-md-5">
+                                <div class="col-md-4">
                                     <div class="form-group mb-0">
                                         <label>Khách hàng</label>
-                                        <input type="text"
-                                               name="tenKhachHang"
-                                               class="form-control"
+                                        <input type="text" name="tenKhachHang" class="form-control"
                                                placeholder="Nhập tên khách hàng..."
                                                value="@Model.TenKhachHang" />
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+
+                                <div class="col-md-3">
                                     <div class="form-group mb-0">
                                         <label>Trạng thái</label>
                                         <select name="trangThai" class="form-control">
@@ -71,14 +71,34 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary mr-2">
-                                        <i class="fas fa-search"></i> Lọc
-                                    </button>
-                                    <a asp-action="Index" class="btn btn-secondary">
-                                        <i class="fas fa-redo"></i> Xóa lọc
-                                    </a>
+
+                                <div class="col-md-2">
+                                    <div class="form-group mb-0">
+                                        <label>Từ ngày</label>
+                                        <input type="date" name="tuNgay" class="form-control"
+                                               value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
+                                    </div>
                                 </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group mb-0">
+                                        <label>Đến ngày</label>
+                                        <input type="date" name="denNgay" class="form-control"
+                                               value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100" title="Lọc">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <a asp-action="Index" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-redo mr-1"></i> Xóa lọc
+                                </a>
                             </div>
                         </form>
 
@@ -92,7 +112,7 @@
                                         <th>Khách hàng</th>
                                         <th>Nhân viên</th>
                                         <th>Trạng thái</th>
-                                        <th class="text-center" style="min-width:520px;white-space:nowrap;">Hành động</th>
+                                        <th class="text-center" style="min-width:650px;white-space:nowrap;">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -105,13 +125,40 @@
                                                 <td>@item.ThoiGian.ToString("dd/MM/yyyy HH:mm")</td>
                                                 <td>@item.TenKhachHang</td>
                                                 <td>@(string.IsNullOrEmpty(item.TenNhanVien) ? "Chưa phân công" : item.TenNhanVien)</td>
-                                                <td>@HienThiTrangThai(item.TrangThai)</td>
+
+                                                <td>
+                                                    @switch (item.TrangThai)
+                                                    {
+                                                        case TrangThaiLichChamSoc.ChoXacNhan:
+                                                            <span class="badge badge-secondary">Chờ xác nhận</span>
+                                                            break;
+                                                        case TrangThaiLichChamSoc.DaXacNhan:
+                                                            <span class="badge badge-primary">Đã xác nhận</span>
+                                                            break;
+                                                        case TrangThaiLichChamSoc.DangDienRa:
+                                                            <span class="badge badge-warning">Đang diễn ra</span>
+                                                            break;
+                                                        case TrangThaiLichChamSoc.HoanThanh:
+                                                            <span class="badge badge-success">Hoàn thành</span>
+                                                            break;
+                                                        case TrangThaiLichChamSoc.DaHuy:
+                                                            <span class="badge badge-danger">Đã hủy</span>
+                                                            break;
+                                                        case TrangThaiLichChamSoc.BiTuChoi:
+                                                            <span class="badge badge-dark">Bị từ chối</span>
+                                                            break;
+                                                        default:
+                                                            <span class="badge badge-secondary">@HienThiTrangThai(item.TrangThai)</span>
+                                                            break;
+                                                    }
+                                                </td>
+
                                                 <td class="text-center" style="white-space:nowrap;">
-                                                    <div class="d-flex justify-content-center align-items-center" style="gap:5px;">
+                                                    <div class="d-flex justify-content-center align-items-center flex-wrap" style="gap:5px;">
+
                                                         <button type="button" class="btn btn-sm btn-info xem-chi-tiet" data-id="@item.Id">
                                                             <i class="fas fa-eye"></i> Xem chi tiết
                                                         </button>
-
                                                         @if (item.TrangThai == TrangThaiLichChamSoc.ChoXacNhan)
                                                         {
                                                             <button type="button" class="btn btn-sm btn-primary phan-cong-lich" data-id="@item.Id">
@@ -125,10 +172,26 @@
                                                             <button type="button" class="btn btn-sm btn-secondary edit-lich" data-id="@item.Id">
                                                                 <i class="fas fa-edit"></i> Sửa
                                                             </button>
+
                                                             <button type="button" class="btn btn-sm btn-danger tu-choi-lich" data-id="@item.Id">
                                                                 <i class="fas fa-ban"></i> Từ chối
                                                             </button>
                                                         }
+
+                                                        @if (item.TrangThai == TrangThaiLichChamSoc.DaXacNhan)
+                                                        {
+                                                            <button type="button" class="btn btn-sm btn-warning bat-dau-viec" data-id="@item.Id">
+                                                                <i class="fas fa-play"></i> Bắt đầu việc
+                                                            </button>
+                                                        }
+
+                                                        @if (item.TrangThai == TrangThaiLichChamSoc.DangDienRa)
+                                                        {
+                                                            <button type="button" class="btn btn-sm btn-success hoan-thanh-lich" data-id="@item.Id">
+                                                                <i class="fas fa-check"></i> Hoàn thành
+                                                            </button>
+                                                        }
+
                                                     </div>
                                                 </td>
                                             </tr>
@@ -151,12 +214,15 @@
                         @if (Model.TotalPages > 1)
                         {
                             <div class="d-flex justify-content-between align-items-center mt-3">
+
                                 <div class="text-muted">
                                     Trang @Model.CurrentPage / @Model.TotalPages
                                 </div>
 
                                 <nav>
                                     <ul class="pagination mb-0">
+
+                                        <!-- TRANG TRƯỚC -->
                                         <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
                                             @if (Model.CurrentPage > 1)
                                             {
@@ -164,7 +230,9 @@
                                                    asp-action="Index"
                                                    asp-route-page="@(Model.CurrentPage - 1)"
                                                    asp-route-tenKhachHang="@Model.TenKhachHang"
-                                                   asp-route-trangThai="@Model.TrangThai">
+                                                   asp-route-trangThai="@Model.TrangThai"
+                                                   asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                                                   asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")">
                                                     <i class="fas fa-chevron-left"></i>
                                                 </a>
                                             }
@@ -176,19 +244,100 @@
                                             }
                                         </li>
 
-                                        @for (var i = 1; i <= Model.TotalPages; i++)
+
+                                        @{
+                                            int startPage;
+                                            int endPage;
+
+                                            if (Model.TotalPages <= 7)
+                                            {
+                                                startPage = 1;
+                                                endPage = Model.TotalPages;
+                                            }
+                                            else if (Model.CurrentPage <= 4)
+                                            {
+                                                startPage = 1;
+                                                endPage = 5;
+                                            }
+                                            else if (Model.CurrentPage >= Model.TotalPages - 3)
+                                            {
+                                                startPage = Model.TotalPages - 4;
+                                                endPage = Model.TotalPages;
+                                            }
+                                            else
+                                            {
+                                                startPage = Model.CurrentPage - 2;
+                                                endPage = Model.CurrentPage + 2;
+                                            }
+                                        }
+
+
+                                        <!-- TRANG 1 -->
+                                        @if (startPage > 1)
+                                        {
+                                            <li class="page-item @(Model.CurrentPage == 1 ? "active" : "")">
+                                                <a class="page-link"
+                                                   asp-action="Index"
+                                                   asp-route-page="1"
+                                                   asp-route-tenKhachHang="@Model.TenKhachHang"
+                                                   asp-route-trangThai="@Model.TrangThai"
+                                                   asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                                                   asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")">
+                                                    1
+                                                </a>
+                                            </li>
+
+                                            @if (startPage > 2)
+                                            {
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            }
+                                        }
+
+
+                                        <!-- CÁC TRANG Ở GIỮA -->
+                                        @for (var i = startPage; i <= endPage; i++)
                                         {
                                             <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                                                 <a class="page-link"
                                                    asp-action="Index"
                                                    asp-route-page="@i"
                                                    asp-route-tenKhachHang="@Model.TenKhachHang"
-                                                   asp-route-trangThai="@Model.TrangThai">
+                                                   asp-route-trangThai="@Model.TrangThai"
+                                                   asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                                                   asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")">
                                                     @i
                                                 </a>
                                             </li>
                                         }
 
+
+                                        <!-- TRANG CUỐI -->
+                                        @if (endPage < Model.TotalPages)
+                                        {
+                                            @if (endPage < Model.TotalPages - 1)
+                                            {
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            }
+
+                                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "active" : "")">
+                                                <a class="page-link"
+                                                   asp-action="Index"
+                                                   asp-route-page="@Model.TotalPages"
+                                                   asp-route-tenKhachHang="@Model.TenKhachHang"
+                                                   asp-route-trangThai="@Model.TrangThai"
+                                                   asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                                                   asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")">
+                                                    @Model.TotalPages
+                                                </a>
+                                            </li>
+                                        }
+
+
+                                        <!-- TRANG SAU -->
                                         <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
                                             @if (Model.CurrentPage < Model.TotalPages)
                                             {
@@ -196,7 +345,9 @@
                                                    asp-action="Index"
                                                    asp-route-page="@(Model.CurrentPage + 1)"
                                                    asp-route-tenKhachHang="@Model.TenKhachHang"
-                                                   asp-route-trangThai="@Model.TrangThai">
+                                                   asp-route-trangThai="@Model.TrangThai"
+                                                   asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                                                   asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")">
                                                     <i class="fas fa-chevron-right"></i>
                                                 </a>
                                             }
@@ -206,11 +357,13 @@
                                                     <i class="fas fa-chevron-right"></i>
                                                 </span>
                                             }
-                                        </li>
+                                            }
+
                                     </ul>
                                 </nav>
                             </div>
                         }
+
                     </div>
                 </div>
             </div>
@@ -224,12 +377,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Phân công nhân viên</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
+
             <div class="modal-body">
                 <input type="hidden" id="PhanCongLichId" />
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Bạn có thể chọn nhân viên thủ công hoặc để hệ thống tự động tìm nhân viên phù hợp với khung giờ.
+                </div>
+
                 <div class="form-group">
                     <label>Nhân viên <span class="text-danger">*</span></label>
                     <select id="PhanCongNhanVienId" class="form-control">
@@ -237,24 +395,29 @@
                     </select>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                <button type="button" id="btnLuuPhanCong" class="btn btn-primary">Lưu phân công</button>
+                <button type="button" id="btnTuDongPhanCong" class="btn btn-success">
+                    <i class="fas fa-magic mr-1"></i> Tự động phân công
+                </button>
+                <button type="button" id="btnLuuPhanCong" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Lưu phân công
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- MODAL XEM CHI TIẾT -->
+<!-- MODAL CHI TIẾT -->
 <div class="modal fade" id="LichChamSocChiTietModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Chi tiết lịch chăm sóc</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
+
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
@@ -263,30 +426,35 @@
                             <input type="text" id="ChiTietTenKhachHang" class="form-control" readonly />
                         </div>
                     </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Thú cưng</label>
                             <input type="text" id="ChiTietTenThuCung" class="form-control" readonly />
                         </div>
                     </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Dịch vụ</label>
                             <input type="text" id="ChiTietTenDichVu" class="form-control" readonly />
                         </div>
                     </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Nhân viên</label>
                             <input type="text" id="ChiTietTenNhanVien" class="form-control" readonly />
                         </div>
                     </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Thời gian</label>
                             <input type="text" id="ChiTietThoiGian" class="form-control" readonly />
                         </div>
                     </div>
+
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>Trạng thái</label>
@@ -295,6 +463,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
             </div>
@@ -315,133 +484,22 @@
     <script>
         $(function () {
             var lichChamSocId = 0;
+            var editBangGias = [];
 
-            // PHÂN CÔNG NHÂN VIÊN
-            $(document).on('click', '.phan-cong-lich', function () {
-                lichChamSocId = parseInt($(this).data('id'), 10);
-                $('#PhanCongLichId').val(lichChamSocId);
-                $('#PhanCongNhanVienId').html('<option value="">-- Đang tải nhân viên --</option>');
-                $('#PhanCongNhanVienModal').modal('show');
+            function getResult(response) {
+                return response && response.result ? response.result : response;
+            }
 
-                abp.services.app.nhanvien.getNhanVienDangLamViec()
-                    .done(function (result) {
-                        var list = Array.isArray(result) ? result : (result.items || []);
-                        var select = $('#PhanCongNhanVienId');
-                        select.empty().append('<option value="">-- Chọn nhân viên --</option>');
-
-                        $.each(list, function (index, item) {
-                            select.append($('<option>', {
-                                value: item.id,
-                                text: item.hoten + ' - ' + item.sdt
-                            }));
-                        });
-
-                        if (list.length === 0) {
-                            select.append('<option value="" disabled>Không có nhân viên đang làm việc</option>');
-                        }
-                    })
-                    .fail(function (error) {
-                        $('#PhanCongNhanVienId').html('<option value="">-- Không tải được nhân viên --</option>');
-                        abp.message.error(getErrorMessage(error, 'Không thể tải danh sách nhân viên.'));
-                    });
-            });
-
-            // LƯU PHÂN CÔNG
-            $('#btnLuuPhanCong').on('click', function () {
-                var nhanVienId = parseInt($('#PhanCongNhanVienId').val(), 10);
-
-                if (!nhanVienId) {
-                    abp.message.warn('Vui lòng chọn nhân viên.');
-                    return;
+            function getErrorMessage(error, defaultMessage) {
+                if (error?.responseJSON?.error) {
+                    return error.responseJSON.error.message || error.responseJSON.error.details || defaultMessage;
                 }
+                if (error?.error) {
+                    return error.error.message || error.error.details || defaultMessage;
+                }
+                return defaultMessage;
+            }
 
-                var button = $(this);
-                button.prop('disabled', true);
-
-                abp.services.app.lichChamSoc.phanCongNhanVien(lichChamSocId, nhanVienId)
-                    .done(function () {
-                        abp.notify.success('Phân công nhân viên thành công.');
-                        $('#PhanCongNhanVienModal').modal('hide');
-
-                        setTimeout(function () {
-                            location.reload();
-                        }, 500);
-                    })
-                    .fail(function (error) {
-                        abp.message.error(getErrorMessage(error, 'Phân công nhân viên không thành công.'));
-                    })
-                    .always(function () {
-                        button.prop('disabled', false);
-                    });
-            });
-
-            // XEM CHI TIẾT
-            $(document).on('click', '.xem-chi-tiet', function () {
-                var id = parseInt($(this).data('id'), 10);
-
-                abp.services.app.lichChamSoc.getLichChamSoc(id)
-                    .done(function (result) {
-                        $('#ChiTietTenKhachHang').val(result.tenKhachHang || '');
-                        $('#ChiTietTenThuCung').val(result.tenThuCung || '');
-                        $('#ChiTietTenDichVu').val(result.tenDichVu || '');
-                        $('#ChiTietTenNhanVien').val(result.tenNhanVien || 'Chưa phân công');
-                        $('#ChiTietThoiGian').val(formatDateTime(result.thoiGian));
-                        $('#ChiTietTrangThai').val(getTrangThaiText(result.trangThai));
-                        $('#LichChamSocChiTietModal').modal('show');
-                    })
-                    .fail(function (error) {
-                        abp.message.error(getErrorMessage(error, 'Không thể tải chi tiết lịch chăm sóc.'));
-                    });
-            });
-
-            // MỞ MODAL SỬA
-            $(document).on('click', '.edit-lich', function () {
-                var id = parseInt($(this).data('id'), 10);
-
-                abp.services.app.lichChamSoc.getLichChamSoc(id)
-                    .done(function (result) {
-                        $('#edit-lich-id').val(result.id);
-                        $('#edit-lich-khachhang').val(result.tenKhachHang || '');
-                        $('#edit-lich-thucung').val(result.tenThuCung || '');
-                        $('#edit-lich-thoigian').val(formatDateTimeLocal(result.thoiGian));
-
-                        if (typeof loadDichVu === 'function') {
-                            loadDichVu(result.dichVuId, result.bangGiaId);
-                        }
-
-                        $('#LichChamSocEditModal').modal('show');
-                    })
-                    .fail(function (error) {
-                        abp.message.error(getErrorMessage(error, 'Không thể tải thông tin lịch chăm sóc.'));
-                    });
-            });
-
-            // ADMIN TỪ CHỐI
-            $(document).on('click', '.tu-choi-lich', function () {
-                var id = parseInt($(this).data('id'), 10);
-
-                abp.message.confirm(
-                    'Bạn có chắc chắn muốn từ chối lịch chăm sóc này?',
-                    'Xác nhận từ chối',
-                    function (isConfirmed) {
-                        if (!isConfirmed) return;
-
-                        abp.services.app.lichChamSoc.tuChoiLichChamSoc(id)
-                            .done(function () {
-                                abp.notify.success('Đã từ chối lịch chăm sóc.');
-
-                                setTimeout(function () {
-                                    location.reload();
-                                }, 500);
-                            })
-                            .fail(function (error) {
-                                abp.message.error(getErrorMessage(error, 'Không thể từ chối lịch chăm sóc.'));
-                            });
-                    }
-                );
-            });
-
-            // TRẠNG THÁI
             function getTrangThaiText(trangThai) {
                 switch (trangThai) {
                     case 0: return 'Chờ xác nhận';
@@ -454,55 +512,650 @@
                 }
             }
 
-            // FORMAT NGÀY
             function formatDateTime(value) {
                 if (!value) return '';
-
                 var date = new Date(value);
-
                 if (isNaN(date.getTime())) return value;
 
-                var day = String(date.getDate()).padStart(2, '0');
-                var month = String(date.getMonth() + 1).padStart(2, '0');
-                var year = date.getFullYear();
-                var hours = String(date.getHours()).padStart(2, '0');
-                var minutes = String(date.getMinutes()).padStart(2, '0');
-
-                return day + '/' + month + '/' + year + ' ' + hours + ':' + minutes;
+                return String(date.getDate()).padStart(2, '0') + '/' +
+                    String(date.getMonth() + 1).padStart(2, '0') + '/' +
+                    date.getFullYear() + ' ' +
+                    String(date.getHours()).padStart(2, '0') + ':' +
+                    String(date.getMinutes()).padStart(2, '0');
             }
 
-            function formatDateTimeLocal(value) {
-                if (!value) return '';
-
-                var date = new Date(value);
-
-                if (isNaN(date.getTime())) return '';
-
-                var year = date.getFullYear();
-                var month = String(date.getMonth() + 1).padStart(2, '0');
-                var day = String(date.getDate()).padStart(2, '0');
-                var hours = String(date.getHours()).padStart(2, '0');
-                var minutes = String(date.getMinutes()).padStart(2, '0');
-
-                return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            function formatMoney(value) {
+                return Number(value || 0).toLocaleString('vi-VN') + ' đ';
             }
 
-            // ERROR
-            function getErrorMessage(error, defaultMessage) {
-                if (error && error.responseJSON && error.responseJSON.error) {
-                    return error.responseJSON.error.message ||
-                        error.responseJSON.error.details ||
-                        defaultMessage;
+            // =========================================================
+            // PHÂN CÔNG
+            // =========================================================
+
+            $(document).on('click', '.phan-cong-lich', function () {
+                lichChamSocId = parseInt($(this).data('id'), 10);
+
+                $('#PhanCongLichId').val(lichChamSocId);
+                $('#PhanCongNhanVienId').html('<option value="">-- Đang tải nhân viên --</option>');
+                $('#PhanCongNhanVienModal').modal('show');
+
+                abp.services.app.nhanvien.getNhanVienDangLamViec()
+                    .done(function (response) {
+                        var result = getResult(response);
+                        var list = Array.isArray(result) ? result : (result.items || result.Items || []);
+                        var select = $('#PhanCongNhanVienId');
+
+                        select.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+                        $.each(list, function (_, item) {
+                            select.append(
+                                $('<option>').val(item.id).text(
+                                    (item.hoten || '') + ' - ' + (item.sdt || '')
+                                )
+                            );
+                        });
+
+                        if (list.length === 0) {
+                            select.append('<option value="" disabled>Không có nhân viên đang làm việc</option>');
+                        }
+                    })
+                    .fail(function (error) {
+                        $('#PhanCongNhanVienId').html('<option value="">-- Không tải được nhân viên --</option>');
+                        abp.message.error(getErrorMessage(error, 'Không thể tải danh sách nhân viên.'));
+                    });
+            });
+
+            $('#btnLuuPhanCong').on('click', function () {
+                var nhanVienId = parseInt($('#PhanCongNhanVienId').val(), 10);
+
+                if (!nhanVienId) {
+                    abp.message.warn('Vui lòng chọn nhân viên.');
+                    return;
                 }
 
-                if (error && error.error) {
-                    return error.error.message ||
-                        error.error.details ||
-                        defaultMessage;
+                var button = $(this).prop('disabled', true);
+
+                abp.services.app.lichChamSoc.phanCongNhanVien(lichChamSocId, nhanVienId)
+                    .done(function () {
+                        abp.notify.success('Phân công nhân viên thành công.');
+                        $('#PhanCongNhanVienModal').modal('hide');
+                        setTimeout(function () { location.reload(); }, 500);
+                    })
+                    .fail(function (error) {
+                        abp.message.error(getErrorMessage(error, 'Phân công nhân viên không thành công.'));
+                    })
+                    .always(function () {
+                        button.prop('disabled', false);
+                    });
+            });
+
+            // =========================================================
+            // TỰ ĐỘNG PHÂN CÔNG
+            // =========================================================
+
+            $('#btnTuDongPhanCong').on('click', function () {
+                if (!lichChamSocId) {
+                    abp.message.error('Không xác định được lịch chăm sóc.');
+                    return;
                 }
 
-                return defaultMessage;
+                abp.message.confirm(
+                    'Hệ thống sẽ tự động tìm nhân viên phù hợp với khung giờ. Bạn có chắc chắn muốn tiếp tục?',
+                    'Tự động phân công',
+                    function (isConfirmed) {
+                        if (!isConfirmed) return;
+
+                        var button = $('#btnTuDongPhanCong').prop('disabled', true);
+                        $('#btnLuuPhanCong').prop('disabled', true);
+
+                        abp.services.app.lichChamSoc.tuDongPhanCongNhanVien(lichChamSocId)
+                            .done(function (response) {
+                                var result = getResult(response);
+                                var tenNhanVien = result || 'nhân viên phù hợp';
+
+                                abp.notify.success('Đã tự động phân công cho nhân viên: ' + tenNhanVien);
+                                $('#PhanCongNhanVienModal').modal('hide');
+
+                                setTimeout(function () { location.reload(); }, 700);
+                            })
+                            .fail(function (error) {
+                                abp.message.error(getErrorMessage(
+                                    error,
+                                    'Không có nhân viên phù hợp trong khung giờ này.'
+                                ));
+                            })
+                            .always(function () {
+                                button.prop('disabled', false);
+                                $('#btnLuuPhanCong').prop('disabled', false);
+                            });
+                    }
+                );
+            });
+
+            // =========================================================
+            // BẮT ĐẦU
+            // =========================================================
+
+            $(document).on('click', '.bat-dau-viec', function () {
+                var id = parseInt($(this).data('id'), 10);
+
+                abp.message.confirm(
+                    'Bạn có chắc chắn muốn bắt đầu thực hiện dịch vụ này?',
+                    'Bắt đầu thực hiện',
+                    function (isConfirmed) {
+                        if (!isConfirmed) return;
+
+                        abp.services.app.lichChamSoc.batDauViec(id)
+                            .done(function () {
+                                abp.notify.success('Đã bắt đầu thực hiện dịch vụ.');
+                                setTimeout(function () { location.reload(); }, 500);
+                            })
+                            .fail(function (error) {
+                                abp.message.error(getErrorMessage(
+                                    error,
+                                    'Không thể bắt đầu thực hiện dịch vụ.'
+                                ));
+                            });
+                    }
+                );
+            });
+
+            // =========================================================
+            // HOÀN THÀNH
+            // =========================================================
+
+            $(document).on('click', '.hoan-thanh-lich', function () {
+                var id = parseInt($(this).data('id'), 10);
+
+                abp.message.confirm(
+                    'Bạn có chắc chắn dịch vụ này đã được thực hiện xong?',
+                    'Xác nhận hoàn thành',
+                    function (isConfirmed) {
+                        if (!isConfirmed) return;
+
+                        abp.services.app.lichChamSoc.hoanThanhLichChamSoc(id)
+                            .done(function () {
+                                abp.notify.success('Đã hoàn thành lịch chăm sóc.');
+                                setTimeout(function () { location.reload(); }, 500);
+                            })
+                            .fail(function (error) {
+                                abp.message.error(getErrorMessage(
+                                    error,
+                                    'Không thể hoàn thành lịch chăm sóc.'
+                                ));
+                            });
+                    }
+                );
+            });
+
+            // =========================================================
+            // XEM CHI TIẾT
+            // =========================================================
+
+            $(document).on('click', '.xem-chi-tiet', function () {
+                var id = parseInt($(this).data('id'), 10);
+
+                abp.services.app.lichChamSoc.getLichChamSoc(id)
+                    .done(function (response) {
+                        var result = getResult(response);
+
+                        $('#ChiTietTenKhachHang').val(result.tenKhachHang || '');
+                        $('#ChiTietTenThuCung').val(result.tenThuCung || '');
+                        $('#ChiTietTenDichVu').val(result.tenDichVu || '');
+                        $('#ChiTietTenNhanVien').val(result.tenNhanVien || 'Chưa phân công');
+                        $('#ChiTietThoiGian').val(formatDateTime(result.thoiGian));
+                        $('#ChiTietTrangThai').val(getTrangThaiText(result.trangThai));
+
+                        $('#LichChamSocChiTietModal').modal('show');
+                    })
+                    .fail(function (error) {
+                        abp.message.error(getErrorMessage(
+                            error,
+                            'Không thể tải chi tiết lịch chăm sóc.'
+                        ));
+                    });
+            });
+
+            // =========================================================
+            // MỞ MODAL SỬA
+            // =========================================================
+
+            $(document).on('click', '.edit-lich', function () {
+                var id = parseInt($(this).data('id'), 10);
+
+                if (!id) {
+                    abp.message.error('Không xác định được lịch chăm sóc.');
+                    return;
+                }
+
+                loadEditLichChamSoc(id);
+            });
+
+            // =========================================================
+            // TẢI MODAL SỬA
+            // =========================================================
+
+            function loadEditLichChamSoc(id) {
+                $('#edit-lich-id').val(id);
+                $('#edit-lich-dichvu').html('<option value="">-- Đang tải dịch vụ --</option>');
+                $('#edit-lich-banggia').html('<option value="">-- Chọn dịch vụ trước --</option>').prop('disabled', true);
+                $('#edit-lich-banggia-info').empty();
+                $('#edit-lich-cannang').val('');
+
+                abp.services.app.lichChamSoc.getLichChamSoc(id)
+                    .done(function (response) {
+                        var lich = getResult(response);
+
+                        if (!lich) {
+                            abp.message.error('Không tìm thấy lịch chăm sóc.');
+                            return;
+                        }
+
+                        $('#edit-lich-id').val(lich.id);
+                        $('#edit-lich-khachhang').val(lich.tenKhachHang || '');
+                        $('#edit-lich-thucung').val(lich.tenThuCung || '');
+
+                        // Lấy cân nặng và thông tin thú cưng
+                        var canNang = lich.canNang || lich.cannang || lich.thuCungCanNang || 0;
+                        var loaiThuCung = lich.loaiThuCung || lich.loaithucung || '';
+                        var loaiLong = lich.loaiLong;
+
+                        $('#edit-lich-cannang').val(canNang || '');
+
+                        // Lưu thông tin để lọc bảng giá
+                        $('#edit-lich-cannang').data('loai-thu-cung', loaiThuCung);
+                        $('#edit-lich-cannang').data('loai-long', loaiLong);
+
+                        // Tải danh sách dịch vụ
+                        abp.services.app.dichVu.getAll()
+                            .done(function (serviceResponse) {
+                                var services = getResult(serviceResponse);
+                                services = Array.isArray(services)
+                                    ? services
+                                    : (services.items || services.Items || []);
+
+                                var select = $('#edit-lich-dichvu');
+                                select.empty().append('<option value="">-- Chọn dịch vụ --</option>');
+
+                                $.each(services, function (_, service) {
+                                    if (service.trangthai === false) return;
+
+                                    select.append(
+                                        $('<option>')
+                                            .val(service.id)
+                                            .text(service.tendichvu || service.tenDichVu || '')
+                                    );
+                                });
+
+                                select.val(lich.dichVuId || lich.dichvuId || '');
+
+                                // Lấy bảng giá của dịch vụ hiện tại
+                                if (select.val()) {
+                                    loadBangGia(
+                                        parseInt(select.val(), 10),
+                                        lich.bangGiaId || lich.banggiaId || 0,
+                                        loaiThuCung,
+                                        loaiLong,
+                                        parseFloat(canNang) || 0
+                                    );
+                                }
+                            })
+                            .fail(function (error) {
+                                abp.message.error(getErrorMessage(
+                                    error,
+                                    'Không thể tải danh sách dịch vụ.'
+                                ));
+                            });
+
+                        $('#edit-lich-thoigian').val(formatDateTime(lich.thoiGian));
+
+                        $('#LichChamSocEditModal').modal('show');
+                    })
+                    .fail(function (error) {
+                        abp.message.error(getErrorMessage(
+                            error,
+                            'Không thể tải thông tin lịch chăm sóc.'
+                        ));
+                    });
             }
+
+            // =========================================================
+            // LOAD BẢNG GIÁ THEO DỊCH VỤ + LOẠI THÚ CƯNG + LÔNG + CÂN NẶNG
+            // =========================================================
+
+            function loadBangGia(dichVuId, selectedBangGiaId, loaiThuCung, loaiLong, canNang) {
+                var select = $('#edit-lich-banggia');
+
+                select.empty().append('<option value="">-- Đang tải bảng giá --</option>');
+                select.prop('disabled', true);
+                $('#edit-lich-banggia-info').empty();
+
+                if (!dichVuId) {
+                    select.html('<option value="">-- Chọn dịch vụ trước --</option>');
+                    return;
+                }
+
+                abp.services.app.dichVu.getDichVu(dichVuId)
+                    .done(function (response) {
+                        var service = getResult(response);
+                        editBangGias = service?.bangGias || service?.BangGias || [];
+
+                        select.empty().append('<option value="">-- Chọn bảng giá --</option>');
+
+                        // Chuẩn hóa tên thuộc tính
+                        var filtered = editBangGias.filter(function (bg) {
+                            var bgLoaiThuCung = bg.loaithucung || bg.loaiThuCung || '';
+                            var bgLoaiLong = bg.loailong;
+
+                            // Điều kiện loại thú cưng
+                            var matchLoaiThuCung = true;
+
+                            if (loaiThuCung) {
+                                matchLoaiThuCung =
+                                    String(bgLoaiThuCung).toLowerCase() ===
+                                    String(loaiThuCung).toLowerCase();
+                            }
+
+                            // Điều kiện lông
+                            var matchLoaiLong = true;
+
+                            if (loaiLong !== null && loaiLong !== undefined && loaiLong !== '') {
+                                matchLoaiLong = Boolean(bgLoaiLong) === Boolean(loaiLong);
+                            }
+
+                            // Điều kiện cân nặng
+                            var matchCanNang = true;
+
+                            if (canNang > 0) {
+                                var tu = Number(bg.cannangtu ?? bg.canNangTu ?? 0);
+                                var den = Number(bg.cannangden ?? bg.canNangDen ?? 0);
+
+                                matchCanNang = canNang >= tu && canNang < den;
+                            }
+
+                            return matchLoaiThuCung && matchLoaiLong && matchCanNang;
+                        });
+
+                        // Nếu không tìm được do dữ liệu loại/lông chưa có,
+                        // vẫn hiển thị bảng giá của dịch vụ để không làm select rỗng.
+                        if (filtered.length === 0 && editBangGias.length > 0) {
+                            filtered = editBangGias.filter(function (bg) {
+                                if (!canNang) return true;
+
+                                var tu = Number(bg.cannangtu ?? bg.canNangTu ?? 0);
+                                var den = Number(bg.cannangden ?? bg.canNangDen ?? 0);
+
+                                return canNang >= tu && canNang < den;
+                            });
+                        }
+
+                        $.each(filtered, function (_, bg) {
+                            var id = bg.id;
+                            var loai = bg.loaithucung || bg.loaiThuCung || 'Không xác định';
+                            var longText = Boolean(bg.loailong) ? 'Lông dài' : 'Lông ngắn';
+                            var tu = bg.cannangtu ?? bg.canNangTu ?? 0;
+                            var den = bg.cannangden ?? bg.canNangDen ?? 0;
+                            var gia = bg.giadv ?? bg.giaDv ?? 0;
+                            var thoiGian = bg.thoiGianPhut || 0;
+
+                            var text =
+                                loai +
+                                ' - ' +
+                                longText +
+                                ' - ' +
+                                tu + ' đến ' + den + ' kg' +
+                                ' - ' +
+                                formatMoney(gia) +
+                                (thoiGian ? ' - ' + thoiGian + ' phút' : '');
+
+                            select.append(
+                                $('<option>').val(id).text(text)
+                            );
+                        });
+
+                        select.prop('disabled', false);
+
+                        if (selectedBangGiaId) {
+                            select.val(selectedBangGiaId);
+
+                            if (!select.val()) {
+                                abp.message.warn('Bảng giá cũ không còn phù hợp với thú cưng. Vui lòng chọn bảng giá mới.');
+                            }
+                        }
+
+                        hienThiThongTinBangGia();
+                    })
+                    .fail(function (error) {
+                        select.html('<option value="">-- Không tải được bảng giá --</option>');
+                        abp.message.error(getErrorMessage(
+                            error,
+                            'Không thể tải bảng giá của dịch vụ.'
+                        ));
+                    });
+            }
+
+            // =========================================================
+            // CHỌN DỊCH VỤ
+            // =========================================================
+
+            $('#edit-lich-dichvu').on('change', function () {
+                var dichVuId = parseInt($(this).val(), 10);
+
+                var loaiThuCung = $('#edit-lich-cannang').data('loai-thu-cung') || '';
+                var loaiLong = $('#edit-lich-cannang').data('loai-long');
+                var canNang = parseFloat($('#edit-lich-cannang').val()) || 0;
+
+                if (!dichVuId) {
+                    $('#edit-lich-banggia')
+                        .html('<option value="">-- Chọn dịch vụ trước --</option>')
+                        .prop('disabled', true);
+
+                    $('#edit-lich-banggia-info').empty();
+                    return;
+                }
+
+                loadBangGia(
+                    dichVuId,
+                    0,
+                    loaiThuCung,
+                    loaiLong,
+                    canNang
+                );
+            });
+
+            // =========================================================
+            // THAY ĐỔI CÂN NẶNG
+            // =========================================================
+
+            $('#edit-lich-cannang').on('change keyup', function () {
+                var dichVuId = parseInt($('#edit-lich-dichvu').val(), 10);
+
+                if (!dichVuId) return;
+
+                var loaiThuCung = $(this).data('loai-thu-cung') || '';
+                var loaiLong = $(this).data('loai-long');
+                var canNang = parseFloat($(this).val()) || 0;
+
+                loadBangGia(
+                    dichVuId,
+                    0,
+                    loaiThuCung,
+                    loaiLong,
+                    canNang
+                );
+            });
+
+            // =========================================================
+            // HIỂN THỊ THÔNG TIN BẢNG GIÁ
+            // =========================================================
+
+            $('#edit-lich-banggia').on('change', function () {
+                hienThiThongTinBangGia();
+            });
+
+            function hienThiThongTinBangGia() {
+                var id = parseInt($('#edit-lich-banggia').val(), 10);
+                var container = $('#edit-lich-banggia-info');
+
+                container.empty();
+
+                if (!id) return;
+
+                var bg = editBangGias.find(function (x) {
+                    return Number(x.id) === id;
+                });
+
+                if (!bg) return;
+
+                var loai = bg.loaithucung || bg.loaiThuCung || 'Không xác định';
+                var longText = Boolean(bg.loailong) ? 'Lông dài' : 'Lông ngắn';
+                var tu = bg.cannangtu ?? bg.canNangTu ?? 0;
+                var den = bg.cannangden ?? bg.canNangDen ?? 0;
+                var gia = bg.giadv ?? bg.giaDv ?? 0;
+                var thoiGian = bg.thoiGianPhut || 0;
+
+                container.html(
+                    '<div class="alert alert-info mt-2 mb-3">' +
+                        '<div><strong>Loại thú cưng:</strong> ' + loai + '</div>' +
+                        '<div><strong>Bộ lông:</strong> ' + longText + '</div>' +
+                        '<div><strong>Cân nặng:</strong> ' + tu + ' - ' + den + ' kg</div>' +
+                        '<div><strong>Giá:</strong> ' + formatMoney(gia) + '</div>' +
+                        '<div><strong>Thời gian:</strong> ' + thoiGian + ' phút</div>' +
+                    '</div>'
+                );
+            }
+
+            // =========================================================
+            // ĐÓNG MODAL SỬA
+            // =========================================================
+
+            $('#btnDongEditLich').on('click', function () {
+                $('#LichChamSocEditModal').modal('hide');
+            });
+
+            // =========================================================
+            // LƯU SỬA LỊCH
+            // =========================================================
+
+            $('#lichchamsoc-edit-form').on('submit', function (e) {
+                e.preventDefault();
+
+                var id = parseInt($('#edit-lich-id').val(), 10);
+                var dichVuId = parseInt($('#edit-lich-dichvu').val(), 10);
+                var bangGiaId = parseInt($('#edit-lich-banggia').val(), 10);
+                var thoiGianText = $('#edit-lich-thoigian').val().trim();
+
+                if (!id) {
+                    abp.message.error('Không xác định được lịch chăm sóc.');
+                    return;
+                }
+
+                if (!dichVuId) {
+                    abp.message.warn('Vui lòng chọn dịch vụ.');
+                    return;
+                }
+
+                if (!bangGiaId) {
+                    abp.message.warn('Vui lòng chọn bảng giá.');
+                    return;
+                }
+
+                if (!thoiGianText) {
+                    abp.message.warn('Vui lòng nhập thời gian.');
+                    return;
+                }
+
+                var parts = thoiGianText.split(/[/ :]/);
+
+                if (parts.length !== 5) {
+                    abp.message.warn('Thời gian không đúng định dạng dd/MM/yyyy HH:mm.');
+                    return;
+                }
+
+                var day = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1;
+                var year = parseInt(parts[2], 10);
+                var hour = parseInt(parts[3], 10);
+                var minute = parseInt(parts[4], 10);
+
+                var date = new Date(year, month, day, hour, minute);
+
+                if (isNaN(date.getTime()) ||
+                    date.getFullYear() !== year ||
+                    date.getMonth() !== month ||
+                    date.getDate() !== day) {
+                    abp.message.warn('Thời gian không hợp lệ.');
+                    return;
+                }
+
+                var input = {
+                    id: id,
+                    dichVuId: dichVuId,
+                    bangGiaId: bangGiaId,
+                    khachHangId: 0,
+                    nhanVienId: null,
+                    thoiGian: date.toISOString(),
+                    trangThai: 0
+                };
+
+                var button = $('#btnLuuEditLich').prop('disabled', true);
+
+                abp.services.app.lichChamSoc.update(input)
+                    .done(function () {
+                        abp.notify.success('Cập nhật lịch chăm sóc thành công.');
+                        $('#LichChamSocEditModal').modal('hide');
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500);
+                    })
+                    .fail(function (error) {
+                        abp.message.error(
+                            getErrorMessage(
+                                error,
+                                'Không thể cập nhật lịch chăm sóc.'
+                            )
+                        );
+                    })
+                    .always(function () {
+                        button.prop('disabled', false);
+                    });
+            });
+
+            // =========================================================
+            // TỪ CHỐI
+            // =========================================================
+
+            $(document).on('click', '.tu-choi-lich', function () {
+                var id = parseInt($(this).data('id'), 10);
+
+                abp.message.confirm(
+                    'Bạn có chắc chắn muốn từ chối lịch chăm sóc này?',
+                    'Xác nhận từ chối',
+                    function (isConfirmed) {
+                        if (!isConfirmed) return;
+
+                        abp.services.app.lichChamSoc.tuChoiLichChamSoc(id)
+                            .done(function () {
+                                abp.notify.success('Đã từ chối lịch chăm sóc.');
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 500);
+                            })
+                            .fail(function (error) {
+                                abp.message.error(
+                                    getErrorMessage(
+                                        error,
+                                        'Không thể từ chối lịch chăm sóc.'
+                                    )
+                                );
+                            });
+                    }
+                );
+            });
+
+            // Cho phép gọi từ ngoài nếu cần
+            window.loadEditLichChamSoc = loadEditLichChamSoc;
         });
     </script>
 }

@@ -9,6 +9,7 @@
         <h1 class="fw-bold mt-2">Đặt lịch cho thú cưng</h1>
         <p class="text-muted">Vui lòng lựa chọn thú cưng, dịch vụ và thời gian bạn mong muốn.</p>
     </div>
+
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
             <div class="card border-0 shadow-sm rounded-4">
@@ -21,6 +22,7 @@
                             </select>
                             <small id="ThongTinThuCung" class="text-muted d-none"></small>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label fw-bold">Cân nặng thú cưng <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -29,33 +31,51 @@
                             </div>
                             <small class="text-muted">Cân nặng phải lớn hơn 0 kg. Bảng giá sẽ được lọc theo cân nặng.</small>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label fw-bold">Dịch vụ <span class="text-danger">*</span></label>
                             <select id="DichVuId" class="form-select" required>
                                 <option value="">-- Đang tải dịch vụ --</option>
                             </select>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label fw-bold">Bảng giá <span class="text-danger">*</span></label>
                             <select id="BangGiaId" class="form-select" required disabled>
                                 <option value="">-- Chọn dịch vụ trước --</option>
                             </select>
+
+                            <div id="ThongTinVip" class="alert alert-light border rounded-3 d-none mt-3">
+                                <div class="d-flex align-items-center">
+                                    <div><strong>Cấp VIP:</strong> <span id="TenVip" class="text-warning fw-bold"></span></div>
+                                    <div class="ms-auto"><strong>Giảm:</strong> <span id="PhanTramGiamVip" class="text-success fw-bold"></span></div>
+                                </div>
+                                <small id="ThongTinGiamGiaVip" class="text-muted"></small>
+                            </div>
+
                             <small id="BangGiaHint" class="text-muted"></small>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label fw-bold">Ngày và giờ <span class="text-danger">*</span></label>
                             <input type="datetime-local" id="ThoiGian" class="form-control" required />
                             <small class="text-muted">Vui lòng chọn thời gian trong tương lai.</small>
                         </div>
+
                         <div class="mb-4">
                             <div class="form-check">
                                 <input type="checkbox" id="DongYDieuKhoan" class="form-check-input" required />
-                                <label class="form-check-label" for="DongYDieuKhoan">Tôi đã đọc và đồng ý với <a href="#" data-bs-toggle="modal" data-bs-target="#DieuKhoanModal">điều khoản sử dụng dịch vụ</a></label>
+                                <label class="form-check-label" for="DongYDieuKhoan">
+                                    Tôi đã đọc và đồng ý với
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#DieuKhoanModal">điều khoản sử dụng dịch vụ</a>
+                                </label>
                             </div>
                         </div>
+
                         <div class="alert alert-warning">
                             <strong>Lưu ý:</strong> Lịch sau khi đặt sẽ ở trạng thái <strong>Chờ xác nhận</strong>. Cửa hàng sẽ xác nhận và phân công nhân viên sau đó.
                         </div>
+
                         <div class="text-center mt-4">
                             <a asp-controller="Landing" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Quay lại</a>
                             <button type="submit" id="btnDatLich" class="btn btn-warning rounded-pill px-5">
@@ -80,16 +100,22 @@
             <div class="modal-body">
                 <h6 class="fw-bold">1. Điều kiện sử dụng dịch vụ</h6>
                 <p>Khách hàng cần cung cấp thông tin chính xác về thú cưng và tình trạng sức khỏe của thú cưng trước khi sử dụng dịch vụ.</p>
+
                 <h6 class="fw-bold">2. Tình trạng sức khỏe</h6>
                 <p>Khách hàng có trách nhiệm thông báo cho cửa hàng về bệnh lý, dị ứng hoặc các tình trạng đặc biệt của thú cưng.</p>
+
                 <h6 class="fw-bold">3. Dịch vụ tiêm phòng</h6>
                 <p>Thú cưng sử dụng dịch vụ tiêm phòng cần có tình trạng sức khỏe phù hợp và không thuộc trường hợp chống chỉ định của vaccine.</p>
+
                 <h6 class="fw-bold">4. Quyền từ chối dịch vụ</h6>
                 <p>Cửa hàng có quyền từ chối hoặc thay đổi dịch vụ nếu thú cưng có dấu hiệu bệnh, quá hung dữ hoặc không đảm bảo an toàn.</p>
+
                 <h6 class="fw-bold">5. Trường hợp thú cưng tử vong</h6>
                 <p>Trong trường hợp thú cưng tử vong, cửa hàng và khách hàng sẽ phối hợp xác định nguyên nhân và trách nhiệm dựa trên tình trạng thực tế và quá trình cung cấp dịch vụ.</p>
+
                 <h6 class="fw-bold">6. Hủy lịch</h6>
                 <p>Khách hàng cần thông báo cho cửa hàng khi muốn hủy hoặc thay đổi lịch đã đặt.</p>
+
                 <h6 class="fw-bold">7. Xác nhận lịch</h6>
                 <p>Lịch đặt trên hệ thống ở trạng thái <strong>Chờ xác nhận</strong> và chỉ chính thức sau khi cửa hàng xác nhận.</p>
             </div>
@@ -106,6 +132,7 @@
             var danhSachThuCung = [];
             loadThuCungs();
             loadDichVus();
+            loadThongTinVip();
             setMinDate();
 
             function setMinDate() {
@@ -117,13 +144,20 @@
             function loadThuCungs() {
                 var select = $('#ThuCungId');
                 select.html('<option value="">-- Đang tải thú cưng... --</option>');
+
                 abp.services.app.thuCung.getCuaToi().done(function (result) {
                     select.empty().append('<option value="">-- Chọn thú cưng --</option>');
-                    danhSachThuCung = Array.isArray(result) ? result : (result.items || []);
-                    if (danhSachThuCung.length === 0) {
-                        select.append('<option value="" disabled>(Bạn chưa có thú cưng nào)</option>');
+                    var list = Array.isArray(result) ? result : (result.items || []);
+
+                    danhSachThuCung = list.filter(function (item) {
+                        return item.trangThai === true || item.trangthai === true;
+                    });
+
+                    if (!danhSachThuCung.length) {
+                        select.append('<option value="" disabled>(Bạn chưa có thú cưng đang hoạt động)</option>');
                         return;
                     }
+
                     $.each(danhSachThuCung, function (_, item) {
                         var ten = item.tenThuCung || item.tenThucung || item.tenthucung || item.name || 'Thú cưng';
                         select.append($('<option>', { value: item.id, text: ten }));
@@ -134,18 +168,18 @@
             }
 
             $('#ThuCungId').on('change', function () {
-                var thuCungId = parseInt($(this).val(), 10);
+                var id = parseInt($(this).val(), 10);
                 $('#ThongTinThuCung').addClass('d-none').text('');
                 resetBangGia();
-                if (!thuCungId) return;
+                if (!id) return;
 
-                var thuCung = danhSachThuCung.find(function (item) {
-                    return parseInt(item.id, 10) === thuCungId;
+                var thuCung = danhSachThuCung.find(function (x) {
+                    return parseInt(x.id, 10) === id;
                 });
                 if (!thuCung) return;
 
-                var loaiThuCung = layLoaiThuCung(thuCung);
-                if (loaiThuCung) $('#ThongTinThuCung').removeClass('d-none').text('Loại thú cưng: ' + loaiThuCung);
+                var loai = layLoaiThuCung(thuCung);
+                if (loai) $('#ThongTinThuCung').removeClass('d-none').text('Loại thú cưng: ' + loai);
                 if ($('#CanNang').val() && $('#DichVuId').val()) loadBangGia(parseInt($('#DichVuId').val(), 10));
             });
 
@@ -161,24 +195,49 @@
             function loadDichVus() {
                 var select = $('#DichVuId');
                 select.html('<option value="">-- Đang tải dịch vụ... --</option>');
+
                 abp.services.app.dichVu.getAll().done(function (result) {
                     select.empty().append('<option value="">-- Chọn dịch vụ --</option>');
                     var list = Array.isArray(result) ? result : (result.items || []);
+
                     $.each(list, function (_, item) {
                         var trangThai = item.trangthai !== undefined ? item.trangthai : item.trangThai;
                         var ten = item.tendichvu || item.tenDichVu || item.name || 'Dịch vụ';
-                        if (trangThai === true) select.append($('<option>', { value: item.id, text: ten }));
+
+                        if (trangThai === true)
+                            select.append($('<option>', { value: item.id, text: ten }));
                     });
-                    if (select.find('option').length <= 1) select.append('<option value="" disabled>(Hiện không có dịch vụ hoạt động)</option>');
+
+                    if (select.find('option').length <= 1)
+                        select.append('<option value="" disabled>(Hiện không có dịch vụ hoạt động)</option>');
                 }).fail(function (error) {
                     showError(getErrorMessage(error, 'Không thể tải danh sách dịch vụ.'));
                 });
             }
 
+            function loadThongTinVip() {
+                abp.services.app.khachHang.getThongTinCaNhan().done(function (result) {
+                    var phanTram = result.phanTramGiam !== undefined ? parseFloat(result.phanTramGiam) : 0;
+                    var tenVip = result.tenVip || '';
+
+                    $('#ThongTinVip').removeClass('d-none');
+                    $('#TenVip').text(tenVip || 'Chưa có cấp VIP');
+                    $('#PhanTramGiamVip').text(phanTram + '%');
+
+                    $('#ThongTinGiamGiaVip').text(
+                        phanTram > 0
+                            ? 'Bạn được hưởng ưu đãi giảm ' + phanTram + '% theo cấp VIP hiện tại.'
+                            : 'Bạn chưa được hưởng ưu đãi giảm giá VIP.'
+                    );
+                }).fail(function (error) {
+                    console.log('Không lấy được thông tin VIP:', error);
+                });
+            }
+
             $('#DichVuId').on('change', function () {
-                var dichVuId = parseInt($(this).val(), 10);
-                resetBangGia(dichVuId ? '-- Đang tải bảng giá... --' : '-- Chọn dịch vụ trước --');
-                if (dichVuId) loadBangGia(dichVuId);
+                var id = parseInt($(this).val(), 10);
+                resetBangGia(id ? '-- Đang tải bảng giá... --' : '-- Chọn dịch vụ trước --');
+                if (id) loadBangGia(id);
             });
 
             function loadBangGia(dichVuId) {
@@ -192,14 +251,16 @@
                     resetBangGia('-- Chọn thú cưng trước --');
                     return;
                 }
+
                 if (isNaN(canNang) || canNang <= 0) {
                     resetBangGia('-- Nhập cân nặng trước --');
                     return;
                 }
 
-                var thuCung = danhSachThuCung.find(function (item) {
-                    return parseInt(item.id, 10) === thuCungId;
+                var thuCung = danhSachThuCung.find(function (x) {
+                    return parseInt(x.id, 10) === thuCungId;
                 });
+
                 if (!thuCung) return;
 
                 var loaiThuCung = layLoaiThuCung(thuCung);
@@ -214,14 +275,15 @@
                     var laTrongGiu = normalizeText(tenDichVu) === normalizeText('Trông giữ thú cưng');
 
                     var bangGiaPhuHop = list.filter(function (item) {
-                        var bgLoaiThuCung = item.loaithucung || item.loaiThuCung || item.loaiThucung || '';
-                        var canNangTu = item.cannangtu !== undefined ? parseFloat(item.cannangtu) : parseFloat(item.canNangTu);
-                        var canNangDen = item.cannangden !== undefined ? parseFloat(item.cannangden) : parseFloat(item.canNangDen);
-                        return normalizeLoaiThuCung(bgLoaiThuCung) === normalizeLoaiThuCung(loaiThuCung) &&
-                            !isNaN(canNangTu) && !isNaN(canNangDen) && canNang >= canNangTu && canNang <= canNangDen;
+                        var bgLoai = item.loaithucung || item.loaiThuCung || item.loaiThucung || '';
+                        var tu = item.cannangtu !== undefined ? parseFloat(item.cannangtu) : parseFloat(item.canNangTu);
+                        var den = item.cannangden !== undefined ? parseFloat(item.cannangden) : parseFloat(item.canNangDen);
+
+                        return normalizeLoaiThuCung(bgLoai) === normalizeLoaiThuCung(loaiThuCung) &&
+                            !isNaN(tu) && !isNaN(den) && canNang >= tu && canNang <= den;
                     });
 
-                    if (bangGiaPhuHop.length === 0) {
+                    if (!bangGiaPhuHop.length) {
                         resetBangGia('(Không có bảng giá phù hợp)');
                         $('#BangGiaHint').text('Không tìm thấy bảng giá cho ' + loaiThuCung + ' với cân nặng ' + canNang + ' kg.');
                         return;
@@ -232,20 +294,24 @@
                     $.each(bangGiaPhuHop, function (_, item) {
                         var loai = item.loaithucung || item.loaiThuCung || item.loaiThucung || '';
                         var loaiPhong = item.loaiPhong || item.LoaiPhong || '';
-                        var canNangTu = item.cannangtu !== undefined ? item.cannangtu : item.canNangTu;
-                        var canNangDen = item.cannangden !== undefined ? item.cannangden : item.canNangDen;
+                        var tu = item.cannangtu !== undefined ? item.cannangtu : item.canNangTu;
+                        var den = item.cannangden !== undefined ? item.cannangden : item.canNangDen;
                         var loaiLong = item.loailong !== undefined ? item.loailong : item.loaiLong;
                         var gia = item.giadv !== undefined ? item.giadv : item.giaDv;
-                        var thoiGianPhut = item.thoiGianPhut !== undefined ? item.thoiGianPhut : 0;
-                        var text = loai + ' - ' + canNangTu + ' đến ' + canNangDen + ' kg';
+                        var thoiGian = item.thoiGianPhut !== undefined ? item.thoiGianPhut : 0;
+
+                        var text = loai + ' - ' + tu + ' đến ' + den + ' kg';
 
                         if (laTrongGiu && loaiPhong) text += ' - ' + loaiPhong;
                         if (!laTrongGiu) {
                             if (loaiLong === true) text += ' - Lông dài';
                             else if (loaiLong === false) text += ' - Lông ngắn';
                         }
-                        if (gia !== undefined && gia !== null) text += ' - ' + Number(gia).toLocaleString('vi-VN') + ' VNĐ';
-                        if (thoiGianPhut > 0) text += ' - ' + thoiGianPhut + ' phút';
+
+                        if (gia !== undefined && gia !== null)
+                            text += ' - ' + Number(gia).toLocaleString('vi-VN') + ' VNĐ';
+
+                        if (thoiGian > 0) text += ' - ' + thoiGian + ' phút';
 
                         select.append($('<option>', { value: item.id, text: text }));
                     });
@@ -259,7 +325,9 @@
             }
 
             function resetBangGia(message) {
-                $('#BangGiaId').empty().append('<option value="">' + (message || '-- Chọn dịch vụ trước --') + '</option>').prop('disabled', true);
+                $('#BangGiaId').empty()
+                    .append('<option value="">' + (message || '-- Chọn dịch vụ trước --') + '</option>')
+                    .prop('disabled', true);
                 $('#BangGiaHint').text('');
             }
 
@@ -289,11 +357,13 @@
                 var thoiGian = $('#ThoiGian').val();
 
                 if (!thuCungId) return showWarning('Vui lòng chọn thú cưng.');
+
                 if (isNaN(canNang) || canNang <= 0) {
                     showWarning('Cân nặng thú cưng phải lớn hơn 0 kg.');
                     $('#CanNang').focus();
                     return;
                 }
+
                 if (!dichVuId) return showWarning('Vui lòng chọn dịch vụ.');
                 if (!bangGiaId) return showWarning('Vui lòng chọn bảng giá phù hợp.');
                 if (!thoiGian) return showWarning('Vui lòng chọn ngày và giờ.');
@@ -315,7 +385,9 @@
 
                 abp.services.app.lichChamSoc.create(input).done(function () {
                     showSuccess('Đặt lịch chăm sóc thành công!');
-                    setTimeout(function () { window.location.href = '/Landing/Index'; }, 1200);
+                    setTimeout(function () {
+                        window.location.href = '/Landing/Index';
+                    }, 1200);
                 }).fail(function (error) {
                     showError(getErrorMessage(error, 'Đặt lịch không thành công.'));
                 }).always(function () {
@@ -334,27 +406,33 @@
                     var e = error.responseJSON.error;
                     if (e.message) return e.message;
                     if (e.details) return e.details;
-                    if (e.validationErrors && e.validationErrors.length) return e.validationErrors.map(function (x) { return x.message; }).join('\n');
+                    if (e.validationErrors && e.validationErrors.length)
+                        return e.validationErrors.map(function (x) { return x.message; }).join('\n');
                 }
+
                 if (error && error.error) {
                     if (error.error.message) return error.error.message;
                     if (error.error.details) return error.error.details;
                 }
+
                 return error && (error.details || error.message) || defaultMessage;
             }
 
             function showSuccess(message) {
-                if (typeof Swal !== 'undefined') Swal.fire({ icon: 'success', title: 'Thành công', text: message, confirmButtonText: 'OK' });
+                if (typeof Swal !== 'undefined')
+                    Swal.fire({ icon: 'success', title: 'Thành công', text: message, confirmButtonText: 'OK' });
                 else alert(message);
             }
 
             function showWarning(message) {
-                if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: message, confirmButtonText: 'OK' });
+                if (typeof Swal !== 'undefined')
+                    Swal.fire({ icon: 'warning', title: 'Cảnh báo', text: message, confirmButtonText: 'OK' });
                 else alert(message);
             }
 
             function showError(message) {
-                if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Lỗi', text: message, confirmButtonText: 'Đóng' });
+                if (typeof Swal !== 'undefined')
+                    Swal.fire({ icon: 'error', title: 'Lỗi', text: message, confirmButtonText: 'Đóng' });
                 else alert(message);
             }
         });

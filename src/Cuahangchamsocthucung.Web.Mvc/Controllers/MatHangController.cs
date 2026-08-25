@@ -1,6 +1,7 @@
 using Abp.Authorization;
 using Cuahangchamsocthucung.Authorization.Roles;
 using Cuahangchamsocthucung.Controllers;
+using Cuahangchamsocthucung.MatHang.Dto;
 using Cuahangchamsocthucung.Web.Models.MatHang;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,9 +9,7 @@ using System.Threading.Tasks;
 
 namespace Cuahangchamsocthucung.Web.Controllers
 {
-    
     [Authorize(Roles = StaticRoleNames.Tenants.Admin)]
-
     public class MatHangController : CuahangchamsocthucungControllerBase
     {
         private readonly IMatHangAppService _matHangAppService;
@@ -23,11 +22,14 @@ namespace Cuahangchamsocthucung.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var matHangs = await _matHangAppService.LayDanhSachMatHang();
-            var model = new MatHangListViewModel
-            {
-                MatHangs = matHangs
-            };
+            var model = new MatHangListViewModel { MatHangs = matHangs };
             return View(model);
+        }
+
+        public async Task<IActionResult> EditModal(int id)
+        {
+            var matHang = await _matHangAppService.LayChiTietMatHang(id);
+            return PartialView("~/Views/MatHang/_UpdateModal.cshtml", matHang);
         }
     }
 }

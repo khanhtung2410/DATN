@@ -10,119 +10,70 @@ using Cuahangchamsocthucung.KhachHang.Dto;
 using Cuahangchamsocthucung.ThuCung.Dto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class KhachHangAppService :
-    ApplicationService,
-    IKhachHangAppService
+public class KhachHangAppService : ApplicationService, IKhachHangAppService
 {
     private const int RegistrationTenantId = 1;
-
     private readonly IRepository<KhachHang, int> _khachHangRepository;
-    private readonly UserRegistrationManager _userRegistrationManager;
     private readonly UserManager<User> _userManager;
     private readonly IRepository<ThuCung, int> _thuCungRepository;
     private readonly IRepository<UserRole, long> _userRoleRepository;
     private readonly IRepository<Role, int> _roleRepository;
+    private readonly IRepository<HoaDon, int> _hoaDonRepository;
+    private readonly IRepository<Vip, int> _vipRepository;
+    private readonly IRepository<CauHinhVip, int> _cauHinhVipRepository;
 
-    public KhachHangAppService(
-        IRepository<KhachHang, int> khachHangRepository,
-        UserRegistrationManager userRegistrationManager,
-        UserManager<User> userManager,
-        IRepository<ThuCung, int> thuCungRepository,
-        IRepository<UserRole, long> userRoleRepository,
-        IRepository<Role, int> roleRepository)
+
+public KhachHangAppService(
+    IRepository<KhachHang, int> khachHangRepository,
+    UserManager<User> userManager,
+    IRepository<ThuCung, int> thuCungRepository,
+    IRepository<UserRole, long> userRoleRepository,
+    IRepository<Role, int> roleRepository,
+    IRepository<HoaDon, int> hoaDonRepository,
+    IRepository<Vip, int> vipRepository,
+    IRepository<CauHinhVip, int> cauHinhVipRepository)
     {
         _khachHangRepository = khachHangRepository;
-        _userRegistrationManager = userRegistrationManager;
         _userManager = userManager;
         _thuCungRepository = thuCungRepository;
         _userRoleRepository = userRoleRepository;
         _roleRepository = roleRepository;
+        _hoaDonRepository = hoaDonRepository;
+        _vipRepository = vipRepository;
+        _cauHinhVipRepository = cauHinhVipRepository;
     }
 
     public async Task<KhachHangDto> DangKy(DangKyDto input)
     {
-        // =====================================================
-        // 1. Kiểm tra dữ liệu đầu vào
-        // =====================================================
-
         if (input == null)
-        {
-            throw new UserFriendlyException(
-                "Thông tin đăng ký không hợp lệ.");
-        }
-
+            throw new UserFriendlyException("Thông tin đăng ký không hợp lệ.");
         if (string.IsNullOrWhiteSpace(input.HoTen))
-        {
-            throw new UserFriendlyException(
-                "Họ và tên không được để trống.");
-        }
-
+            throw new UserFriendlyException("Họ và tên không được để trống.");
         if (string.IsNullOrWhiteSpace(input.SDT))
-        {
-            throw new UserFriendlyException(
-                "Số điện thoại không được để trống.");
-        }
-
+            throw new UserFriendlyException("Số điện thoại không được để trống.");
         if (string.IsNullOrWhiteSpace(input.MatKhau))
-        {
-            throw new UserFriendlyException(
-                "Mật khẩu không được để trống.");
-        }
-
+            throw new UserFriendlyException("Mật khẩu không được để trống.");
         if (input.MatKhau != input.XacNhanMatKhau)
-        {
-            throw new UserFriendlyException(
-                "Mật khẩu xác nhận không khớp.");
-        }
+            throw new UserFriendlyException("Mật khẩu xác nhận không khớp.");
 
-        // =====================================================
-        // 2. Kiểm tra số điện thoại trong bảng KhachHang
-        // =====================================================
-
-        var existedKhachHang = await _khachHangRepository
-            .GetAll()
-            .AnyAsync(x => x.SDT == input.SDT);
-
+        var existedKhachHang = await _khachHangRepository.GetAll().AnyAsync(x => x.SDT == input.SDT);
         if (existedKhachHang)
-        {
-            throw new UserFriendlyException(
-                "Số điện thoại đã được đăng ký.");
-        }
+            throw new UserFriendlyException("Số điện thoại đã được đăng ký.");
 
-        // =====================================================
-        // 3. Kiểm tra User trong đúng Tenant
-        // =====================================================
-
-        var existedUser = await _userManager
-            .Users
-            .IgnoreQueryFilters()
-            .AnyAsync(x =>
-                x.TenantId == RegistrationTenantId &&
-                x.UserName == input.SDT);
+        var existedUser = await _userManager.Users.IgnoreQueryFilters().AnyAsync(x =>
+            x.TenantId == RegistrationTenantId && x.UserName == input.SDT);
 
         if (existedUser)
-        {
-            throw new UserFriendlyException(
-                "Số điện thoại đã được sử dụng.");
-        }
-
-        // =====================================================
-        // 4. Email
-        // ABP yêu cầu EmailAddress không được null khi CreateAsync
-        // nhưng Email đăng ký của khách hàng vẫn không bắt buộc.
-        // =====================================================
+            throw new UserFriendlyException("Số điện thoại đã được sử dụng.");
 
         var emailAddress = string.IsNullOrWhiteSpace(input.Email)
             ? $"{input.SDT}@noemail.local"
             : input.Email.Trim();
-
-        // =====================================================
-        // 5. Tạo User
-        // =====================================================
 
         var user = new User
         {
@@ -135,43 +86,20 @@ public class KhachHangAppService :
             IsEmailConfirmed = true
         };
 
-        var createResult = await _userManager.CreateAsync(
-            user,
-            input.MatKhau);
-
+        var createResult = await _userManager.CreateAsync(user, input.MatKhau);
         if (!createResult.Succeeded)
-        {
-            throw new UserFriendlyException(
-                string.Join(
-                    ", ",
-                    createResult.Errors.Select(x => x.Description)));
-        }
+            throw new UserFriendlyException(string.Join(", ", createResult.Errors.Select(x => x.Description)));
 
-        // =====================================================
-        // 6. Tìm Role Customer của Tenant 1
-        // =====================================================
-
-        var customerRole = await _roleRepository
-            .GetAll()
+        var customerRole = await _roleRepository.GetAll()
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(x =>
                 x.TenantId == RegistrationTenantId &&
                 x.Name == StaticRoleNames.Tenants.Customer);
 
         if (customerRole == null)
-        {
-            throw new UserFriendlyException(
-                $"Không tìm thấy role Customer cho Tenant {RegistrationTenantId}.");
-        }
+            throw new UserFriendlyException($"Không tìm thấy role Customer cho Tenant {RegistrationTenantId}.");
 
-        // =====================================================
-        // 7. Gán User vào Role Customer
-        // Không dùng AddToRoleAsync vì lúc đăng ký anonymous
-        // ABP không xác định được Tenant hiện tại.
-        // =====================================================
-
-        var existingUserRole = await _userRoleRepository
-            .GetAll()
+        var existingUserRole = await _userRoleRepository.GetAll()
             .IgnoreQueryFilters()
             .AnyAsync(x =>
                 x.TenantId == RegistrationTenantId &&
@@ -179,18 +107,7 @@ public class KhachHangAppService :
                 x.RoleId == customerRole.Id);
 
         if (!existingUserRole)
-        {
-            await _userRoleRepository.InsertAsync(
-                new UserRole(
-                    RegistrationTenantId,
-                    user.Id,
-                    customerRole.Id));
-        }
-
-        // =====================================================
-        // 8. Tạo KhachHang
-        // Email thật có thể null
-        // =====================================================
+            await _userRoleRepository.InsertAsync(new UserRole(RegistrationTenantId, user.Id, customerRole.Id));
 
         var khachHang = new KhachHang
         {
@@ -198,51 +115,67 @@ public class KhachHangAppService :
             UserId = user.Id,
             Hoten = input.HoTen.Trim(),
             SDT = input.SDT.Trim(),
-            Email = string.IsNullOrWhiteSpace(input.Email)
-                ? null
-                : input.Email.Trim()
+            Email = string.IsNullOrWhiteSpace(input.Email) ? null : input.Email.Trim()
         };
 
         await _khachHangRepository.InsertAsync(khachHang);
-
-        // =====================================================
-        // 9. Lưu toàn bộ
-        // =====================================================
-
         await CurrentUnitOfWork.SaveChangesAsync();
-
-        // =====================================================
-        // 10. Trả kết quả
-        // =====================================================
 
         return new KhachHangDto
         {
             Id = khachHang.Id,
             Hoten = khachHang.Hoten,
             SDT = khachHang.SDT,
-            Email = khachHang.Email
+            Email = khachHang.Email,
+            TrangThai = user.IsActive
         };
     }
 
     public async Task<List<KhachHangDto>> GetAllKhachHangAsync()
     {
-        var khachHangs = await _khachHangRepository
-            .GetAll()
-            .Select(x => new KhachHangDto
+        var khachHangs = await _khachHangRepository.GetAll()
+            .Select(x => new
             {
-                Id = x.Id,
-                Hoten = x.Hoten,
-                SDT = x.SDT,
-                Email = x.Email
+                KhachHang = x,
+                UserIsActive = x.User != null && x.User.IsActive,
+                Vip = x.Vip
             })
             .ToListAsync();
 
-        var khachHangIds = khachHangs
-            .Select(x => x.Id)
+        var khachHangIds = khachHangs.Select(x => x.KhachHang.Id).ToList();
+
+        if (!khachHangIds.Any())
+            return new List<KhachHangDto>();
+
+        var hoaDons = await _hoaDonRepository.GetAll()
+            .Where(x => khachHangIds.Contains(x.KhachHangId) && x.TrangThai == "DaThanhToan")
+            .Select(x => new
+            {
+                x.KhachHangId,
+                x.TongTien
+            })
+            .ToListAsync();
+
+        var vipIds = khachHangs
+            .Where(x => x.Vip != null)
+            .Select(x => x.Vip.Id)
+            .Distinct()
             .ToList();
 
-        var thuCungs = await _thuCungRepository
-            .GetAll()
+        var cauHinhVips = await _cauHinhVipRepository.GetAll()
+            .Where(x => vipIds.Contains(x.VipId))
+            .OrderByDescending(x => x.TuNgay)
+            .ToListAsync();
+
+        var allVips = await _vipRepository.GetAll()
+            .OrderBy(x => x.CapVip)
+            .ToListAsync();
+
+        var allCauHinhVips = await _cauHinhVipRepository.GetAll()
+            .OrderBy(x => x.MucChiTieu)
+            .ToListAsync();
+
+        var thuCungs = await _thuCungRepository.GetAll()
             .Where(x => khachHangIds.Contains(x.KhachHangId))
             .Select(x => new ThuCungDto
             {
@@ -256,30 +189,103 @@ public class KhachHangAppService :
             })
             .ToListAsync();
 
-        foreach (var khachHang in khachHangs)
+        var result = new List<KhachHangDto>();
+
+        foreach (var item in khachHangs)
         {
-            khachHang.ThuCungs = thuCungs
+            var khachHang = item.KhachHang;
+            var tongChiTieu = hoaDons
                 .Where(x => x.KhachHangId == khachHang.Id)
-                .ToList();
+                .Sum(x => x.TongTien);
+
+            var vipHienTai = item.Vip;
+            var cauHinhHienTai = vipHienTai == null
+                ? null
+                : allCauHinhVips
+                    .Where(x => x.VipId == vipHienTai.Id)
+                    .OrderByDescending(x => x.TuNgay)
+                    .FirstOrDefault();
+
+            var vipTiepTheo = vipHienTai == null
+                ? allVips.FirstOrDefault()
+                : allVips.FirstOrDefault(x => x.CapVip > vipHienTai.CapVip);
+
+            var cauHinhTiepTheo = vipTiepTheo == null
+                ? null
+                : allCauHinhVips
+                    .Where(x => x.VipId == vipTiepTheo.Id)
+                    .OrderBy(x => x.MucChiTieu)
+                    .FirstOrDefault();
+
+            var mucChiTieuVip = cauHinhHienTai?.MucChiTieu ?? 0;
+            var mucChiTieuVipTiepTheo = cauHinhTiepTheo?.MucChiTieu ?? 0;
+            var conThieuVip = vipTiepTheo == null
+                ? 0
+                : System.Math.Max(0, mucChiTieuVipTiepTheo - tongChiTieu);
+
+            result.Add(new KhachHangDto
+            {
+                Id = khachHang.Id,
+                Hoten = khachHang.Hoten,
+                SDT = khachHang.SDT,
+                Email = khachHang.Email,
+                TrangThai = item.UserIsActive,
+                VipId = vipHienTai?.Id,
+                TenVip = vipHienTai?.TenVip,
+                CapVip = vipHienTai?.CapVip ?? 0,
+                MucChiTieuVip = mucChiTieuVip,
+                TongChiTieu = tongChiTieu,
+                TenVipTiepTheo = vipTiepTheo?.TenVip,
+                MucChiTieuVipTiepTheo = mucChiTieuVipTiepTheo,
+                ConThieuVip = conThieuVip,
+                ThuCungs = thuCungs.Where(x => x.KhachHangId == khachHang.Id).ToList()
+            });
         }
 
-        return khachHangs;
+        return result;
     }
 
     public async Task<KhachHangDto> GetKhachHangByIdAsync(int id)
     {
-        var khachHang = await _khachHangRepository
-            .GetAll()
+        var khachHang = await _khachHangRepository.GetAll()
+            .Include(x => x.User)
+            .Include(x => x.Vip)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (khachHang == null)
-        {
-            throw new UserFriendlyException(
-                "Không tìm thấy khách hàng.");
-        }
+            throw new UserFriendlyException("Không tìm thấy khách hàng.");
 
-        var thuCungs = await _thuCungRepository
-            .GetAll()
+        var tongChiTieu = await _hoaDonRepository.GetAll()
+            .Where(x => x.KhachHangId == id && x.TrangThai == "DaThanhToan")
+            .SumAsync(x => (decimal?)x.TongTien) ?? 0;
+
+        var allVips = await _vipRepository.GetAll()
+            .OrderBy(x => x.CapVip)
+            .ToListAsync();
+
+        var allCauHinhVips = await _cauHinhVipRepository.GetAll()
+            .OrderBy(x => x.MucChiTieu)
+            .ToListAsync();
+
+        var cauHinhHienTai = khachHang.Vip == null
+            ? null
+            : allCauHinhVips
+                .Where(x => x.VipId == khachHang.Vip.Id)
+                .OrderByDescending(x => x.TuNgay)
+                .FirstOrDefault();
+
+        var vipTiepTheo = khachHang.Vip == null
+            ? allVips.FirstOrDefault()
+            : allVips.FirstOrDefault(x => x.CapVip > khachHang.Vip.CapVip);
+
+        var cauHinhTiepTheo = vipTiepTheo == null
+            ? null
+            : allCauHinhVips
+                .Where(x => x.VipId == vipTiepTheo.Id)
+                .OrderBy(x => x.MucChiTieu)
+                .FirstOrDefault();
+
+        var thuCungs = await _thuCungRepository.GetAll()
             .Where(x => x.KhachHangId == id)
             .Select(x => new ThuCungDto
             {
@@ -293,13 +299,96 @@ public class KhachHangAppService :
             })
             .ToListAsync();
 
+        var mucChiTieuVip = cauHinhHienTai?.MucChiTieu ?? 0;
+        var mucChiTieuVipTiepTheo = cauHinhTiepTheo?.MucChiTieu ?? 0;
+
         return new KhachHangDto
         {
             Id = khachHang.Id,
             Hoten = khachHang.Hoten,
             SDT = khachHang.SDT,
             Email = khachHang.Email,
+            TrangThai = khachHang.User?.IsActive ?? false,
+            VipId = khachHang.Vip?.Id,
+            TenVip = khachHang.Vip?.TenVip,
+            CapVip = khachHang.Vip?.CapVip ?? 0,
+            MucChiTieuVip = mucChiTieuVip,
+            TongChiTieu = tongChiTieu,
+            TenVipTiepTheo = vipTiepTheo?.TenVip,
+            MucChiTieuVipTiepTheo = mucChiTieuVipTiepTheo,
+            ConThieuVip = vipTiepTheo == null ? 0 : System.Math.Max(0, mucChiTieuVipTiepTheo - tongChiTieu),
             ThuCungs = thuCungs
+        };
+    }
+
+    public async Task<KhachHangDto> GetThongTinCaNhanAsync()
+    {
+        if (!AbpSession.UserId.HasValue)
+            throw new UserFriendlyException("Bạn chưa đăng nhập.");
+
+        var khachHang = await _khachHangRepository.GetAll()
+            .Include(x => x.User)
+            .Include(x => x.Vip)
+            .FirstOrDefaultAsync(x => x.UserId == AbpSession.UserId.Value);
+
+        if (khachHang == null)
+            throw new UserFriendlyException("Không tìm thấy thông tin khách hàng.");
+
+        var tongChiTieu = await _hoaDonRepository.GetAll()
+            .Where(x => x.KhachHangId == khachHang.Id && x.TrangThai == "DaThanhToan")
+            .SumAsync(x => (decimal?)x.TongTien) ?? 0;
+
+        var allVips = await _vipRepository.GetAll()
+            .OrderBy(x => x.CapVip)
+            .ToListAsync();
+
+        var allCauHinhVips = await _cauHinhVipRepository.GetAll()
+            .OrderBy(x => x.MucChiTieu)
+            .ToListAsync();
+
+        var vipHienTai = khachHang.Vip;
+
+        var cauHinhHienTai = vipHienTai == null
+            ? null
+            : allCauHinhVips
+                .Where(x => x.VipId == vipHienTai.Id)
+                .OrderByDescending(x => x.TuNgay)
+                .FirstOrDefault();
+
+        var vipTiepTheo = vipHienTai == null
+            ? allVips.FirstOrDefault()
+            : allVips.FirstOrDefault(x => x.CapVip > vipHienTai.CapVip);
+
+        var cauHinhTiepTheo = vipTiepTheo == null
+            ? null
+            : allCauHinhVips
+                .Where(x => x.VipId == vipTiepTheo.Id)
+                .OrderByDescending(x => x.TuNgay)
+                .FirstOrDefault();
+
+        var mucChiTieuVip = cauHinhHienTai?.MucChiTieu ?? 0;
+        var mucChiTieuVipTiepTheo = cauHinhTiepTheo?.MucChiTieu ?? 0;
+        var conThieuVip = vipTiepTheo == null
+            ? 0
+            : Math.Max(0, mucChiTieuVipTiepTheo - tongChiTieu);
+
+        return new KhachHangDto
+        {
+            Id = khachHang.Id,
+            Hoten = khachHang.Hoten,
+            SDT = khachHang.SDT,
+            Email = khachHang.Email,
+            TrangThai = khachHang.User?.IsActive ?? false,
+            VipId = vipHienTai?.Id,
+            TenVip = vipHienTai?.TenVip,
+            CapVip = vipHienTai?.CapVip ?? 0,
+            PhanTramGiam = cauHinhHienTai?.PhanTramGiam ?? 0,
+            MucChiTieuVip = mucChiTieuVip,
+            TongChiTieu = tongChiTieu,
+            TenVipTiepTheo = vipTiepTheo?.TenVip,
+            PhanTramGiamTiepTheo = cauHinhTiepTheo?.PhanTramGiam ?? 0,
+            MucChiTieuVipTiepTheo = mucChiTieuVipTiepTheo,
+            ConThieuVip = conThieuVip
         };
     }
 }

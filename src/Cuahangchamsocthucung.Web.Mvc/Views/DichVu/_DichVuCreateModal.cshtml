@@ -1,0 +1,304 @@
+﻿@model Cuahangchamsocthucung.DichVu.Dto.ThemDichVuDto
+@using Cuahangchamsocthucung.Enum
+@{
+    Layout = null;
+}
+
+<div class="modal fade" id="DichVuCreateModal" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            @await Html.PartialAsync("~/Views/Shared/Modals/_ModalHeader.cshtml",
+            new Cuahangchamsocthucung.Web.Models.Common.Modals.ModalHeaderViewModel("Thêm dịch vụ"))
+            <form id="dichvu-create-form" class="form-horizontal">
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Tên dịch vụ</label>
+                        <div class="col-md-9">
+                            <input type="text" id="dv-tendichvu" class="form-control" placeholder="Nhập tên dịch vụ" />
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Loại dịch vụ</label>
+                        <div class="col-md-9">
+                            <select id="dv-loaidichvu" class="form-control">
+                                <option value="">-- Chọn loại dịch vụ --</option>
+                                <option value="1">Chăm sóc</option>
+                                <option value="2">Lưu trú</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label class="col-md-3 col-form-label">Mô tả</label>
+                        <div class="col-md-9">
+                            <textarea id="dv-mota" class="form-control" rows="3" placeholder="Nhập mô tả dịch vụ"></textarea>
+                        </div>
+                    </div>
+                    <hr />
+                    <h5 class="mb-3">Bảng giá</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="bang-gia-table">
+                            <thead>
+                                <tr>
+                                    <th>Đối tượng</th>
+                                    <th>Loại phòng</th>
+                                    <th>Lông dài</th>
+                                    <th>Cân nặng từ</th>
+                                    <th>Cân nặng đến</th>
+                                    <th>Thời gian (phút)</th>
+                                    <th>Giá</th>
+                                    <th style="width:80px">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bang-gia-container"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" id="btn-add-banggia" class="btn btn-success btn-sm">
+                        + Thêm mức giá
+                    </button>
+                </div>
+                @await Html.PartialAsync("~/Views/Shared/Modals/_ModalFooterWithSaveAndCancel.cshtml")
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function ($) {
+        var modal = $('#DichVuCreateModal');
+        if (!modal.length) return;
+
+        var service = abp.services.app.dichVu;
+        var form = modal.find('#dichvu-create-form');
+
+        function taoRow() {
+            return `
+                <tr class="bang-gia-row">
+                    <td>
+                        <select class="form-control bg-loaithucung">
+                            <option value="">-- Chọn --</option>
+                            <option value="Chó">Chó</option>
+                            <option value="Mèo">Mèo</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control bg-loaiphong">
+                            <option value="">-- Chọn phòng --</option>
+                            <option value="Thường">Phòng thường</option>
+                            <option value="VIP">Phòng VIP</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control bg-loailong">
+                            <option value="false">Không</option>
+                            <option value="true">Có</option>
+                        </select>
+                    </td>
+                    <td><input type="number" min="0" class="form-control bg-cannangtu" value="0"></td>
+                    <td><input type="number" min="1" class="form-control bg-cannangden" value="1"></td>
+                    <td><input type="number" min="1" max="1440" class="form-control bg-thoigian" value="30"></td>
+                    <td><input type="number" min="0.01" step="0.01" class="form-control bg-giadv"></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm btn-remove-banggia">Xóa</button>
+                    </td>
+                </tr>`;
+        }
+
+        function updateLoaiPhong() {
+            var loaiDichVu = parseInt(modal.find('#dv-loaidichvu').val()) || 0;
+            var laLuuTru = loaiDichVu === 2;
+
+            modal.find('.bg-loaiphong').each(function () {
+                $(this).prop('disabled', !laLuuTru);
+                if (!laLuuTru) $(this).val('');
+            });
+        }
+
+        function addRow() {
+            modal.find('#bang-gia-container').append(taoRow());
+            updateLoaiPhong();
+        }
+
+        function resetForm() {
+            form[0].reset();
+            modal.find('#bang-gia-container').empty();
+            addRow();
+        }
+
+        // Xóa toàn bộ event cũ của chính modal này
+        modal.off('.dichvuCreate');
+
+        // Thêm mức giá
+        modal.on('click.dichvuCreate', '#btn-add-banggia', function (e) {
+            e.preventDefault();
+            addRow();
+        });
+
+        // Đổi loại dịch vụ
+        modal.on('change.dichvuCreate', '#dv-loaidichvu', function () {
+            updateLoaiPhong();
+        });
+
+        // Xóa mức giá
+        modal.on('click.dichvuCreate', '.btn-remove-banggia', function () {
+            if (modal.find('.bang-gia-row').length <= 1) {
+                abp.notify.warn('Phải có ít nhất một mức giá.');
+                return;
+            }
+
+            $(this).closest('.bang-gia-row').remove();
+        });
+
+        // Lưu
+        modal.on('click.dichvuCreate', '.save-button', function (e) {
+            e.preventDefault();
+
+            var tenDichVu = modal.find('#dv-tendichvu').val().trim();
+            var loaiDichVu = parseInt(modal.find('#dv-loaidichvu').val()) || 0;
+            var bangGias = [];
+            var valid = true;
+
+            if (!tenDichVu) {
+                abp.notify.error('Vui lòng nhập tên dịch vụ.');
+                return;
+            }
+
+            if (loaiDichVu !== 1 && loaiDichVu !== 2) {
+                abp.notify.error('Vui lòng chọn loại dịch vụ.');
+                return;
+            }
+
+            var rows = modal.find('.bang-gia-row');
+
+            if (!rows.length) {
+                abp.notify.error('Vui lòng thêm ít nhất một mức giá.');
+                return;
+            }
+
+            rows.each(function () {
+                if (!valid) return;
+
+                var row = $(this);
+                var doiTuong = row.find('.bg-loaithucung').val();
+                var loaiPhong = row.find('.bg-loaiphong').val() || null;
+                var loaiLong = row.find('.bg-loailong').val() === 'true';
+                var canNangTu = parseInt(row.find('.bg-cannangtu').val()) || 0;
+                var canNangDen = parseInt(row.find('.bg-cannangden').val()) || 0;
+                var thoiGian = parseInt(row.find('.bg-thoigian').val()) || 0;
+                var gia = parseFloat(row.find('.bg-giadv').val()) || 0;
+
+                if (!doiTuong) {
+                    abp.notify.error('Vui lòng chọn đối tượng Chó hoặc Mèo.');
+                    valid = false;
+                    return;
+                }
+
+                if (loaiDichVu === 2 && !loaiPhong) {
+                    abp.notify.error('Vui lòng chọn loại phòng cho dịch vụ lưu trú.');
+                    valid = false;
+                    return;
+                }
+
+                if (loaiDichVu === 1) loaiPhong = null;
+
+                if (canNangDen <= canNangTu) {
+                    abp.notify.error('Cân nặng đến phải lớn hơn cân nặng từ.');
+                    valid = false;
+                    return;
+                }
+
+                if (thoiGian < 1 || thoiGian > 1440) {
+                    abp.notify.error('Thời gian phải từ 1 đến 1440 phút.');
+                    valid = false;
+                    return;
+                }
+
+                if (gia <= 0) {
+                    abp.notify.error('Giá phải lớn hơn 0.');
+                    valid = false;
+                    return;
+                }
+
+                var trung = bangGias.some(function (x) {
+                    return x.Loaithucung === doiTuong &&
+                        x.LoaiPhong === loaiPhong &&
+                        x.Loailong === loaiLong &&
+                        x.Cannangtu === canNangTu &&
+                        x.Cannangden === canNangDen;
+                });
+
+                if (trung) {
+                    abp.notify.error('Không được nhập trùng mức giá.');
+                    valid = false;
+                    return;
+                }
+
+                bangGias.push({
+                    Loaithucung: doiTuong,
+                    LoaiPhong: loaiPhong,
+                    Loailong: loaiLong,
+                    Cannangtu: canNangTu,
+                    Cannangden: canNangDen,
+                    ThoiGianPhut: thoiGian,
+                    Giadv: gia
+                });
+            });
+
+            if (!valid) return;
+
+            var input = {
+                Tendichvu: tenDichVu,
+                Mota: modal.find('#dv-mota').val().trim(),
+                LoaiDichVu: loaiDichVu,
+                Trangthai: true,
+                BangGias: bangGias
+            };
+
+            abp.ui.setBusy(form);
+
+            service.create(input)
+                .done(function (result) {
+                    abp.notify.success('Thêm dịch vụ thành công.');
+                    modal.modal('hide');
+                    abp.event.trigger('dichVu.created', result);
+                    location.reload();
+                })
+                .fail(function (error) {
+                    console.error('Lỗi thêm dịch vụ:', error);
+                    console.error('Response:', error.responseJSON);
+
+                    var message =
+                        error.message ||
+                        (error.responseJSON &&
+                            error.responseJSON.error &&
+                            error.responseJSON.error.message) ||
+                        'Không thể thêm dịch vụ.';
+
+                    abp.notify.error(message);
+                })
+                .always(function () {
+                    abp.ui.clearBusy(form);
+                });
+        });
+
+        // Khi mở modal: nếu chưa có thì tạo đúng 1 dòng
+        modal.on('shown.bs.modal.dichvuCreate', function () {
+            var rows = modal.find('.bang-gia-row');
+
+            if (rows.length === 0)
+                addRow();
+
+            updateLoaiPhong();
+            modal.find('#dv-tendichvu').focus();
+        });
+
+        // Khi đóng: reset về đúng 1 dòng
+        modal.on('hidden.bs.modal.dichvuCreate', function () {
+            resetForm();
+        });
+
+        // Khởi tạo ban đầu: chỉ tạo nếu chưa có
+        if (modal.find('.bang-gia-row').length === 0)
+            addRow();
+
+    })(jQuery);
+</script>

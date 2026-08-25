@@ -1,0 +1,204 @@
+﻿@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <span class="text-warning fw-bold">TÀI KHOẢN</span>
+        <h2 class="fw-bold mt-2">Thông tin cá nhân</h2>
+        <p class="text-muted">Quản lý thông tin tài khoản và theo dõi cấp độ thành viên VIP.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- THÔNG TIN CƠ BẢN -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <h5 class="fw-bold border-bottom pb-3 mb-4">👤 Thông tin cơ bản</h5>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="text-muted small">Họ tên</label>
+                            <div class="fw-semibold fs-5" id="detailHoTen">-</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Số điện thoại</label>
+                            <div class="fw-semibold" id="detailSDT">-</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small">Email</label>
+                            <div class="fw-semibold" id="detailEmail">-</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="text-muted small">Trạng thái tài khoản</label>
+                            <div id="detailTrangThai">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIP -->
+        <div class="col-lg-6">
+            <div class="card vip-card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="vip-icon me-3">👑</div>
+                        <div>
+                            <h5 class="fw-bold mb-1">Thành viên VIP</h5>
+                            <span class="text-muted">Ưu đãi dành riêng cho khách hàng</span>
+                        </div>
+                    </div>
+
+                    <!-- CẤP VIP HIỆN TẠI -> CẤP TIẾP THEO -->
+                    <div class="row align-items-center text-center mb-4">
+                        <div class="col-5">
+                            <div class="text-muted small mb-1">Cấp hiện tại</div>
+                            <div class="fs-3 fw-bold text-warning" id="detailVip">Thành viên thường</div>
+                            <div class="fw-semibold mt-1">
+                                Giảm <span id="detailPhanTramGiam">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="col-2">
+                            <div class="fs-3 text-muted">→</div>
+                        </div>
+
+                        <div class="col-5">
+                            <div class="text-muted small mb-1">Cấp tiếp theo</div>
+                            <div class="fs-3 fw-bold" id="detailVipTiepTheoHeader">-</div>
+                            <div class="fw-semibold mt-1">
+                                Giảm <span id="detailPhanTramGiamTiepTheo">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- THÔNG TIN CHI TIÊU -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="bg-white rounded-4 p-3 h-100">
+                                <div class="text-muted small">Tổng chi tiêu</div>
+                                <div class="fw-bold fs-5" id="detailTongChi">0đ</div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="bg-white rounded-4 p-3 h-100">
+                                <div class="text-muted small">Mức cần đạt</div>
+                                <div class="fw-bold fs-5" id="detailMucChi">0đ</div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="bg-white rounded-4 p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small">Còn thiếu để lên hạng</div>
+                                        <div class="fw-bold fs-5 text-danger" id="detailConThieu">0đ</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIẾN ĐỘ -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold">Tiến độ lên hạng</span>
+                        <span class="fw-bold text-warning" id="detailTienDo">0%</span>
+                    </div>
+
+                    <div class="progress rounded-pill" style="height:14px;">
+                        <div id="vipProgress"
+                             class="progress-bar bg-warning rounded-pill"
+                             role="progressbar"
+                             style="width:0%;">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <small class="text-muted" id="detailHienTai">0đ</small>
+                        <small class="text-muted" id="detailMucTieuProgress">0đ</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            loadThongTinCaNhan();
+        });
+
+        function formatTien(value) {
+            return new Intl.NumberFormat('vi-VN').format(value || 0) + 'đ';
+        }
+
+        function loadThongTinCaNhan() {
+            if (!abp.services.app.khachHang || !abp.services.app.khachHang.getThongTinCaNhan) {
+                console.warn('Chưa có API getThongTinCaNhan.');
+                return;
+            }
+
+            abp.services.app.khachHang.getThongTinCaNhan()
+                .done(function (data) {
+                    console.log('Thông tin cá nhân:', data);
+
+                    // THÔNG TIN CƠ BẢN
+                    $('#detailHoTen').text(data.hoten || '-');
+                    $('#detailSDT').text(data.sdt || '-');
+                    $('#detailEmail').text(data.email || 'Chưa cập nhật');
+
+                    $('#detailTrangThai').html(
+                        data.trangThai
+                            ? '<span class="badge bg-success rounded-pill px-3">Đang hoạt động</span>'
+                            : '<span class="badge bg-secondary rounded-pill px-3">Đã khóa</span>'
+                    );
+
+                    // VIP HIỆN TẠI
+                    $('#detailVip').text(data.tenVip || 'Thành viên thường');
+                    $('#detailPhanTramGiam').text((data.phanTramGiam || 0) + '%');
+
+                    // VIP TIẾP THEO
+                    if (data.tenVipTiepTheo) {
+                        $('#detailVipTiepTheoHeader').text(data.tenVipTiepTheo);
+                        $('#detailPhanTramGiamTiepTheo').text((data.phanTramGiamTiepTheo || 0) + '%');
+                    } else {
+                        $('#detailVipTiepTheoHeader').text('Cao nhất');
+                        $('#detailPhanTramGiamTiepTheo').text((data.phanTramGiam || 0) + '%');
+                    }
+
+                    // CHI TIÊU
+                    var tongChiTieu = Number(data.tongChiTieu) || 0;
+                    var mucChiTieu = Number(data.mucChiTieuVipTiepTheo) || 0;
+                    var conThieu = Number(data.conThieuVip) || 0;
+
+                    $('#detailTongChi').text(formatTien(tongChiTieu));
+                    $('#detailMucChi').text(data.tenVipTiepTheo ? formatTien(mucChiTieu) : 'Đã đạt');
+                    $('#detailConThieu').text(data.tenVipTiepTheo ? formatTien(conThieu) : '0đ');
+
+                    // TIẾN ĐỘ
+                    var tienDo = 0;
+
+                    if (mucChiTieu > 0) {
+                        tienDo = Math.min(100, Math.max(0, tongChiTieu / mucChiTieu * 100));
+                    } else if (!data.tenVipTiepTheo) {
+                        tienDo = 100;
+                    }
+
+                    $('#detailTienDo').text(Math.round(tienDo) + '%');
+                    $('#vipProgress').css('width', tienDo + '%');
+                    $('#detailHienTai').text(formatTien(tongChiTieu));
+                    $('#detailMucTieuProgress').text(data.tenVipTiepTheo ? formatTien(mucChiTieu) : 'Cao nhất');
+                })
+                .fail(function (error) {
+                    console.error('Không thể tải thông tin cá nhân:', error);
+                    console.error('Response:', error.responseJSON);
+                    abp.message.error(
+                        error.responseJSON?.error?.message || 'Không thể tải thông tin cá nhân.'
+                    );
+                });
+        }
+    </script>
+}

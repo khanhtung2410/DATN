@@ -71,14 +71,16 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
                     uowManager.Object
                 ).Create();
             }
-
+            // VIP
+            new DefaultVipCreator(context, 1).Create();
             // Khách hàng
             new DefaultKhachHangCreator(context).Create();
-
             // Thú cưng
             new DefaultThuCungCreator(context).Create();
             // Lịch chăm sóc
             new DefaultLichChamSocCreator(context).Create();
+            // Hóa đơn
+            new DefaultHoaDonCreator(context).Create();
         }
 
         private static void WithDbContext<TDbContext>(

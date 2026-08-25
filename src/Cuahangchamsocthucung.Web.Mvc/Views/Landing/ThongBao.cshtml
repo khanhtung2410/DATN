@@ -1,0 +1,366 @@
+﻿@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Thông báo";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="text-warning fw-bold">TÀI KHOẢN</span>
+            <h2 class="fw-bold mt-2 mb-1">Thông báo</h2>
+            <p class="text-muted mb-0">Theo dõi các thông tin mới nhất từ cửa hàng.</p>
+        </div>
+        <button type="button" class="btn btn-outline-warning rounded-pill px-4" id="btnMarkAllRead">
+            ✓ Đánh dấu tất cả đã đọc
+        </button>
+    </div>
+
+    <div id="notificationContainer">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-warning mb-3" role="status"></div>
+                <div class="text-muted">Đang tải thông báo...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .notification-item {
+            transition: .2s;
+            cursor: pointer;
+        }
+
+            .notification-item:hover {
+                background-color: #fffaf0;
+            }
+
+        .notification-unread {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107 !important;
+        }
+
+        .notification-icon {
+            width: 45px;
+            height: 45px;
+            min-width: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .notification-time {
+            font-size: .82rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(function () {
+            loadNotifications();
+            $('#btnMarkAllRead').on('click', markAllAsRead);
+        });
+
+        function loadNotifications() {
+            if (!abp.services.app.thongBao) {
+                console.error('Không tìm thấy abp.services.app.thongBao');
+                showLoadError();
+                return;
+            }
+
+            $('#notificationContainer').html(`
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-warning mb-3" role="status"></div>
+                        <div class="text-muted">Đang tải thông báo...</div>
+                    </div>
+                </div>
+            `);
+
+            abp.services.app.thongBao.getCuaToi()
+                .done(function (result) {
+                    var items = result.result || result || [];
+                    renderNotifications(items);
+                    updateNotificationBadge(items);
+                })
+                .fail(function (error) {
+                    console.error('Lỗi tải thông báo:', error);
+                    console.error('Response:', error.responseJSON);
+                    showLoadError();
+                });
+        }
+
+        function showLoadError() {
+            $('#notificationContainer').html(`
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center py-5">
+                        <div class="text-danger mb-2">Không thể tải thông báo.</div>
+                        <small class="text-muted">Vui lòng thử lại sau.</small>
+                    </div>
+                </div>
+            `);
+        }
+
+        function renderNotifications(items) {
+            if (!items.length) {
+                $('#notificationContainer').html(`
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body text-center py-5">
+                            <div class="display-6 mb-3">🔔</div>
+                            <h5 class="fw-bold">Chưa có thông báo</h5>
+                            <p class="text-muted mb-0">Các thông báo từ cửa hàng sẽ xuất hiện tại đây.</p>
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+
+            var html = '<div class="card border-0 shadow-sm rounded-4 overflow-hidden"><div class="list-group list-group-flush">';
+
+            $.each(items, function (_, item) {
+                var isRead = Number(item.state) === 1;
+                var name = item.notificationName || '';
+                var icon = getNotificationIcon(name);
+                var iconClass = getIconClass(name);
+
+                html += `
+                    <div class="list-group-item notification-item border-0 border-bottom p-4 ${!isRead ? 'notification-unread' : ''}"
+                         data-id="${item.id}"
+                         data-read="${isRead}">
+                        <div class="d-flex align-items-start">
+                            <div class="notification-icon ${iconClass} me-3">${icon}</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <div class="fw-bold">
+                                            ${getNotificationTitle(name)}
+                                            ${!isRead ? '<span class="badge bg-warning text-dark rounded-pill ms-2">Mới</span>' : ''}
+                                        </div>
+                                        <div class="text-muted mt-1">${escapeHtml(item.message)}</div>
+                                    </div>
+                                    <small class="text-muted notification-time text-nowrap">
+                                        ${formatDate(item.creationTime)}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            html += '</div></div>';
+            $('#notificationContainer').html(html);
+
+            $('.notification-item').on('click', function () {
+                var $item = $(this);
+
+                if ($item.attr('data-read') === 'true')
+                    return;
+
+                var id = $item.attr('data-id');
+
+                if (!id) {
+                    console.error('Không có Id thông báo.');
+                    return;
+                }
+
+                // QUAN TRỌNG: ABP proxy nhận trực tiếp Guid, không truyền { id: id }
+                abp.services.app.thongBao.danhDauDaDoc(id)
+                    .done(function () {
+                        $item.removeClass('notification-unread');
+                        $item.attr('data-read', 'true');
+                        $item.find('.badge.bg-warning').remove();
+                        updateNotificationBadgeFromPage();
+                    })
+                    .fail(function (error) {
+                        console.error('Không thể đánh dấu đã đọc:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Không thể đánh dấu thông báo đã đọc.'
+                        });
+                    });
+            });
+        }
+
+        function markAllAsRead() {
+            var unreadCount = $('.notification-item').filter(function () {
+                return $(this).attr('data-read') !== 'true';
+            }).length;
+
+            if (unreadCount === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Thông báo',
+                    text: 'Tất cả thông báo đã được đọc.',
+                    confirmButtonText: 'Đóng'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Đánh dấu đã đọc?',
+                text: 'Bạn có chắc muốn đánh dấu tất cả thông báo là đã đọc?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d'
+            }).then(function (result) {
+                if (!result.isConfirmed)
+                    return;
+
+                var $button = $('#btnMarkAllRead');
+                $button.prop('disabled', true);
+
+                abp.services.app.thongBao.danhDauTatCaDaDoc()
+                    .done(function () {
+                        $('.notification-item').removeClass('notification-unread');
+                        $('.notification-item').attr('data-read', 'true');
+                        $('.notification-item').find('.badge.bg-warning').remove();
+
+                        updateNotificationBadgeFromPage();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công',
+                            text: 'Đã đánh dấu tất cả thông báo là đã đọc.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    })
+                    .fail(function (error) {
+                        console.error('Không thể đánh dấu tất cả đã đọc:', error);
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Không thể cập nhật thông báo.'
+                        });
+                    })
+                    .always(function () {
+                        $button.prop('disabled', false);
+                    });
+            });
+        }
+
+        function updateNotificationBadge(items) {
+            var count = items.filter(function (x) {
+                return Number(x.state) === 0;
+            }).length;
+
+            updateBadgeElements(count);
+        }
+
+        function updateNotificationBadgeFromPage() {
+            var count = $('.notification-item').filter(function () {
+                return $(this).attr('data-read') !== 'true';
+            }).length;
+
+            updateBadgeElements(count);
+        }
+
+        function updateBadgeElements(count) {
+            var $badge = $('#notificationBadge');
+            var $menuBadge = $('#notificationMenuBadge');
+
+            if (count > 0) {
+                $badge.text(count).removeClass('d-none');
+                $menuBadge.text(count).removeClass('d-none');
+            } else {
+                $badge.addClass('d-none');
+                $menuBadge.addClass('d-none');
+            }
+        }
+
+        function getNotificationTitle(name) {
+            name = name || '';
+
+            if (name.indexOf('LichChamSoc.DaXacNhan') >= 0)
+                return 'Lịch chăm sóc đã được xác nhận';
+
+            if (name.indexOf('LichChamSoc.BiTuChoi') >= 0)
+                return 'Lịch chăm sóc bị từ chối';
+
+            if (name.indexOf('LichChamSoc.SapDenGio') >= 0)
+                return 'Sắp đến giờ chăm sóc';
+
+            if (name.indexOf('LichChamSoc.DaHoanThanh') >= 0)
+                return 'Lịch chăm sóc đã hoàn thành';
+
+            if (name.indexOf('KhachHang.DatVip') >= 0)
+                return '🎉 Bạn đã đạt cấp VIP mới';
+
+            if (name.indexOf('Vip.ThayDoiChinhSach') >= 0)
+                return 'Chính sách VIP đã thay đổi';
+
+            return 'Thông báo';
+        }
+
+        function getNotificationIcon(name) {
+            name = name || '';
+
+            if (name.indexOf('LichChamSoc.DaXacNhan') >= 0)
+                return '✅';
+
+            if (name.indexOf('LichChamSoc.BiTuChoi') >= 0)
+                return '❌';
+
+            if (name.indexOf('LichChamSoc.SapDenGio') >= 0)
+                return '⏰';
+
+            if (name.indexOf('LichChamSoc.DaHoanThanh') >= 0)
+                return '🎉';
+
+            if (name.indexOf('KhachHang.DatVip') >= 0)
+                return '👑';
+
+            if (name.indexOf('Vip.ThayDoiChinhSach') >= 0)
+                return '📢';
+
+            return '🔔';
+        }
+
+        function getIconClass(name) {
+            name = name || '';
+
+            if (name.indexOf('LichChamSoc.DaXacNhan') >= 0 ||
+                name.indexOf('LichChamSoc.DaHoanThanh') >= 0 ||
+                name.indexOf('KhachHang.DatVip') >= 0)
+                return 'bg-success-subtle';
+
+            if (name.indexOf('LichChamSoc.BiTuChoi') >= 0)
+                return 'bg-danger-subtle';
+
+            if (name.indexOf('LichChamSoc.SapDenGio') >= 0 ||
+                name.indexOf('Vip.ThayDoiChinhSach') >= 0)
+                return 'bg-warning-subtle';
+
+            return 'bg-light';
+        }
+
+        function formatDate(value) {
+            if (!value)
+                return '';
+
+            var date = new Date(value);
+
+            if (isNaN(date.getTime()))
+                return '';
+
+            return date.toLocaleDateString('vi-VN') + ' ' +
+                date.toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+        }
+
+        function escapeHtml(value) {
+            return $('<div>').text(value == null ? '' : value).html();
+        }
+    </script>
+}

@@ -1,11 +1,12 @@
 ﻿@model Cuahangchamsocthucung.Web.Models.DichVu.DichVuListViewModel
 @using System.Security.Claims
-
+@using Cuahangchamsocthucung.Enum
 @{
     var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
     ViewBag.Title = "Danh sách dịch vụ";
     ViewBag.CurrentPageName = "Dịch vụ";
 }
+
 <section class="content-header">
     <div class="container-fluid">
         <div class="row">
@@ -13,24 +14,20 @@
                 <h1>Dịch vụ</h1>
             </div>
             <div class="col-sm-6 text-right">
-                <a href="javascript:;" data-toggle="modal" data-target="#BookCreateModal" class="btn bg-blue">
+                <a href="javascript:;" data-toggle="modal" data-target="#DichVuCreateModal" class="btn bg-blue">
                     <i class="fa fa-plus-square"></i> Thêm
                 </a>
             </div>
         </div>
     </div>
 </section>
+
 <section class="content">
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-md-6">
-                            </div>
-                        </div>
-                    </div>
+                    <div class="card-header"></div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="DichVuTable" class="table table-striped table-bordered">
@@ -40,7 +37,7 @@
                                         <th>Tên</th>
                                         <th>Mô tả</th>
                                         <th>Trạng thái</th>
-                                        <th style="width: 200px">Hành động</th>
+                                        <th style="width:150px">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -48,9 +45,16 @@
                                     {
                                         foreach (var item in Model.DichVus)
                                         {
+                                            var isLuuTru = item.LoaiDichVu == LoaiDichVu.LuuTru;
+
                                             <tr>
                                                 <td>
-                                                    <a class="btn btn-sm btn-info" data-toggle="collapse" href="#bg-@item.Id" role="button" aria-expanded="false" aria-controls="bg-@item.Id">
+                                                    <a class="btn btn-sm btn-info"
+                                                       data-toggle="collapse"
+                                                       href="#bg-@item.Id"
+                                                       role="button"
+                                                       aria-expanded="false"
+                                                       aria-controls="bg-@item.Id">
                                                         Giá
                                                     </a>
                                                 </td>
@@ -58,9 +62,20 @@
                                                 <td>@item.Mota</td>
                                                 <td>@(item.Trangthai ? "Hoạt động" : "Ngưng")</td>
                                                 <td>
-                                                    <button class="btn btn-sm btn-secondary edit-dichvu" data-id="@item.Id" data-toggle="modal" data-target="#DichVuEditModal">Sửa</button>
-                                                    <button class="btn btn-sm btn-warning toggle-status" data-id="@item.Id" data-status="@item.Trangthai">@(item.Trangthai ? "Ngưng" : "Kích hoạt")</button>
-                                                    <button class="btn btn-sm btn-danger delete-dichvu" data-id="@item.Id">Xóa</button>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-secondary edit-dichvu"
+                                                            data-id="@item.Id"
+                                                            data-toggle="modal"
+                                                            data-target="#DichVuEditModal">
+                                                        Sửa
+                                                    </button>
+
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-warning toggle-status"
+                                                            data-id="@item.Id"
+                                                            data-status="@item.Trangthai">
+                                                        @(item.Trangthai ? "Ngưng" : "Kích hoạt")
+                                                    </button>
                                                 </td>
                                             </tr>
 
@@ -74,6 +89,7 @@
                                                                     <thead>
                                                                         <tr>
                                                                             <th>Đối tượng</th>
+                                                                            <th class="text-center">Loại phòng</th>
                                                                             <th class="text-center">Lông dài</th>
                                                                             <th class="text-center">Cân nặng / Ghi chú</th>
                                                                             <th class="text-center">Thời gian</th>
@@ -86,39 +102,53 @@
                                                                         {
                                                                             foreach (var bg in item.BangGias)
                                                                             {
-                                                                                // If service is 'Trông giữ thú cưng' we don't show lông dài column and treat price as per day
-                                                                                var isTrongGiu = item.Tendichvu != null && item.Tendichvu.Contains("Trông giữ");
                                                                                 <tr data-bg-id="@bg.Id">
                                                                                     <td>@bg.Loaithucung</td>
-                                                                                    <td class="text-center">@(isTrongGiu ? "-" : (bg.Loailong ? "Có" : "Không"))</td>
-                                                                                    <td class="text-center">@(isTrongGiu ? $"≤ {bg.Cannangden} kg" : $"{bg.Cannangtu} - {bg.Cannangden} kg")</td>
                                                                                     <td class="text-center">
-                                                                                        @bg.ThoiGianPhut phút
+                                                                                        @(string.IsNullOrEmpty(bg.LoaiPhong) ? "-" : bg.LoaiPhong)
                                                                                     </td>
-                                                                                    <td class="text-right">@string.Format("{0:N0}", bg.Giadv) ₫</td>
                                                                                     <td class="text-center">
-                                                                                        <button class="btn btn-sm btn-secondary edit-banggia"
-                                                                                                data-id="@bg.Id"
-                                                                                                data-dichvu="@item.Id"
-                                                                                                data-dichvuname="@item.Tendichvu"
-                                                                                                data-trangthai="@item.Trangthai"
-                                                                                                data-loaithucung="@bg.Loaithucung"
-                                                                                                data-loailong="@bg.Loailong"
-                                                                                                data-cannangtu="@bg.Cannangtu"
-                                                                                                data-cannangden="@bg.Cannangden"
-                                                                                                data-giadv="@bg.Giadv"
-                                                                                                data-thoigianphut="@bg.ThoiGianPhut"
-                                                                                                data-toggle="modal"
-                                                                                                data-target="#BangGiaEditModal">
-                                                                                            Sửa
-                                                                                        </button>
+                                                                                        @(item.LoaiDichVu == LoaiDichVu.LuuTru ? "-" : (bg.Loailong ? "Có" : "Không"))
                                                                                     </td>
-                                                                                </tr>
-                                                                            }
+                                                                                    <td class="text-center">
+                                                                                        @(item.LoaiDichVu == LoaiDichVu.LuuTru ? $"≤ {bg.Cannangden} kg" : $"{bg.Cannangtu} - {bg.Cannangden} kg")
+                                                                                    
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        @bg.ThoiGianPhut phút
+                                                                    </td>
+                                                                    <td class="text-right">
+                                                                        @string.Format("{0:N0}", bg.Giadv) ₫
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <button type="button"
+                                                                                class="btn btn-sm btn-secondary edit-banggia"
+                                                                                data-id="@bg.Id"
+                                                                                data-dichvu="@item.Id"
+                                                                                data-dichvuname="@item.Tendichvu"
+                                                                                data-trangthai="@item.Trangthai"
+                                                                                data-loaithucung="@bg.Loaithucung"
+                                                                                data-loaiphong="@bg.LoaiPhong"
+                                                                                data-loailong="@bg.Loailong"
+                                                                                data-cannangtu="@bg.Cannangtu"
+                                                                                data-cannangden="@bg.Cannangden"
+                                                                                data-giadv="@bg.Giadv"
+                                                                                data-thoigianphut="@bg.ThoiGianPhut"
+                                                                                data-toggle="modal"
+                                                                                data-target="#BangGiaEditModal">
+                                                                            Sửa
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                                                                                                }
                                                                         }
                                                                         else
                                                                         {
-                                                                            <tr><td colspan="4">Không có mức giá.</td></tr>
+                                                                            <tr>
+                                                                                <td colspan="7" class="text-center">
+                                                                                    Không có mức giá.
+                                                                                </td>
+                                                                            </tr>
                                                                         }
                                                                     </tbody>
                                                                 </table>
@@ -138,99 +168,66 @@
         </div>
     </div>
 </section>
+
 @section Scripts {
+    @await Html.PartialAsync(
+    "~/Views/DichVu/_DichVuCreateModal.cshtml",
+        new Cuahangchamsocthucung.DichVu.Dto.ThemDichVuDto())
 
-    @await Html.PartialAsync("~/Views/DichVu/_BangGiaEditModal.cshtml", new Cuahangchamsocthucung.DichVu.Dto.SuaBangGiaDto())
+@await Html.PartialAsync(
+        "~/Views/DichVu/_DichVuEditModal.cshtml",
+        new Cuahangchamsocthucung.DichVu.Dto.SuaDichVuDto())
 
-    <script>
-        (function () {
-            // Edit BangGia -> populate modal
-            $(document).on('click', '.edit-banggia', function () {
-                var btn = $(this);
-                $('#bg-id').val(btn.data('id'));
-                $('#bg-dichvu-id').val(btn.data('dichvu'));
-                $('#bg-loaithucung').val(btn.data('loaithucung'));
-                $('#bg-loailong').val(btn.data('loailong').toString());
-                $('#bg-cannangtu').val(btn.data('cannangtu'));
-                $('#bg-cannangden').val(btn.data('cannangden'));
-                $('#bg-giadv').val(btn.data('giadv'));
-                $('#BangGiaEditModal').modal('show');
-            });
+@await Html.PartialAsync(
+        "~/Views/DichVu/_BangGiaEditModal.cshtml",
+        new Cuahangchamsocthucung.DichVu.Dto.SuaBangGiaDto())
 
-            // simple client-side validation when saving
-            $('#BangGiaEditModal').on('click', '.save-button', function (e) {
-                var giadv = parseFloat($('#bg-giadv').val() || 0);
-                var cannangtu = parseInt($('#bg-cannangtu').val() || 0);
-                var cannangden = parseInt($('#bg-cannangden').val() || 0);
-                var loaithucung = $('#bg-loaithucung').val();
-                if (!loaithucung || loaithucung.trim() === '') {
-                    abp.notify.error('Vui lòng nhập đối tượng.');
-                    e.preventDefault();
-                    return false;
-                }
-                if (giadv <= 0) {
-                    abp.notify.error('Giá phải lớn hơn 0.');
-                    e.preventDefault();
-                    return false;
-                }
-                if (cannangtu < 0 || cannangden <= 0 || cannangden <= cannangtu) {
-                    abp.notify.error('Khoảng cân nặng không hợp lệ.');
-                    e.preventDefault();
-                    return false;
-                }
-            });
+<script>
+    $(function () {
+        // ==================== SỬA DỊCH VỤ ====================
+        $(document).on('click', '.edit-dichvu', function () {
+            var id = parseInt($(this).attr('data-id')) || 0;
+            var modal = $('#DichVuEditModal');
 
-            // Save BangGia - use ABP app service
-            $(document).on('click', '#BangGiaEditModal .save-button', function (e) {
-                e.preventDefault();
-                var payload = {
-                    Id: parseInt($('#bg-id').val() || 0),
-                    DichVuId: parseInt($('#bg-dichvu-id').val() || 0),
-                    Loaithucung: $('#bg-loaithucung').val(),
-                    Loailong: $('#bg-loailong').val() === 'true',
-                    Cannangtu: parseInt($('#bg-cannangtu').val() || 0),
-                    Cannangden: parseInt($('#bg-cannangden').val() || 0),
-                    Giadv: parseFloat($('#bg-giadv').val() || 0)
-                };
+            console.log('ID dịch vụ cần sửa:', id);
 
-                abp.ui.setBusy($('#BangGiaEditModal'));
-                abp.services.app.dichVu.updateBangGia(payload).done(function (result) {
-                    abp.notify.info('Lưu thành công');
-                    $('#BangGiaEditModal').modal('hide');
+            if (!id) {
+                abp.notify.error('Không xác định được ID dịch vụ.');
+                return;
+            }
 
-                    // Update row in-place without reload
-                    var row = $('tr[data-bg-id="' + payload.Id + '"]');
-                    if (row.length) {
-                        row.find('td').eq(0).text(payload.Loaithucung);
-                        // Lông dài column is second
-                        row.find('td').eq(1).text(payload.Loailong ? 'Có' : 'Không');
-                        // Cân nặng column
-                        row.find('td').eq(2).text(payload.Loailong && payload.Cannangtu == 0 ? ('≤ ' + payload.Cannangden + ' kg') : (payload.Cannangtu + ' - ' + payload.Cannangden + ' kg'));
-                        // Giá column
-                        row.find('td').eq(3).text(new Intl.NumberFormat('vi-VN').format(payload.Giadv) + ' ₫');
-                        // Update data attributes on edit button
-                        var editBtn = row.find('.edit-banggia');
-                        editBtn.data('loaithucung', payload.Loaithucung);
-                        editBtn.data('loailong', payload.Loailong);
-                        editBtn.data('cannangtu', payload.Cannangtu);
-                        editBtn.data('cannangden', payload.Cannangden);
-                        editBtn.data('giadv', payload.Giadv);
-                    } else {
-                        // fallback: reload
-                        location.reload();
-                    }
-                }).fail(function (err) {
-                    abp.notify.error(err && err.message ? err.message : 'Có lỗi');
-                }).always(function () {
-                    abp.ui.clearBusy($('#BangGiaEditModal'));
-                });
-            });
+            // Quan trọng: truyền ID vào modal
+            modal.attr('data-id', id);
+            modal.data('id', id);
+            modal.find('#dv-edit-id').val(id);
+        });
 
-                    $(document).on('click', '.toggle-status', function () {
+        // ==================== SỬA BẢNG GIÁ ====================
+        $(document).on('click', '.edit-banggia', function () {
             var btn = $(this);
-            var id = parseInt(btn.data('id'));
-            var current = btn.data('status') === true || btn.data('status') === 'True';
+
+            $('#bg-id').val(btn.attr('data-id'));
+            $('#bg-dichvu-id').val(btn.attr('data-dichvu'));
+            $('#bg-loaithucung').val(btn.attr('data-loaithucung'));
+            $('#bg-loaiphong').val(btn.attr('data-loaiphong') || '');
+            $('#bg-loailong').val(String(btn.attr('data-loailong')).toLowerCase());
+            $('#bg-cannangtu').val(btn.attr('data-cannangtu'));
+            $('#bg-cannangden').val(btn.attr('data-cannangden'));
+            $('#bg-giadv').val(btn.attr('data-giadv'));
+            $('#bg-thoigianphut').val(btn.attr('data-thoigianphut'));
+        });
+
+        // ==================== ĐỔI TRẠNG THÁI ====================
+        $(document).on('click', '.toggle-status', function () {
+            var btn = $(this);
+            var id = parseInt(btn.attr('data-id')) || 0;
+            var current = btn.attr('data-status') === 'true' || btn.attr('data-status') === 'True';
             var newStatus = !current;
+
+            if (!id) {
+                abp.notify.error('Không xác định được dịch vụ.');
+                return;
+            }
 
             abp.message.confirm(
                 newStatus
@@ -238,10 +235,7 @@
                     : 'Bạn có muốn ngừng dịch vụ này không?',
                 'Xác nhận',
                 function (isConfirmed) {
-
-                    if (!isConfirmed) {
-                        return;
-                    }
+                    if (!isConfirmed) return;
 
                     abp.ui.setBusy();
 
@@ -250,23 +244,19 @@
                         trangthai: newStatus
                     })
                     .done(function () {
-
                         abp.notify.success(
                             newStatus
                                 ? 'Đã kích hoạt dịch vụ.'
                                 : 'Đã ngừng dịch vụ.'
                         );
-
                         location.reload();
                     })
                     .fail(function (error) {
-
                         abp.notify.error(
                             error.details ||
                             error.message ||
                             'Không thể thay đổi trạng thái dịch vụ.'
                         );
-
                     })
                     .always(function () {
                         abp.ui.clearBusy();
@@ -274,6 +264,6 @@
                 }
             );
         });
-        })();
-    </script>
+    });
+</script>
 }

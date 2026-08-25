@@ -30,7 +30,7 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
                 ["0912345678"] = new()
                 {
                     ("Lucky", "Chó", "Chó Shiba", "/img/thu-cung-duoi-10kg.jpg"),
-                    ("Milo", "Chó", "Chó Poodle", "/img/poodle-1")
+                    ("Milo", "Chó", "Chó Poodle", "/img/poodle-1.jpg")
                 },
                 ["0912345679"] = new()
                 {

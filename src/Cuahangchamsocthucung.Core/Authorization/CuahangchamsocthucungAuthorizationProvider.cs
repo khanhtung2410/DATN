@@ -16,6 +16,11 @@ namespace Cuahangchamsocthucung.Authorization
         "Lịch chăm sóc",
         CuahangchamsocthucungConsts.LocalizationSourceName
     ));
+            context.CreatePermission(PermissionNames.Pages_DichVu, L("Dịch vụ"));
+            context.CreatePermission(PermissionNames.Pages_NhanVien, L("Nhân viên"));
+            context.CreatePermission(PermissionNames.Pages_HoaDon, L("Hóa đơn"));
+            context.CreatePermission(PermissionNames.Pages_KhachHang, L("Khách hàng"));
+            context.CreatePermission(PermissionNames.Pages_Vip, L("VIP"));
         }
 
         private static ILocalizableString L(string name)

@@ -1,0 +1,60 @@
+﻿<div class="row">
+    <div class="col-md-6">
+        <p><strong>Mã hóa đơn:</strong> #@Model.Id</p>
+        <p><strong>Khách hàng:</strong> @(string.IsNullOrEmpty(Model.TenKhachHang) ? "Không xác định" : Model.TenKhachHang)</p>
+        <p><strong>SĐT:</strong> @(string.IsNullOrEmpty(Model.SDTKhachHang) ? "Không xác định" : Model.SDTKhachHang)</p>
+        <p><strong>Thú cưng:</strong> @(string.IsNullOrEmpty(Model.TenThuCung) ? "Không xác định" : Model.TenThuCung)</p>
+    </div>
+    <div class="col-md-6">
+        <p><strong>Nhân viên:</strong> @(string.IsNullOrEmpty(Model.TenNhanVien) ? "Không xác định" : Model.TenNhanVien)</p>
+        <p><strong>Ngày lập:</strong> @Model.NgayLap.ToString("dd/MM/yyyy HH:mm")</p>
+        <p><strong>Dịch vụ:</strong> @(string.IsNullOrEmpty(Model.TenDichVu) ? "Không xác định" : Model.TenDichVu)</p>
+        <p><strong>Bảng giá:</strong> @(string.IsNullOrEmpty(Model.TenBangGia) ? "Không xác định" : Model.TenBangGia)</p>
+    </div>
+</div>
+
+<hr />
+
+<div class="mb-3">
+    <p><strong>Thời gian:</strong> @Model.ThoiGianTu.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianDen.ToString("HH:mm")</p>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <tr>
+            <th>Đơn giá</th>
+            <td class="text-right">@Model.DonGia.ToString("N0") đ</td>
+        </tr>
+        <tr>
+            <th>Tổng tiền trước giảm</th>
+            <td class="text-right">@Model.TongTienTruocGiam.ToString("N0") đ</td>
+        </tr>
+        <tr>
+            <th>Giảm giá VIP</th>
+            <td class="text-right">@Model.PhanTramGiam.ToString("0.##")%</td>
+        </tr>
+        <tr>
+            <th>Tiền giảm</th>
+            <td class="text-right text-danger">-@Model.TienGiam.ToString("N0") đ</td>
+        </tr>
+        <tr>
+            <th class="font-weight-bold">Tổng thanh toán</th>
+            <td class="text-right font-weight-bold text-success" style="font-size:20px;">
+                @Model.TongTien.ToString("N0") đ
+            </td>
+        </tr>
+    </table>
+</div>
+
+@if (Model.TrangThai == "DaThanhToan")
+{
+    <div class="text-right mt-3">
+        <a asp-controller="HoaDon"
+           asp-action="InHoaDon"
+           asp-route-id="@Model.Id"
+           target="_blank"
+           class="btn btn-success">
+            <i class="fas fa-print mr-1"></i> In hóa đơn
+        </a>
+    </div>
+}

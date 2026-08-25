@@ -1,663 +1,135 @@
 ﻿@{
     Layout = "_LandingLayout";
-
     ViewData["Title"] = "Trang chủ";
 }
-
-
-<!-- ===================================================== -->
-<!-- HERO -->
-<!-- ===================================================== -->
 
 <section class="hero">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-7">
-                <h1 class="display-3 fw-bold">
-                    Chăm sóc thú cưng
-                    <br />
-                    Tận tâm mỗi ngày
-                </h1>
-                <p class="fs-4 mt-4">
-                    Dịch vụ spa, tắm, cắt tỉa,
-                    khách sạn và chăm sóc chó mèo
-                    chuyên nghiệp.
-                </p>
+                <h1 class="display-3 fw-bold">Chăm sóc thú cưng<br />Tận tâm mỗi ngày</h1>
+                <p class="fs-4 mt-4">Dịch vụ spa, tắm, cắt tỉa, khách sạn và chăm sóc chó mèo chuyên nghiệp.</p>
                 <div class="mt-4">
-                    <a class="btn btn-light
-                              rounded-pill
-                              px-5
-                              py-3"
-                       asp-controller="Landing"
-                       asp-action="Create">
-                        Đặt lịch ngay
-                    </a>
+                    <a class="btn btn-light rounded-pill px-5 py-3" asp-controller="Landing" asp-action="Create">Đặt lịch ngay</a>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-
-
-<!-- ===================================================== -->
-<!-- GIỚI THIỆU -->
-<!-- ===================================================== -->
-
 <section class="container my-5 py-4">
     <div class="text-center mb-5">
-        <span class="text-warning fw-bold">
-            VỀ CHÚNG TÔI
-        </span>
-        <h2 class="fw-bold mt-2">
-            Chăm sóc thú cưng
-            bằng sự tận tâm
-        </h2>
-        <p class="text-muted mx-auto"
-           style="max-width:700px;">
-            Chúng tôi cung cấp các dịch vụ chăm sóc
-            và làm đẹp dành cho chó mèo, giúp thú cưng
-            luôn sạch sẽ, khỏe mạnh và thoải mái.
-
-        </p>
+        <span class="text-warning fw-bold">VỀ CHÚNG TÔI</span>
+        <h2 class="fw-bold mt-2">Chăm sóc thú cưng bằng sự tận tâm</h2>
+        <p class="text-muted mx-auto" style="max-width:700px;">Chúng tôi cung cấp các dịch vụ chăm sóc và làm đẹp dành cho chó mèo, giúp thú cưng luôn sạch sẽ, khỏe mạnh và thoải mái.</p>
     </div>
-
     <div class="row align-items-center g-5">
-        <!-- HÌNH -->
         <div class="col-md-6">
-            <img src="~/img/cat-tia-long-cho-meo2.jpg"
-                 class="img-fluid rounded-4 shadow"
-                 style="width:100%;
-                        height:350px;
-                        object-fit:cover;"
-                 alt="Chăm sóc thú cưng" />
+            <img src="~/img/cat-tia-long-cho-meo2.jpg" class="img-fluid rounded-4 shadow" style="width:100%;height:350px;object-fit:cover;" alt="Chăm sóc thú cưng" />
         </div>
-        <!-- NỘI DUNG -->
         <div class="col-md-6">
-            <h3 class="fw-bold mb-4">
-
-                Vì sao nên chọn chúng tôi?
-
-            </h3>
-
-
-            <div class="mb-4">
-
-                <h5 class="fw-bold">
-
-                    🐾 Dịch vụ đa dạng
-
-                </h5>
-
-                <p class="text-muted">
-
-                    Cung cấp các dịch vụ trông giữ,
-                    tắm Spa và cắt tỉa lông cho chó mèo.
-
-                </p>
-
-            </div>
-
-
-            <div class="mb-4">
-
-                <h5 class="fw-bold">
-
-                    ❤️ Chăm sóc tận tâm
-
-                </h5>
-
-                <p class="text-muted">
-
-                    Thú cưng được quan tâm và chăm sóc
-                    phù hợp trong suốt quá trình sử dụng
-                    dịch vụ.
-
-                </p>
-
-            </div>
-
-
-            <div class="mb-4">
-
-                <h5 class="fw-bold">
-
-                    🏠 Không gian an toàn
-
-                </h5>
-
-                <p class="text-muted">
-
-                    Môi trường được giữ sạch sẽ,
-                    đảm bảo sự thoải mái và an toàn
-                    cho thú cưng.
-
-                </p>
-
-            </div>
-
-
-            <a class="btn btn-warning rounded-pill px-4"
-               asp-controller="Landing"
-               asp-action="KhachSan">
-
-                Tìm hiểu thêm
-
-            </a>
-
+            <h3 class="fw-bold mb-4">Vì sao nên chọn chúng tôi?</h3>
+            <div class="mb-4"><h5 class="fw-bold">🐾 Dịch vụ đa dạng</h5><p class="text-muted">Cung cấp các dịch vụ trông giữ, tắm Spa và cắt tỉa lông cho chó mèo.</p></div>
+            <div class="mb-4"><h5 class="fw-bold">❤️ Chăm sóc tận tâm</h5><p class="text-muted">Thú cưng được quan tâm và chăm sóc phù hợp trong suốt quá trình sử dụng dịch vụ.</p></div>
+            <div class="mb-4"><h5 class="fw-bold">🏠 Không gian an toàn</h5><p class="text-muted">Môi trường được giữ sạch sẽ, đảm bảo sự thoải mái và an toàn cho thú cưng.</p></div>
+            <a class="btn btn-warning rounded-pill px-4" asp-controller="Landing" asp-action="KhachSan">Tìm hiểu thêm</a>
         </div>
-
-
     </div>
-
 </section>
-
-
-
-<!-- ===================================================== -->
-<!-- DỊCH VỤ -->
-<!-- ===================================================== -->
 
 <section class="service-section py-5">
-
-
     <div class="container">
-
-
         <div class="text-center mb-5">
-
-
-            <span class="text-warning fw-bold">
-
-                DỊCH VỤ
-
-            </span>
-
-
-            <h2 class="fw-bold mt-2">
-
-                Dịch vụ của chúng tôi
-
-            </h2>
-
-
-            <p class="text-muted">
-
-                Những dịch vụ chăm sóc thú cưng
-                được cung cấp tại cửa hàng.
-
-            </p>
-
+            <span class="text-warning fw-bold">DỊCH VỤ</span>
+            <h2 class="fw-bold mt-2">Dịch vụ của chúng tôi</h2>
+            <p class="text-muted">Những dịch vụ chăm sóc thú cưng được cung cấp tại cửa hàng.</p>
         </div>
-
-
-
         <div class="row g-4">
-
-
-            <!-- ================================================= -->
-            <!-- KHÁCH SẠN -->
-            <!-- ================================================= -->
-
             <div class="col-md-4">
-
-
-                <div class="card service-card
-                            border-0
-                            shadow-sm
-                            h-100
-                            overflow-hidden">
-
-
-                    <img src="/img/khach-san-cho-meo1-2048x1365.jpg"
-                         class="card-img-top"
-                         style="height:250px;
-                                object-fit:cover;"
-                         alt="Khách sạn thú cưng" />
-
-
+                <div class="card service-card border-0 shadow-sm h-100 overflow-hidden">
+                    <img src="/img/khach-san-cho-meo1-2048x1365.jpg" class="card-img-top" style="height:250px;object-fit:cover;" alt="Khách sạn thú cưng" />
                     <div class="card-body p-4">
-
-
-                        <span class="badge bg-warning
-                                     text-dark
-                                     mb-2">
-
-                            Lưu trú
-
-                        </span>
-
-
-                        <h4 class="fw-bold">
-
-                            Khách sạn thú cưng
-
-                        </h4>
-
-
-                        <p class="text-muted">
-
-                            Không gian lưu trú an toàn,
-                            sạch sẽ và thoải mái cho chó
-                            và mèo khi chủ nuôi đi xa.
-
-                        </p>
-
-
-                        <a class="btn btn-outline-warning
-                                  rounded-pill
-                                  px-4"
-                           asp-controller="Landing"
-                           asp-action="KhachSan">
-
-                            Xem chi tiết
-
-                        </a>
-
+                        <span class="badge bg-warning text-dark mb-2">Lưu trú</span>
+                        <h4 class="fw-bold">Khách sạn thú cưng</h4>
+                        <p class="text-muted">Không gian lưu trú an toàn, sạch sẽ và thoải mái cho chó và mèo khi chủ nuôi đi xa.</p>
+                        <a class="btn btn-outline-warning rounded-pill px-4" asp-controller="Landing" asp-action="KhachSan">Xem chi tiết</a>
                     </div>
-
                 </div>
-
             </div>
-
-
-
-            <!-- ================================================= -->
-            <!-- TẮM SPA -->
-            <!-- ================================================= -->
-
             <div class="col-md-4">
-
-
-                <div class="card service-card
-                            border-0
-                            shadow-sm
-                            h-100
-                            overflow-hidden">
-
-
-                    <img src="/img/spa-1.jpg"
-                         class="card-img-top"
-                         style="height:250px;
-                                object-fit:cover;"
-                         alt="Tắm Spa thú cưng" />
-
-
+                <div class="card service-card border-0 shadow-sm h-100 overflow-hidden">
+                    <img src="/img/spa-1.jpg" class="card-img-top" style="height:250px;object-fit:cover;" alt="Tắm Spa thú cưng" />
                     <div class="card-body p-4">
-
-
-                        <span class="badge bg-warning
-                                     text-dark
-                                     mb-2">
-
-                            Spa
-
-                        </span>
-
-
-                        <h4 class="fw-bold">
-
-                            Tắm Spa
-
-                        </h4>
-
-
-                        <p class="text-muted">
-
-                            Làm sạch lông, vệ sinh tai,
-                            chăm sóc da và giúp thú cưng
-                            luôn sạch sẽ, thơm tho.
-
-                        </p>
-
-
-                        <a class="btn btn-outline-warning
-                                  rounded-pill
-                                  px-4"
-                           asp-controller="Landing"
-                           asp-action="TamSpa">
-
-                            Xem chi tiết
-
-                        </a>
-
+                        <span class="badge bg-warning text-dark mb-2">Spa</span>
+                        <h4 class="fw-bold">Tắm Spa</h4>
+                        <p class="text-muted">Làm sạch lông, vệ sinh tai, chăm sóc da và giúp thú cưng luôn sạch sẽ, thơm tho.</p>
+                        <a class="btn btn-outline-warning rounded-pill px-4" asp-controller="Landing" asp-action="TamSpa">Xem chi tiết</a>
                     </div>
-
                 </div>
-
             </div>
-
-
-
-            <!-- ================================================= -->
-            <!-- CẮT TỈA -->
-            <!-- ================================================= -->
-
             <div class="col-md-4">
-
-
-                <div class="card service-card
-                            border-0
-                            shadow-sm
-                            h-100
-                            overflow-hidden">
-
-
-                    <img src="/img/grooming.jpg"
-                         class="card-img-top"
-                         style="height:250px;
-                                object-fit:cover;"
-                         alt="Cắt tỉa lông thú cưng" />
-
-
+                <div class="card service-card border-0 shadow-sm h-100 overflow-hidden">
+                    <img src="/img/grooming.jpg" class="card-img-top" style="height:250px;object-fit:cover;" alt="Cắt tỉa lông thú cưng" />
                     <div class="card-body p-4">
-
-
-                        <span class="badge bg-warning
-                                     text-dark
-                                     mb-2">
-
-                            Grooming
-
-                        </span>
-
-
-                        <h4 class="fw-bold">
-
-                            Cắt tỉa lông
-
-                        </h4>
-
-
-                        <p class="text-muted">
-
-                            Cắt tỉa và tạo kiểu phù hợp,
-                            giúp thú cưng có bộ lông
-                            gọn gàng và đẹp hơn.
-
-                        </p>
-
-
-                        <a class="btn btn-outline-warning
-                                  rounded-pill
-                                  px-4"
-                           asp-controller="Landing"
-                           asp-action="CatTiaLong">
-
-                            Xem chi tiết
-
-                        </a>
-
+                        <span class="badge bg-warning text-dark mb-2">Grooming</span>
+                        <h4 class="fw-bold">Cắt tỉa lông</h4>
+                        <p class="text-muted">Cắt tỉa và tạo kiểu phù hợp, giúp thú cưng có bộ lông gọn gàng và đẹp hơn.</p>
+                        <a class="btn btn-outline-warning rounded-pill px-4" asp-controller="Landing" asp-action="CatTiaLong">Xem chi tiết</a>
                     </div>
-
                 </div>
-
             </div>
-
-
         </div>
-
     </div>
-
 </section>
-
-
-
-<!-- ===================================================== -->
-<!-- QUY TRÌNH ĐẶT LỊCH -->
-<!-- ===================================================== -->
 
 <section class="container my-5 py-4">
-
-
     <div class="text-center mb-5">
-
-
-        <span class="text-warning fw-bold">
-
-            QUY TRÌNH
-
-        </span>
-
-
-        <h2 class="fw-bold mt-2">
-
-            Đặt lịch đơn giản
-
-        </h2>
-
-
-        <p class="text-muted">
-
-            Chỉ với vài bước để đăng ký
-            dịch vụ cho thú cưng.
-
-        </p>
-
+        <span class="text-warning fw-bold">QUY TRÌNH</span>
+        <h2 class="fw-bold mt-2">Đặt lịch đơn giản</h2>
+        <p class="text-muted">Chỉ với vài bước để đăng ký dịch vụ cho thú cưng.</p>
     </div>
-
-    <<div class="row g-4">
-
-        <!-- BƯỚC 1 -->
-        <div class="col-md-3">
-            <div class="process-card text-center h-100">
-
-                <div class="step-icon">
-                    1
-                </div>
-
-                <h5 class="fw-bold mt-4">
-                    Chọn thú cưng
-                </h5>
-
-                <p class="text-muted mb-0">
-                    Chọn thú cưng cần sử dụng
-                    dịch vụ.
-                </p>
-
-            </div>
-        </div>
-
-
-        <!-- BƯỚC 2 -->
-        <div class="col-md-3">
-            <div class="process-card text-center h-100">
-
-                <div class="step-icon">
-                    2
-                </div>
-
-                <h5 class="fw-bold mt-4">
-                    Chọn dịch vụ
-                </h5>
-
-                <p class="text-muted mb-0">
-                    Lựa chọn dịch vụ phù hợp
-                    với thú cưng.
-                </p>
-
-            </div>
-        </div>
-
-
-        <!-- BƯỚC 3 -->
-        <div class="col-md-3">
-            <div class="process-card text-center h-100">
-
-                <div class="step-icon">
-                    3
-                </div>
-
-                <h5 class="fw-bold mt-4">
-                    Chọn thời gian
-                </h5>
-
-                <p class="text-muted mb-0">
-                    Chọn ngày và khung giờ
-                    mong muốn.
-                </p>
-
-            </div>
-        </div>
-
-
-        <!-- BƯỚC 4 -->
-        <div class="col-md-3">
-            <div class="process-card text-center h-100">
-
-                <div class="step-icon">
-                    4
-                </div>
-
-                <h5 class="fw-bold mt-4">
-                    Xác nhận
-                </h5>
-
-                <p class="text-muted mb-0">
-                    Xác nhận lịch và chờ cửa hàng
-                    xử lý.
-                </p>
-
-            </div>
-        </div>
-
+    <div class="row g-4">
+        <div class="col-md-3"><div class="process-card text-center h-100"><div class="step-icon">1</div><h5 class="fw-bold mt-4">Chọn thú cưng</h5><p class="text-muted mb-0">Chọn thú cưng cần sử dụng dịch vụ.</p></div></div>
+        <div class="col-md-3"><div class="process-card text-center h-100"><div class="step-icon">2</div><h5 class="fw-bold mt-4">Chọn dịch vụ</h5><p class="text-muted mb-0">Lựa chọn dịch vụ phù hợp với thú cưng.</p></div></div>
+        <div class="col-md-3"><div class="process-card text-center h-100"><div class="step-icon">3</div><h5 class="fw-bold mt-4">Chọn thời gian</h5><p class="text-muted mb-0">Chọn ngày và khung giờ mong muốn.</p></div></div>
+        <div class="col-md-3"><div class="process-card text-center h-100"><div class="step-icon">4</div><h5 class="fw-bold mt-4">Xác nhận</h5><p class="text-muted mb-0">Xác nhận lịch và chờ cửa hàng xử lý.</p></div></div>
     </div>
 </section>
-
-
-
-<!-- ===================================================== -->
-<!-- LỢI ÍCH -->
-<!-- ===================================================== -->
 
 <section class="benefit-section py-5">
-
-
     <div class="container">
         <div class="row text-center g-4">
-
-            <!-- CHĂM SÓC CHÓ -->
-            <div class="col-md-3">
-
-                <div class="benefit-card h-100">
-
-                    <div class="benefit-icon">
-                        🐶
-                    </div>
-
-                    <h5 class="fw-bold mt-3">
-                        Chăm sóc chó
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        Dịch vụ phù hợp cho nhiều
-                        giống chó.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- CHĂM SÓC MÈO -->
-            <div class="col-md-3">
-
-                <div class="benefit-card h-100">
-
-                    <div class="benefit-icon">
-                        🐱
-                    </div>
-
-                    <h5 class="fw-bold mt-3">
-                        Chăm sóc mèo
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        Không gian và dịch vụ
-                        dành riêng cho mèo.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- SẠCH SẼ -->
-            <div class="col-md-3">
-
-                <div class="benefit-card h-100">
-
-                    <div class="benefit-icon">
-                        🧼
-                    </div>
-
-                    <h5 class="fw-bold mt-3">
-                        Sạch sẽ
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        Đảm bảo vệ sinh trong
-                        quá trình chăm sóc.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- TẬN TÂM -->
-            <div class="col-md-3">
-
-                <div class="benefit-card h-100">
-
-                    <div class="benefit-icon">
-                        ❤️
-                    </div>
-
-                    <h5 class="fw-bold mt-3">
-                        Tận tâm
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        Luôn đặt sự an toàn và
-                        thoải mái của thú cưng lên đầu.
-                    </p>
-
-                </div>
-
-            </div>
-
+            <div class="col-md-3"><div class="benefit-card h-100"><div class="benefit-icon">🐶</div><h5 class="fw-bold mt-3">Chăm sóc chó</h5><p class="text-muted mb-0">Dịch vụ phù hợp cho nhiều giống chó.</p></div></div>
+            <div class="col-md-3"><div class="benefit-card h-100"><div class="benefit-icon">🐱</div><h5 class="fw-bold mt-3">Chăm sóc mèo</h5><p class="text-muted mb-0">Không gian và dịch vụ dành riêng cho mèo.</p></div></div>
+            <div class="col-md-3"><div class="benefit-card h-100"><div class="benefit-icon">🧼</div><h5 class="fw-bold mt-3">Sạch sẽ</h5><p class="text-muted mb-0">Đảm bảo vệ sinh trong quá trình chăm sóc.</p></div></div>
+            <div class="col-md-3"><div class="benefit-card h-100"><div class="benefit-icon">❤️</div><h5 class="fw-bold mt-3">Tận tâm</h5><p class="text-muted mb-0">Luôn đặt sự an toàn và thoải mái của thú cưng lên đầu.</p></div></div>
         </div>
     </div>
 </section>
 
-
-
-<!-- ===================================================== -->
-<!-- CTA -->
-<!-- ===================================================== -->
+<section class="container my-5">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-5 text-center">
+            <span class="text-warning fw-bold">THÀNH VIÊN VIP</span>
+            <h2 class="fw-bold mt-2">Chi tiêu càng nhiều, ưu đãi càng lớn</h2>
+            <p class="text-muted mx-auto" style="max-width:700px;">Hệ thống tự động nâng cấp hạng thành viên dựa trên tổng giá trị các hóa đơn đã thanh toán.</p>
+            <div class="row g-3 mt-4">
+                <div class="col-6 col-md-3"><div class="p-3 rounded-4 bg-light"><div class="fw-bold">VIP 1</div><small>1.000.000đ</small><div class="text-warning fw-bold">2%</div></div></div>
+                <div class="col-6 col-md-3"><div class="p-3 rounded-4 bg-light"><div class="fw-bold">VIP 2</div><small>3.000.000đ</small><div class="text-warning fw-bold">5%</div></div></div>
+                <div class="col-6 col-md-3"><div class="p-3 rounded-4 bg-light"><div class="fw-bold">VIP 3</div><small>5.000.000đ</small><div class="text-warning fw-bold">10%</div></div></div>
+                <div class="col-6 col-md-3"><div class="p-3 rounded-4 bg-light"><div class="fw-bold">VIP 4</div><small>10.000.000đ</small><div class="text-warning fw-bold">15%</div></div></div>
+            </div>
+            <div class="mt-3 p-3 rounded-4 bg-warning-subtle">
+                <strong>👑 VIP 5</strong> · Từ 20.000.000đ · <strong>Giảm 20%</strong>
+            </div>
+        </div>
+    </div>
+</section>
 
 <section class="container my-5">
     <div class="cta text-center">
-        <h2 class="fw-bold">
-
-            Đặt lịch chăm sóc thú cưng ngay hôm nay
-
-        </h2>
-        <p class="fs-5 mt-3">
-            Đội ngũ chuyên nghiệp -
-            Dịch vụ tận tâm -
-            Chăm sóc chu đáo.
-
-        </p>
-        <a class="btn btn-light
-                  rounded-pill
-                  px-5
-                  py-3
-                  mt-2"
-           asp-controller="Landing"
-           asp-action="Create">
-            Đặt lịch ngay
-        </a>
+        <h2 class="fw-bold">Đặt lịch chăm sóc thú cưng ngay hôm nay</h2>
+        <p class="fs-5 mt-3">Đội ngũ chuyên nghiệp - Dịch vụ tận tâm - Chăm sóc chu đáo.</p>
+        <a class="btn btn-light rounded-pill px-5 py-3 mt-2" asp-controller="Landing" asp-action="Create">Đặt lịch ngay</a>
     </div>
 </section>

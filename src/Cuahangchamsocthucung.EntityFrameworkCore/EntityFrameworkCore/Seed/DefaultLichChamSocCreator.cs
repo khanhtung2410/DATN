@@ -23,7 +23,8 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
 
         private void CreateLichChamSoc()
         {
-            const int soLuongLichDemo = 100;
+            // 360 lịch trong 3 tháng
+            const int soLuongLichDemo = 360;
 
             var khachHangs = _context.KhachHangs
                 .Where(x => x.TenantId == 1)
@@ -37,6 +38,7 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
 
             var bangGias = _context.BangGias
                 .Include(x => x.DichVu)
+                .Where(x => x.DichVu != null)
                 .OrderBy(x => x.Id)
                 .ToList();
 
@@ -45,32 +47,47 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
                 .OrderBy(x => x.Id)
                 .ToList();
 
-            if (!khachHangs.Any() || !thuCungs.Any() || !bangGias.Any() || !nhanViens.Any())
+            if (!khachHangs.Any() ||
+                !thuCungs.Any() ||
+                !bangGias.Any() ||
+                !nhanViens.Any())
+            {
                 return;
+            }
 
             var soLichHienTai = _context.LichChamSocs.Count();
 
             if (soLichHienTai >= soLuongLichDemo)
                 return;
 
+            var khachHangCoThuCung = khachHangs
+                .Where(kh => thuCungs.Any(tc => tc.KhachHangId == kh.Id))
+                .ToList();
+
+            if (!khachHangCoThuCung.Any())
+                return;
+
             var khungGio = new[]
             {
-        new TimeSpan(8, 0, 0),
-        new TimeSpan(8, 30, 0),
-        new TimeSpan(9, 0, 0),
-        new TimeSpan(9, 30, 0),
-        new TimeSpan(10, 0, 0),
-        new TimeSpan(10, 30, 0),
-        new TimeSpan(11, 0, 0),
-        new TimeSpan(13, 30, 0),
-        new TimeSpan(14, 0, 0),
-        new TimeSpan(14, 30, 0),
-        new TimeSpan(15, 0, 0),
-        new TimeSpan(15, 30, 0),
-        new TimeSpan(16, 0, 0),
-        new TimeSpan(16, 30, 0),
-        new TimeSpan(17, 0, 0)
-    };
+                new TimeSpan(8, 0, 0),
+                new TimeSpan(8, 30, 0),
+                new TimeSpan(9, 0, 0),
+                new TimeSpan(9, 30, 0),
+                new TimeSpan(10, 0, 0),
+                new TimeSpan(10, 30, 0),
+                new TimeSpan(11, 0, 0),
+
+                new TimeSpan(13, 30, 0),
+                new TimeSpan(14, 0, 0),
+                new TimeSpan(14, 30, 0),
+                new TimeSpan(15, 0, 0),
+                new TimeSpan(15, 30, 0),
+                new TimeSpan(16, 0, 0),
+                new TimeSpan(16, 30, 0),
+                new TimeSpan(17, 0, 0)
+            };
+
+            var random = new Random(20260824);
 
             var lichDaCo = _context.LichChamSocs
                 .Select(x => new
@@ -84,114 +101,155 @@ namespace Cuahangchamsocthucung.EntityFrameworkCore.Seed
 
             var lichMoi = new List<LichChamSoc>();
 
-            for (int i = soLichHienTai; i < soLuongLichDemo; i++)
+            var soLichCanThem = soLuongLichDemo - soLichHienTai;
+
+            var ngayBatDau = DateTime.Today.AddMonths(-3);
+            var ngayKetThuc = DateTime.Today.AddDays(-1);
+
+            var danhSachNgay = new List<DateTime>();
+
+            // Tạo tất cả các ngày trong 3 tháng
+            for (var ngay = ngayBatDau.Date;
+                 ngay <= ngayKetThuc.Date;
+                 ngay = ngay.AddDays(1))
             {
-                var khachHang = khachHangs[i % khachHangs.Count];
+                // Mỗi ngày tạo 3-5 lịch
+                var soLichTrongNgay = random.Next(3, 6);
 
-                var danhSachThuCung = thuCungs
-                    .Where(x => x.KhachHangId == khachHang.Id)
-                    .ToList();
-
-                if (!danhSachThuCung.Any())
+                for (var i = 0; i < soLichTrongNgay; i++)
                 {
-                    i--;
-                    continue;
+                    danhSachNgay.Add(ngay);
                 }
+            }
 
-                var thuCung = danhSachThuCung[i % danhSachThuCung.Count];
-                var bangGia = bangGias[i % bangGias.Count];
+            danhSachNgay = danhSachNgay
+                .OrderBy(x => random.Next())
+                .ToList();
 
-                DateTime thoiGian;
+            int daTao = 0;
 
-                // 60% lịch quá khứ, 40% lịch tương lai
-                if (i % 10 < 6)
+            foreach (var ngay in danhSachNgay)
+            {
+                if (daTao >= soLichCanThem)
+                    break;
+
+                for (int thuTu = 0; thuTu < khungGio.Length; thuTu++)
                 {
-                    var ngay = DateTime.Today.AddDays(-(1 + (i % 30)));
-                    thoiGian = ngay.Add(khungGio[i % khungGio.Length]);
-                }
-                else
-                {
-                    var ngay = DateTime.Today.AddDays(1 + (i % 30));
-                    thoiGian = ngay.Add(khungGio[i % khungGio.Length]);
-                }
+                    if (daTao >= soLichCanThem)
+                        break;
 
-                var daTonTai = lichDaCo.Any(x =>
-                    x.KhachHangId == khachHang.Id &&
-                    x.ThuCungId == thuCung.Id &&
-                    x.ThoiGian == thoiGian);
+                    var khachHang =
+                        khachHangCoThuCung[
+                            daTao % khachHangCoThuCung.Count
+                        ];
 
-                if (daTonTai)
-                {
-                    i--;
-                    continue;
-                }
+                    var danhSachThuCung = thuCungs
+                        .Where(x => x.KhachHangId == khachHang.Id)
+                        .ToList();
 
-                TrangThaiLichChamSoc trangThai;
-
-                if (thoiGian < DateTime.Now)
-                {
-                    switch (i % 3)
-                    {
-                        case 0:
-                            trangThai = TrangThaiLichChamSoc.HoanThanh;
-                            break;
-                        case 1:
-                            trangThai = TrangThaiLichChamSoc.DaHuy;
-                            break;
-                        default:
-                            trangThai = TrangThaiLichChamSoc.BiTuChoi;
-                            break;
-                    }
-                }
-                else
-                {
-                    trangThai = i % 2 == 0
-                        ? TrangThaiLichChamSoc.ChoXacNhan
-                        : TrangThaiLichChamSoc.DaXacNhan;
-                }
-
-                int? nhanVienId = null;
-
-                var canPhanCong =
-                    trangThai == TrangThaiLichChamSoc.DaXacNhan ||
-                    trangThai == TrangThaiLichChamSoc.HoanThanh;
-
-                if (canPhanCong)
-                {
-                    var nhanVien = nhanViens.FirstOrDefault(nv =>
-                        !lichDaCo.Any(x =>
-                            x.NhanVienId == nv.Id &&
-                            x.ThoiGian == thoiGian));
-
-                    if (nhanVien == null)
-                    {
-                        i--;
+                    if (!danhSachThuCung.Any())
                         continue;
+
+                    var thuCung =
+                        danhSachThuCung[
+                            daTao % danhSachThuCung.Count
+                        ];
+
+                    var bangGia =
+                        bangGias[
+                            daTao % bangGias.Count
+                        ];
+
+                    var thoiGian =
+                        ngay.Add(khungGio[thuTu]);
+
+                    // Không cho cùng thú cưng trùng đúng thời gian
+                    var thuCungBiTrung = lichDaCo.Any(x =>
+                        x.ThuCungId == thuCung.Id &&
+                        x.ThoiGian == thoiGian);
+
+                    if (thuCungBiTrung)
+                        continue;
+
+                    /*
+                     * Tỷ lệ trạng thái:
+                     * 80% Hoàn thành
+                     * 10% Đã hủy
+                     * 5% Bị từ chối
+                     * 5% Đã xác nhận
+                     */
+                    var randomTrangThai = random.Next(100);
+
+                    TrangThaiLichChamSoc trangThai;
+
+                    if (randomTrangThai < 80)
+                    {
+                        trangThai =
+                            TrangThaiLichChamSoc.HoanThanh;
+                    }
+                    else if (randomTrangThai < 90)
+                    {
+                        trangThai =
+                            TrangThaiLichChamSoc.DaHuy;
+                    }
+                    else if (randomTrangThai < 95)
+                    {
+                        trangThai =
+                            TrangThaiLichChamSoc.BiTuChoi;
+                    }
+                    else
+                    {
+                        trangThai =
+                            TrangThaiLichChamSoc.DaXacNhan;
                     }
 
-                    nhanVienId = nhanVien.Id;
+                    int? nhanVienId = null;
+
+                    // Chỉ phân công nhân viên cho lịch hoàn thành
+                    // hoặc đã xác nhận
+                    if (trangThai ==
+                            TrangThaiLichChamSoc.HoanThanh ||
+                        trangThai ==
+                            TrangThaiLichChamSoc.DaXacNhan)
+                    {
+                        var nhanVien =
+                            nhanViens
+                                .Where(nv =>
+                                    !lichDaCo.Any(x =>
+                                        x.NhanVienId == nv.Id &&
+                                        x.ThoiGian == thoiGian))
+                                .OrderBy(x => random.Next())
+                                .FirstOrDefault();
+
+                        if (nhanVien == null)
+                            continue;
+
+                        nhanVienId = nhanVien.Id;
+                    }
+
+                    var lich = new LichChamSoc
+                    {
+                        KhachHangId = khachHang.Id,
+                        ThuCungId = thuCung.Id,
+                        DichVuId = bangGia.DichVuId,
+                        BangGiaId = bangGia.Id,
+                        NhanVienId = nhanVienId,
+                        ThoiGian = thoiGian,
+                        TrangThai = trangThai
+                    };
+
+                    lichMoi.Add(lich);
+
+                    lichDaCo.Add(new
+                    {
+                        KhachHangId = khachHang.Id,
+                        ThuCungId = thuCung.Id,
+                        ThoiGian = thoiGian,
+                        NhanVienId = nhanVienId
+                    });
+
+                    daTao++;
                 }
-
-                var lich = new LichChamSoc
-                {
-                    KhachHangId = khachHang.Id,
-                    ThuCungId = thuCung.Id,
-                    DichVuId = bangGia.DichVuId,
-                    BangGiaId = bangGia.Id,
-                    NhanVienId = nhanVienId,
-                    ThoiGian = thoiGian,
-                    TrangThai = trangThai
-                };
-
-                lichMoi.Add(lich);
-
-                lichDaCo.Add(new
-                {
-                    KhachHangId = khachHang.Id,
-                    ThuCungId = thuCung.Id,
-                    ThoiGian = thoiGian,
-                    NhanVienId = nhanVienId
-                });
             }
 
             if (lichMoi.Any())

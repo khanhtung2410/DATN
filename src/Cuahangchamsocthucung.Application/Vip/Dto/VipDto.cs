@@ -8,6 +8,7 @@ namespace Cuahangchamsocthucung.Vip.Dto
         public int Id { get; set; }
         public int CapVip { get; set; }
         public string TenVip { get; set; }
+        public decimal MucChiTieu { get; set; }
     }
 
     public class ThemVipDto
@@ -35,6 +36,7 @@ namespace Cuahangchamsocthucung.Vip.Dto
         public int Id { get; set; }
         public int VipId { get; set; }
         public decimal PhanTramGiam { get; set; }
+        public decimal MucChiTieu { get; set; }
         public DateTime TuNgay { get; set; }
         public DateTime? DenNgay { get; set; }
     }
@@ -46,8 +48,10 @@ namespace Cuahangchamsocthucung.Vip.Dto
         [Range(0, 100, ErrorMessage = "Phần trăm giảm phải từ 0 đến 100.")]
         public decimal PhanTramGiam { get; set; }
 
-        public DateTime TuNgay { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "Mức chi tiêu không được âm.")]
+        public decimal MucChiTieu { get; set; }
 
+        public DateTime TuNgay { get; set; }
         public DateTime? DenNgay { get; set; }
     }
 
@@ -59,8 +63,10 @@ namespace Cuahangchamsocthucung.Vip.Dto
         [Range(0, 100, ErrorMessage = "Phần trăm giảm phải từ 0 đến 100.")]
         public decimal PhanTramGiam { get; set; }
 
-        public DateTime TuNgay { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "Mức chi tiêu không được âm.")]
+        public decimal MucChiTieu { get; set; }
 
+        public DateTime TuNgay { get; set; }
         public DateTime? DenNgay { get; set; }
     }
 }

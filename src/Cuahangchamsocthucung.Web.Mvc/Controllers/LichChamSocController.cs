@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Cuahangchamsocthucung.LichChamSoc.Dto;
 namespace Cuahangchamsocthucung.Web.Controllers
 {
 
@@ -23,42 +23,59 @@ namespace Cuahangchamsocthucung.Web.Controllers
         }
 
         [Authorize(Roles = StaticRoleNames.Tenants.Admin)]
-        public async Task<ActionResult> Index(string tenKhachHang = "", TrangThaiLichChamSoc? trangThai = null, int page = 1)
+        public async Task<ActionResult> Index(
+    string tenKhachHang = "",
+    TrangThaiLichChamSoc? trangThai = null,
+    DateTime? tuNgay = null,
+    DateTime? denNgay = null,
+    int page = 1)
         {
-            var lichs = await _lichChamSocAppService.GetAll() ?? new List<LichChamSocDto>();
-
-            if (!string.IsNullOrWhiteSpace(tenKhachHang))
-            {
-                tenKhachHang = tenKhachHang.Trim();
-                lichs = lichs.Where(x => !string.IsNullOrEmpty(x.TenKhachHang) && x.TenKhachHang.Contains(tenKhachHang, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
-            if (trangThai.HasValue)
-                lichs = lichs.Where(x => x.TrangThai == trangThai.Value).ToList();
-
             const int pageSize = 10;
-            var totalItems = lichs.Count;
-            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
             if (page < 1)
                 page = 1;
 
-            if (totalPages > 0 && page > totalPages)
-                page = totalPages;
-
-            var pagedLichs = lichs
-                .OrderByDescending(x => x.ThoiGian)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var result = await _lichChamSocAppService.GetAll(
+                tenKhachHang,
+                trangThai,
+                page,
+                pageSize);
 
             var model = new LichChamSocListViewModel
             {
-                LichChamSocs = pagedLichs,
+                LichChamSocs = result.Items.ToList(),
                 TenKhachHang = tenKhachHang,
                 TrangThai = trangThai,
+                TuNgay = tuNgay,
+                DenNgay = denNgay,
                 CurrentPage = page,
-                TotalPages = totalPages
+                TotalPages = (int)Math.Ceiling(
+                    result.TotalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        [Authorize(Roles = StaticRoleNames.Tenants.Admin)]
+        public async Task<IActionResult> Timeline(DateTime? ngay, int? nhanVienId)
+        {
+            var ngayXem = ngay?.Date ?? DateTime.Today;
+
+            var lichChamSocs =
+                await _lichChamSocAppService.GetTimelineTrongNgay(ngayXem);
+
+            if (nhanVienId.HasValue)
+            {
+                lichChamSocs = lichChamSocs
+                    .Where(x => x.NhanVienId == nhanVienId.Value)
+                    .ToList();
+            }
+
+            var model = new LichChamSocTimelineViewModel
+            {
+                Ngay = ngayXem,
+                NhanVienId = nhanVienId,
+                LichChamSocs = lichChamSocs
             };
 
             return View(model);

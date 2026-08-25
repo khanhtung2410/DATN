@@ -1,0 +1,170 @@
+﻿@model Cuahangchamsocthucung.HoaDon.Dto.XemChiTietHoaDonDto
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Hóa đơn #@Model.Id</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial,sans-serif;
+            background: #eee;
+            margin: 0;
+            padding: 20px;
+            color: #222;
+        }
+
+        .invoice {
+            width: 80mm;
+            max-width: 100%;
+            margin: auto;
+            background: #fff;
+            padding: 5mm;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+            .header h1 {
+                margin: 0 0 5px;
+                font-size: 20px;
+            }
+
+            .header p {
+                margin: 2px 0;
+                font-size: 12px;
+            }
+
+        .info {
+            font-size: 12px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+            .info p {
+                margin: 1px 0;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        th, td {
+            border-bottom: 1px dashed #999;
+            padding: 5px 2px;
+        }
+
+        th {
+            text-align: left;
+        }
+
+        .right {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .total {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .print-button {
+            text-align: center;
+            margin: 15px;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        @@media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .invoice {
+                width: 80mm;
+                padding: 4mm;
+            }
+
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-button">
+        <button onclick="window.print()">🖨 In / Xuất PDF</button>
+    </div>
+
+    <div class="invoice">
+        <div class="header">
+            <h1>HÓA ĐƠN DỊCH VỤ</h1>
+            <p>Mã HĐ: <strong>#@Model.Id</strong></p>
+            <p>@Model.NgayLap.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+
+        <div class="info">
+            <p><strong>Khách hàng:</strong> @(string.IsNullOrEmpty(Model.TenKhachHang) ? "Không xác định" : Model.TenKhachHang)</p>
+            <p><strong>SĐT:</strong> @(string.IsNullOrEmpty(Model.SDTKhachHang) ? "Không xác định" : Model.SDTKhachHang)</p>
+            <p><strong>Thú cưng:</strong> @(string.IsNullOrEmpty(Model.TenThuCung) ? "Không xác định" : Model.TenThuCung)</p>
+            <p><strong>Nhân viên:</strong> @(string.IsNullOrEmpty(Model.TenNhanVien) ? "Không xác định" : Model.TenNhanVien)</p>
+            <p><strong>Dịch vụ:</strong> @(string.IsNullOrEmpty(Model.TenDichVu) ? "Không xác định" : Model.TenDichVu)</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nội dung</th>
+                    <th class="right">Tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ChiTietHoaDons)
+                {
+                    <tr>
+                        <td>@Model.TenBangGia</td>
+                        <td class="right">@item.ThanhTien.ToString("N0") đ</td>
+                    </tr>
+                }
+                <tr>
+                    <th>Tạm tính</th>
+                    <td class="right">@Model.TongTienTruocGiam.ToString("N0") đ</td>
+                </tr>
+                <tr>
+                    <th>VIP (-@Model.PhanTramGiam.ToString("0.##")%)</th>
+                    <td class="right">-@Model.TienGiam.ToString("N0") đ</td>
+                </tr>
+                <tr>
+                    <th class="total">THANH TOÁN</th>
+                    <td class="right total">@Model.TongTien.ToString("N0") đ</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p class="status">TRẠNG THÁI: @(Model.TrangThai == "Đã thanh toán" || Model.TrangThai == "DaThanhToan" ? "ĐÃ THANH TOÁN" : Model.TrangThai)</p>
+            <p>Cảm ơn quý khách!<br />Hẹn gặp lại quý khách.</p>
+        </div>
+    </div>
+</body>
+</html>
