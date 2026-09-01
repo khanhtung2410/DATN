@@ -47,9 +47,9 @@
                                 <label>Trạng thái</label>
                                 <select name="trangThai" class="form-control">
                                     <option value="">-- Tất cả trạng thái --</option>
-                                    <option value="Chưa thanh toán" selected="@(Model.TrangThai == "Chưa thanh toán")">Chưa thanh toán</option>
-                                    <option value="Đã thanh toán" selected="@(Model.TrangThai == "Đã thanh toán")">Đã thanh toán</option>
-                                    <option value="Đã hủy" selected="@(Model.TrangThai == "Đã hủy")">Đã hủy</option>
+                                    <option value="ChuaThanhToan" selected="@(Model.TrangThai == "ChuaThanhToan")">Chưa thanh toán</option>
+                                    <option value="DaThanhToan" selected="@(Model.TrangThai == "DaThanhToan")">Đã thanh toán</option>
+                                    <option value="DaHuy" selected="@(Model.TrangThai == "DaHuy")">Đã hủy</option>
                                 </select>
                             </div>
                         </div>
@@ -135,17 +135,15 @@
                                                     <i class="fas fa-eye"></i> Chi tiết
                                                 </button>
 
-                                                @if (item.TrangThai != "DaThanhToan" && item.TrangThai != "DaHuy")
+                                                @if (item.TrangThai == "ChuaThanhToan")
                                                 {
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-primary"
-                                                            onclick="xacNhanThanhToan(@item.Id)">
+                                                    <a asp-action="ThanhToanQr" asp-route-id="@item.Id" target="_blank" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-qrcode"></i> QR
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-primary" onclick="xacNhanThanhToan(@item.Id)">
                                                         <i class="fas fa-check-circle"></i> Thanh toán
                                                     </button>
-
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-danger"
-                                                            onclick="huyHoaDon(@item.Id)">
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="huyHoaDon(@item.Id)">
                                                         <i class="fas fa-times-circle"></i> Hủy
                                                     </button>
                                                 }
@@ -364,6 +362,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     <script>

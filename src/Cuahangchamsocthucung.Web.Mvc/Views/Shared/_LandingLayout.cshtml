@@ -141,6 +141,14 @@
                                     👤 Thông tin cá nhân
                                 </a>
                             </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Home" asp-action="Index">
+                                        ⚙️ Trang quản trị
+                                    </a>
+                                </li>
+                            }
                             <li>
                                 <a class="dropdown-item" asp-controller="Landing" asp-action="ThongBao">
                                     🔔 Thông báo

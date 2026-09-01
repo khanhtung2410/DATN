@@ -33,4 +33,18 @@ namespace Cuahangchamsocthucung.HoaDon.Dto
         public decimal DonGia { get; set; }
         public decimal ThanhTien { get; set; }
     }
+    public class ThanhToanQrDto
+    {
+        public int HoaDonId { get; set; }
+        public decimal SoTien { get; set; }
+        public string NoiDung { get; set; }
+        public string UrlQr { get; set; }
+    }
+    public class VietQrConfig
+    {
+        public string BankId { get; set; }
+        public string AccountNo { get; set; }
+        public string AccountName { get; set; }
+        public string Template { get; set; }
+    }
 }

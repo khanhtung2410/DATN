@@ -11,4 +11,5 @@ public interface IHoaDonAppService : IApplicationService
     Task<int> ThemHoaDon(ThemHoaDonDto input);
     Task SuaHoaDon(SuaHoaDonDto input);
     Task DoiTrangThaiHoaDon(DoiTrangThaiHoaDonDto input);
+    Task <ThanhToanQrDto> TaoQrThanhToan(int hoaDonId);
 }

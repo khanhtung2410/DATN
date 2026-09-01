@@ -14,7 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+
 [AbpAuthorize(PermissionNames.Pages_HoaDon)]
 public class HoaDonAppService : ApplicationService, IHoaDonAppService
 {
@@ -25,6 +27,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
     private readonly IRepository<Vip, int> _vipRepository;
     private readonly IRepository<CauHinhVip, int> _cauHinhVipRepository;
     private readonly INotificationPublisher _notificationPublisher;
+    private readonly IConfiguration _configuration;
 
     public HoaDonAppService(
         IRepository<HoaDon, int> hoaDonRepository,
@@ -33,6 +36,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         IRepository<KhachHang, int> khachHangRepository,
         IRepository<Vip, int> vipRepository,
         IRepository<CauHinhVip, int> cauHinhVipRepository,
+        IConfiguration configuration,
         INotificationPublisher notificationPublisher)
     {
         _hoaDonRepository = hoaDonRepository;
@@ -41,9 +45,10 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         _khachHangRepository = khachHangRepository;
         _vipRepository = vipRepository;
         _cauHinhVipRepository = cauHinhVipRepository;
+        _configuration = configuration;
         _notificationPublisher = notificationPublisher;
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
+
     // TẠO HÓA ĐƠN TỪ LỊCH CHĂM SÓC
     public async Task<int> ThemHoaDon(ThemHoaDonDto input)
     {
@@ -65,7 +70,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
 
         var daCoHoaDon = await _hoaDonRepository
             .GetAll()
-            .AnyAsync(x => x.LichChamSocId == input.LichChamSocId);
+            .AnyAsync(x => x.LichChamSocId == input.LichChamSocId && !x.IsDeleted);
 
         if (daCoHoaDon)
             throw new UserFriendlyException("Lịch chăm sóc này đã được lập hóa đơn.");
@@ -92,10 +97,9 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         {
             var cauHinhVip = await _cauHinhVipRepository
                 .GetAll()
-                .Where(x =>
-                    x.VipId == khachHang.VipId.Value &&
-                    x.TuNgay <= ngayHienTai &&
-                    (x.DenNgay == null || x.DenNgay >= ngayHienTai))
+                .Where(x => x.VipId == khachHang.VipId.Value &&
+                            x.TuNgay <= ngayHienTai &&
+                            (x.DenNgay == null || x.DenNgay >= ngayHienTai))
                 .OrderByDescending(x => x.TuNgay)
                 .FirstOrDefaultAsync();
 
@@ -103,11 +107,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
                 phanTramGiam = cauHinhVip.PhanTramGiam;
         }
 
-        if (phanTramGiam < 0)
-            phanTramGiam = 0;
-
-        if (phanTramGiam > 100)
-            phanTramGiam = 100;
+        phanTramGiam = Math.Max(0, Math.Min(100, phanTramGiam));
 
         var tienGiam = donGia * phanTramGiam / 100;
         var tongTien = donGia - tienGiam;
@@ -121,7 +121,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             phanTramGiam,
             tienGiam,
             tongTien,
-            "Chưa thanh toán");
+            "ChuaThanhToan");
 
         var hoaDonId = await _hoaDonRepository.InsertAndGetIdAsync(hoaDon);
 
@@ -136,7 +136,6 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
 
         return hoaDonId;
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
 
     // DANH SÁCH HÓA ĐƠN
     public async Task<List<HoaDonDto>> LayDanhSachHoaDon()
@@ -146,6 +145,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             .Include(x => x.KhachHang)
             .ThenInclude(x => x.Vip)
             .Include(x => x.NhanVien)
+            .Where(x => !x.IsDeleted)
             .OrderByDescending(x => x.NgayLap)
             .Select(h => new HoaDonDto
             {
@@ -165,7 +165,6 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             })
             .ToListAsync();
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
 
     // XEM CHI TIẾT HÓA ĐƠN
     public async Task<XemChiTietHoaDonDto> GetChiTietAsync(int hoaDonId)
@@ -187,7 +186,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
                     .ThenInclude(x => x.DichVu)
             .Include(x => x.ChiTietHoaDons)
                 .ThenInclude(x => x.DichVu)
-            .FirstOrDefaultAsync(x => x.Id == hoaDonId);
+            .FirstOrDefaultAsync(x => x.Id == hoaDonId && !x.IsDeleted);
 
         if (hoaDon == null)
             throw new UserFriendlyException("Hóa đơn không tồn tại.");
@@ -219,21 +218,16 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         return new XemChiTietHoaDonDto
         {
             Id = hoaDon.Id,
-
             KhachHangId = hoaDon.KhachHangId,
             TenKhachHang = hoaDon.KhachHang?.Hoten,
             SDTKhachHang = hoaDon.KhachHang?.SDT,
-
             NhanVienId = hoaDon.NhanVienId,
             TenNhanVien = hoaDon.NhanVien?.Hoten,
-
             ThuCungId = lich.ThuCungId,
             TenThuCung = lich.ThuCung?.TenThuCung,
             LoaiThuCung = lich.ThuCung?.LoaiThuCung,
-
             DichVuId = lich.DichVuId,
             TenDichVu = lich.DichVu?.TenDichVu ?? bangGia.DichVu?.TenDichVu,
-
             BangGiaId = bangGia.Id,
             TenBangGia = LayTenBangGia(bangGia),
             LoaiPhong = bangGia.LoaiPhong,
@@ -242,25 +236,19 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             LoaiThuCungBangGia = bangGia.Loaithucung,
             DonGia = bangGia.Giadv,
             ThoiGianPhut = bangGia.ThoiGianPhut,
-
             NgayLap = hoaDon.NgayLap,
             ThoiGianTu = thoiGianTu,
             ThoiGianDen = thoiGianDen,
-
             TongTienTruocGiam = hoaDon.TongTienTruocGiam,
             PhanTramGiam = hoaDon.PhanTramGiam,
             TienGiam = hoaDon.TienGiam,
             TongTien = hoaDon.TongTien,
-
             TenVip = hoaDon.KhachHang?.Vip?.TenVip,
             CapVip = hoaDon.KhachHang?.Vip?.CapVip,
-
             TrangThai = hoaDon.TrangThai,
-
             ChiTietHoaDons = chiTietHoaDons
         };
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
 
     // ĐỔI TRẠNG THÁI HÓA ĐƠN
     public async Task DoiTrangThaiHoaDon(DoiTrangThaiHoaDonDto input)
@@ -268,21 +256,23 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         if (input == null || input.Id <= 0)
             throw new UserFriendlyException("Thông tin hóa đơn không hợp lệ.");
 
+        if (input.TrangThai != "ChuaThanhToan" &&
+            input.TrangThai != "DaThanhToan" &&
+            input.TrangThai != "DaHuy")
+            throw new UserFriendlyException("Trạng thái hóa đơn không hợp lệ.");
+
         var hoaDon = await _hoaDonRepository.FirstOrDefaultAsync(input.Id);
 
         if (hoaDon == null)
             throw new UserFriendlyException("Hóa đơn không tồn tại.");
 
-        if (string.IsNullOrWhiteSpace(input.TrangThai))
-            throw new UserFriendlyException("Trạng thái hóa đơn không hợp lệ.");
-
-        if (hoaDon.TrangThai == "Đã hủy")
+        if (hoaDon.TrangThai == "DaHuy")
             throw new UserFriendlyException("Không thể thay đổi trạng thái hóa đơn đã hủy.");
 
-        if (hoaDon.TrangThai == "Đã thanh toán" && input.TrangThai != "Đã thanh toán")
+        if (hoaDon.TrangThai == "DaThanhToan" && input.TrangThai != "DaThanhToan")
             throw new UserFriendlyException("Không thể thay đổi trạng thái của hóa đơn đã thanh toán.");
 
-        var thanhToanMoi = hoaDon.TrangThai != "Đã thanh toán" && input.TrangThai == "Đã thanh toán";
+        var thanhToanMoi = hoaDon.TrangThai != "DaThanhToan" && input.TrangThai == "DaThanhToan";
 
         hoaDon.TrangThai = input.TrangThai;
         await _hoaDonRepository.UpdateAsync(hoaDon);
@@ -302,15 +292,17 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
     // CẬP NHẬT CẤP VIP
     private async Task CapNhatVip(KhachHang khachHang)
     {
-        var tongDaThanhToan = await _hoaDonRepository.GetAll()
+        var tongDaThanhToan = await _hoaDonRepository
+            .GetAll()
             .Where(x => x.KhachHangId == khachHang.Id &&
                         !x.IsDeleted &&
-                        (x.TrangThai == "Đã thanh toán" || x.TrangThai == "DaThanhToan"))
+                        x.TrangThai == "DaThanhToan")
             .SumAsync(x => (decimal?)x.TongTien) ?? 0;
 
         var ngayHienTai = DateTime.Now;
 
-        var cauHinhVip = await _cauHinhVipRepository.GetAll()
+        var cauHinhVip = await _cauHinhVipRepository
+            .GetAll()
             .Include(x => x.Vip)
             .Where(x => x.TenantId == khachHang.TenantId &&
                         x.TuNgay <= ngayHienTai &&
@@ -320,7 +312,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             .ThenByDescending(x => x.MucChiTieu)
             .FirstOrDefaultAsync();
 
-        if (cauHinhVip == null)
+        if (cauHinhVip == null || cauHinhVip.Vip == null)
             return;
 
         var vipMoi = cauHinhVip.Vip;
@@ -328,7 +320,8 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
 
         if (khachHang.VipId.HasValue)
         {
-            capVipCu = await _vipRepository.GetAll()
+            capVipCu = await _vipRepository
+                .GetAll()
                 .Where(x => x.Id == khachHang.VipId.Value)
                 .Select(x => x.CapVip)
                 .FirstOrDefaultAsync();
@@ -343,15 +336,13 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
                 AppNotificationNames.KhachHangDatVip,
                 new MessageNotificationData(
                     $"Chúc mừng! Bạn đã được nâng lên {vipMoi.TenVip}. " +
-                    $"Mức giảm giá hiện tại là {cauHinhVip.PhanTramGiam}%."
-                ),
+                    $"Mức giảm giá hiện tại là {cauHinhVip.PhanTramGiam}%."),
                 userIds: new[]
                 {
-                new UserIdentifier(khachHang.TenantId, khachHang.UserId)
+                    new UserIdentifier(khachHang.TenantId, khachHang.UserId)
                 });
         }
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
 
     // SỬA HÓA ĐƠN
     public async Task SuaHoaDon(SuaHoaDonDto input)
@@ -359,19 +350,21 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         if (input == null || input.Id <= 0)
             throw new UserFriendlyException("Thông tin hóa đơn không hợp lệ.");
 
+        if (input.TrangThai != "ChuaThanhToan" &&
+            input.TrangThai != "DaThanhToan" &&
+            input.TrangThai != "DaHuy")
+            throw new UserFriendlyException("Trạng thái hóa đơn không hợp lệ.");
+
         var hoaDon = await _hoaDonRepository.FirstOrDefaultAsync(input.Id);
 
         if (hoaDon == null)
             throw new UserFriendlyException("Hóa đơn không tồn tại.");
 
-        if (hoaDon.TrangThai == "Đã thanh toán")
+        if (hoaDon.TrangThai == "DaThanhToan")
             throw new UserFriendlyException("Không thể sửa hóa đơn đã thanh toán.");
 
-        if (hoaDon.TrangThai == "Đã hủy")
+        if (hoaDon.TrangThai == "DaHuy")
             throw new UserFriendlyException("Không thể sửa hóa đơn đã hủy.");
-
-        if (string.IsNullOrWhiteSpace(input.TrangThai))
-            throw new UserFriendlyException("Trạng thái hóa đơn không hợp lệ.");
 
         hoaDon.TrangThai = input.TrangThai;
 
@@ -400,12 +393,12 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
 
         return string.Join(" - ", parts);
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
 
     // LẤY LỊCH ĐÃ HOÀN THÀNH CHƯA CÓ HÓA ĐƠN
     public async Task<List<LichChamSocChuaCoHoaDonDto>> LayLichChamSocChuaCoHoaDon()
     {
-        var lichDaCoHoaDon = _hoaDonRepository.GetAll()
+        var lichDaCoHoaDon = _hoaDonRepository
+            .GetAll()
             .Where(x => !x.IsDeleted)
             .Select(x => x.LichChamSocId);
 
@@ -416,7 +409,8 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             .Include(x => x.ThuCung)
             .Include(x => x.DichVu)
             .Include(x => x.BangGia)
-            .Where(x => x.TrangThai == TrangThaiLichChamSoc.HoanThanh && !lichDaCoHoaDon.Contains(x.Id))
+            .Where(x => x.TrangThai == TrangThaiLichChamSoc.HoanThanh &&
+                        !lichDaCoHoaDon.Contains(x.Id))
             .OrderByDescending(x => x.ThoiGian)
             .Select(x => new LichChamSocChuaCoHoaDonDto
             {
@@ -436,7 +430,8 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
             })
             .ToListAsync();
     }
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
+
+    // XÁC NHẬN THANH TOÁN
     public async Task XacNhanThanhToan(int id)
     {
         if (id <= 0)
@@ -466,7 +461,7 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
         await CurrentUnitOfWork.SaveChangesAsync();
     }
 
-    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
+    // HỦY HÓA ĐƠN
     public async Task HuyHoaDon(int id)
     {
         if (id <= 0)
@@ -487,5 +482,41 @@ public class HoaDonAppService : ApplicationService, IHoaDonAppService
 
         await _hoaDonRepository.UpdateAsync(hoaDon);
         await CurrentUnitOfWork.SaveChangesAsync();
+    }
+    [AbpAuthorize(PermissionNames.Pages_HoaDon)]
+    public async Task<ThanhToanQrDto> TaoQrThanhToan(int hoaDonId)
+    {
+        if (hoaDonId <= 0)
+            throw new UserFriendlyException("Mã hóa đơn không hợp lệ.");
+
+        var hoaDon = await _hoaDonRepository.FirstOrDefaultAsync(hoaDonId);
+
+        if (hoaDon == null)
+            throw new UserFriendlyException("Không tìm thấy hóa đơn.");
+
+        if (hoaDon.TrangThai == "DaThanhToan")
+            throw new UserFriendlyException("Hóa đơn đã được thanh toán.");
+
+        if (hoaDon.TrangThai == "DaHuy")
+            throw new UserFriendlyException("Hóa đơn đã bị hủy.");
+
+        var config = _configuration.GetSection("VietQr").Get<VietQrConfig>();
+
+        if (config == null || string.IsNullOrWhiteSpace(config.BankId) || string.IsNullOrWhiteSpace(config.AccountNo))
+            throw new UserFriendlyException("Chưa cấu hình tài khoản VietQR.");
+
+        var noiDung = $"THANHTOAN HD{hoaDon.Id}";
+        var urlQr = $"https://img.vietqr.io/image/{config.BankId}-{config.AccountNo}-{config.Template}.png" +
+                    $"?amount={hoaDon.TongTien:0}" +
+                    $"&addInfo={Uri.EscapeDataString(noiDung)}" +
+                    $"&accountName={Uri.EscapeDataString(config.AccountName)}";
+
+        return new ThanhToanQrDto
+        {
+            HoaDonId = hoaDon.Id,
+            SoTien = hoaDon.TongTien,
+            NoiDung = noiDung,
+            UrlQr = urlQr
+        };
     }
 }

@@ -88,7 +88,11 @@ namespace Cuahangchamsocthucung.Web.Controllers
 
             return PartialView("_ChiTiet", hoaDon);
         }
-
+        public async Task<IActionResult> ThanhToanQr(int id)
+        {
+            var qr = await _hoaDonAppService.TaoQrThanhToan(id);
+            return View(qr);
+        }
         public async Task<IActionResult> InHoaDon(int id)
         {
             var hoaDon = await _hoaDonAppService.GetChiTietAsync(id);
