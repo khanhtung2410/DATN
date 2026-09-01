@@ -1,37 +1,105 @@
-# C?a h�ng Ch?m s�c Th� c?ng
+﻿# Cửa hàng Chăm sóc Thú cưng
 
-Repository n�y ch?a backend API v� giao di?n web cho ?ng d?ng qu?n l� c?a h�ng ch?m s�c th� c?ng (d? �n x�y d?ng tr�n n?n ABP + ASP.NET Core).
+Repository chứa backend API và giao diện web cho ứng dụng quản lý cửa hàng chăm sóc thú cưng (xây trên ABP + ASP.NET Core).
 
-T�m t?t nhanh
-- ?a d? �n .NET 8 (API, MVC, EF Core, Migrator, v.v.)
-- C�c t�nh n?ng ch�nh: qu?n l� kh�ch h�ng, th� c?ng, d?ch v?, l?ch ch?m s�c, h�a ??n, VIP, th�ng b�o, thanh to�n QR, g?i SMS.
+Tóm tắt
+- Multi-project .NET 8: API, MVC/Razor Pages, EF Core, Migrator.
+- Các tính năng chính: quản lý khách hàng, thú cưng, dịch vụ, lịch chăm sóc, hóa đơn, VIP, thông báo, thanh toán QR, gửi SMS.
 
-API ch�nh
-- Token authentication: `POST /api/TokenAuth/Authenticate`
-- D?ch v? ABP (proxy) (v� d?):
-  - `GET/POST/PUT/DELETE /api/services/app/ThuCung` (qu?n l� th� c?ng)
-  - `GET/POST /api/services/app/LichChamSoc` (l?ch ch?m s�c)
-  - `GET/POST /api/services/app/HoaDon` (h�a ??n)
-  - `GET/POST /api/services/app/Vip` (VIP)
-  - `GET/POST /api/services/app/KhachHang` (kh�ch h�ng)
-  - `GET/POST /api/services/app/DichVu` (d?ch v?)
+Chức năng theo vai trò
 
-Giao di?n Swagger
-- Sau khi ch?y ?ng d?ng host, truy c?p: `http://localhost:{port}/swagger` ?? xem v� th? c�c API.
-- README kh�ng ch?a token/b� m?t; s? d?ng endpoint `Authenticate` ?? l?y token (JWT) v� l?u v�o header `Authorization: Bearer {token}` khi g?i API.
+- Khách hàng (Customer):
+  - Đăng ký / Đăng nhập (JWT)
+  - Quản lý thông tin cá nhân
+  - Quản lý thú cưng (thêm, sửa, upload ảnh)
+  - Xem danh sách dịch vụ và bảng giá
+  - Đặt lịch chăm sóc cho thú cưng
+  - Xem lịch của mình, hủy lịch
+  - Xem hóa đơn, nhận QR thanh toán
 
-Ch?y tr�n m�y local
-1. C�i .NET 8 SDK
-2. C?p nh?t c?u h�nh
-   - C�c file c?u h�nh ch�nh (kh�ng n�n commit b� m?t) n?m trong:
-     - `src/Cuahangchamsocthucung.Web.Host/appsettings.json`
-     - `src/Cuahangchamsocthucung.Web.Mvc/appsettings.json`
-   - M?t s? kh�a c?u h�nh c?n c?p nh?t (?�y l� m?u � ch? d�ng gi� tr? v� d?, KH�NG ??t kh�a th?t trong repo):
+- Quản trị (Admin / Staff):
+  - Quản lý dịch vụ, bảng giá
+  - Quản lý nhân viên
+  - Duyệt / phân công / từ chối / hoàn thành lịch chăm sóc
+  - Tạo hóa đơn từ lịch đã hoàn thành
+  - Cấu hình VIP và chính sách giảm giá
+  - Quản lý thông báo (push/notification)
+
+Các endpoint chính theo chức năng (ví dụ theo pattern ABP proxy)
+
+- Xác thực
+  - `POST /api/TokenAuth/Authenticate` (body: `userNameOrEmailAddress`, `password`) -> trả về JWT
+
+- Khách hàng
+  - `POST /api/services/app/KhachHang/DangKy` (body: `hoTen, sdt, matKhau, xacNhanMatKhau, email?`)
+  - `GET  /api/services/app/KhachHang/GetThongTinCaNhan` (auth)
+
+- Thú cưng (ThuCung)
+  - `GET  /api/services/app/ThuCung/GetAll`
+  - `GET  /api/services/app/ThuCung/Get?id={id}`
+  - `POST /api/services/app/ThuCung/Create` (body: `tenThuCung, loaiThuCung, ghiChu, trangThai`)
+  - `PUT  /api/services/app/ThuCung/Update` (body: `id, tenThuCung, ...`)
+  - `POST /api/services/app/ThuCung/UploadImage` (form-data: `thuCungId`, `file`)
+
+- Lịch chăm sóc (LichChamSoc)
+  - `GET  /api/services/app/LichChamSoc/GetAll` (params: tenKhachHang, trangThai, page, pageSize)
+  - `GET  /api/services/app/LichChamSoc/GetLichChamSoc?id={id}`
+  - `POST /api/services/app/LichChamSoc/Create` (body: `thuCungId, dichVuId, bangGiaId, thoiGian`)
+  - `POST /api/services/app/LichChamSoc/HuyLichChamSoc` (body: `id`)
+  - `POST /api/services/app/LichChamSoc/PhanCongNhanVien` (admin)
+  - `POST /api/services/app/LichChamSoc/TuChoiLichChamSoc` (admin)
+
+- Hóa đơn (HoaDon)
+  - `GET  /api/services/app/HoaDon/GetAll`
+  - `GET  /api/services/app/HoaDon/GetChiTiet?id={id}`
+  - `POST /api/services/app/HoaDon/ThemHoaDon` (tạo từ lịch đã hoàn thành)
+  - `POST /api/services/app/HoaDon/TaoQrThanhToan` (body: `hoaDonId`) -> trả về `UrlQr`
+  - `POST /api/services/app/HoaDon/XacNhanThanhToan` (body: `id`) (admin)
+
+- VIP
+  - `GET  /api/services/app/Vip/LayDanhSachVip`
+  - `GET  /api/services/app/Vip/Get?id={id}`
+  - `POST /api/services/app/Vip/ThemVip` (admin)
+  - `POST /api/services/app/Vip/ThemCauHinhVip` (admin)
+
+- Hệ thống tích hợp
+  - `SmsSettings` (SpeedSMS): cấu hình `SmsSettings:ApiUrl`, `SmsSettings:AccessToken`, `SmsSettings:DeviceID` — lớp gửi SMS: `SpeedSmsSender`
+  - `VietQr` (QR thanh toán): cấu hình `VietQr:BankId, AccountNo, AccountName, Template` (dùng trong `HoaDonAppService.TaoQrThanhToan`)
+  - `Techcombank` (nếu tích hợp cổng ngân hàng): mẫu cấu hình trong appsettings
+
+Luồng chính: từ đặt lịch -> thanh toán
+
+1) Khách hàng đăng ký / đăng nhập
+   - `POST /api/services/app/KhachHang/DangKy`
+   - `POST /api/TokenAuth/Authenticate` để lấy JWT
+
+2) Khách hàng tạo lịch chăm sóc
+   - Lấy danh sách dịch vụ/bảng giá: `GET /api/services/app/DichVu/GetAll`
+   - Tạo lịch: `POST /api/services/app/LichChamSoc/Create` (gửi `thuCungId, dichVuId, bangGiaId, thoiGian`)
+
+3) Admin/Staff xử lý lịch
+   - Xem danh sách lịch chờ: `GET /api/services/app/LichChamSoc/GetAll` (filter `trangThai`)
+   - Phân công nhân viên: `POST /api/services/app/LichChamSoc/PhanCongNhanVien` (admin)
+   - Nếu từ chối: `POST /api/services/app/LichChamSoc/TuChoiLichChamSoc`
+   - Khi hoàn thành: staff đánh dấu hoàn thành (API thay đổi trạng thái)
+
+4) Tạo hóa đơn từ lịch đã hoàn thành
+   - `POST /api/services/app/HoaDon/ThemHoaDon` (body: `lichChamSocId`) -> trả về `hoaDonId`
+
+5) Tạo QR thanh toán (VietQR) và hiển thị cho khách
+   - `POST /api/services/app/HoaDon/TaoQrThanhToan` (body: `hoaDonId`) -> trả về `UrlQr` (link ảnh QR)
+   - Khách hàng dùng app ngân hàng quét QR để thanh toán hoặc dùng tích hợp Techcombank (tuỳ cấu hình)
+
+6) Xác nhận thanh toán
+   - Admin xác nhận hoặc hệ thống tự động chuyển trạng thái khi nhận webhook từ cổng thanh toán
+   - `POST /api/services/app/HoaDon/XacNhanThanhToan` (body: `hoaDonId`)
+
+Mẫu cấu hình `appsettings.json` (ví dụ, KHÔNG đặt giá trị thật vào repo)
 
 ```json
 {
   "ConnectionStrings": {
-    "Default": "Server=.;Database=YOUR_DB_NAME;User Id=YOUR_DB_USER;Password=YOUR_DB_PASSWORD;" 
+    "Default": "Server=.;Database=YOUR_DB_NAME;User Id=YOUR_DB_USER;Password=YOUR_DB_PASSWORD;"
   },
   "App": {
     "CorsOrigins": "https://localhost:4200,https://localhost:5001"
@@ -52,51 +120,34 @@ Ch?y tr�n m�y local
     "BankId": "VCB",
     "AccountNo": "0123456789",
     "AccountName": "TEN_TAI_KHOAN",
-    "Template": "YOUR_TEMPLATE" 
+    "Template": "YOUR_TEMPLATE"
   },
   "Techcombank": {
     "ApiKey": "API_KEY",
     "ApiSecret": "API_SECRET",
     "TerminalId": "TERMINAL_ID"
-  },
-  "Swagger": {
-    "ShowSummaries": true
   }
 }
 ```
 
-L?u � c?u h�nh:
-- `SmsSettings` t??ng ?ng v?i l?p g?i SMS (`SpeedSmsSender`).
-- `VietQr` d�ng ?? t?o link QR thanh to�n (xem `HoaDonAppService.TaoQrThanhToan`).
-- `Techcombank` n?u t�ch h?p c?ng thanh to�n ng�n h�ng th� th�m th�ng tin c?n thi?t (v� d? API key/secret/terminal id).
-- Kh�ng l?u th�ng tin nh?y c?m (API keys, m?t kh?u, connection strings) trong kho chung � d�ng `appsettings.Development.json` (git-ignored), bi?n m�i tr??ng ho?c user-secrets.
+Chạy trên máy local
+1. Cài .NET 8 SDK
+2. Cập nhật cấu hình (file ví dụ):
+   - `src/Cuahangchamsocthucung.Web.Host/appsettings.json`
+   - `src/Cuahangchamsocthucung.Web.Mvc/appsettings.json`
 
-Migrations (c? s? d? li?u)
+Migrations
 - Project migrator: `src/Cuahangchamsocthucung.Migrator`
-- Ch?y migration ?? t?o DB / c?p nh?t schema:
-  - dotnet run --project src/Cuahangchamsocthucung.Migrator/Cuahangchamsocthucung.Migrator.csproj
+- Chạy migration để tạo DB / cập nhật schema:
+  - `dotnet run --project src/Cuahangchamsocthucung.Migrator/Cuahangchamsocthucung.Migrator.csproj`
 
-Ch?y ?ng d?ng API
-- Ch?y Web.Host (API + Swagger):
-  - dotnet run --project src/Cuahangchamsocthucung.Web.Host/Cuahangchamsocthucung.Web.Host.csproj
+Chạy ứng dụng
+- API (Web.Host): `dotnet run --project src/Cuahangchamsocthucung.Web.Host/Cuahangchamsocthucung.Web.Host.csproj`
+- MVC/Razor Pages (giao diện): `dotnet run --project src/Cuahangchamsocthucung.Web.Mvc/Cuahangchamsocthucung.Web.Mvc.csproj`
 
-Ch?y front-end MVC
-- Ch?y Web.Mvc (n?u c?n):
-  - dotnet run --project src/Cuahangchamsocthucung.Web.Mvc/Cuahangchamsocthucung.Web.Mvc.csproj
+Bảo mật
+- Tuyệt đối không commit các giá trị thực tế: `AccessToken`, `SecurityKey`, mật khẩu DB, keys của bên thứ ba.
+- Dùng `appsettings.Development.json` (git-ignored), biến môi trường hoặc `dotnet user-secrets` cho dev.
 
-Th�ng tin b?o m?t
-- Tuy?t ??i kh�ng commit c�c gi� tr? th?c t? c?a `AccessToken`, `SecurityKey`, m?t kh?u DB, ho?c keys c?a b�n th? ba.
-- Trong README n�y ch? ch?a v� d? placeholder nh? `API_KEY`. Th?c t? h�y d�ng bi?n m�i tr??ng, file `appsettings.Development.json` ho?c `dotnet user-secrets` trong m�i tr??ng dev.
-
-Debug / Logs
-- Log4net ???c c?u h�nh trong `Web.Host` (t?p `log4net.config` / `log4net.Production.config`).
-
-G�p � & ?�ng g�p
-- M?i ?�ng g�p vui l�ng t?o PR tr�n GitHub. Kh�ng th�m secrets v�o PR/public commits.
-
-C�c t�i nguy�n kh�c
-- Swagger UI: `/swagger`
-- ABP proxy API pattern: `/api/services/app/{ServiceName}/{Method}`
-
-Li�n h?
-- Th�m h??ng d?n n?i b?, t�i li?u chi ti?t h?n t�y theo nhu c?u tri?n khai � n?u mu?n m�nh c� th? b? sung ph?n h??ng d?n tri?n khai tr�n m�i tr??ng production, Docker ho?c Azure.
+Ghi chú
+- README tập trung vào chức năng và luồng chính. Nếu muốn bổ sung hướng dẫn triển khai production, Docker, hoặc chi tiết webhook/payment flow (Techcombank), mình có thể thêm.
